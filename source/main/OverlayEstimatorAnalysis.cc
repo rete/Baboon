@@ -32,7 +32,7 @@
 
 // root includes
 #include "TCanvas.h"
-#include "TGraph.hh"
+#include "TGraph.h"
 #include "TTree.h"
 #include "TFile.h"
 
@@ -49,6 +49,7 @@ using namespace baboon;
 
 
 int main (int argc ,char *argv[]) {
+
 
 	cout << "Don't forget to source init_Baboon.sh script before running this..." << endl;
 	/********************************************
@@ -67,42 +68,31 @@ int main (int argc ,char *argv[]) {
 	string footer = "Please report bug to <rete@ipnl.in2p3.fr>";
 	TCLAP::CmdLine cmd(footer, ' ', "1.0");
 
-	TCLAP::ValueArg<std::string> pathToRootFilesArg(
-				"o"
-				,"root-output"
-				,"root output file"
-				,true
-				,"OverlayEstimator.root"
-				,"string" );
-
-	TCLAP::ValueArg<int> energyShower1Arg(
-				"e"
-				,"energy-shower"
-				,"energy of one of the two showers"
+	TCLAP::ValueArg<std::string> cfgFileArg(
+				"f"
+				,"config"
+				,"config file for analysis"
 				,true
 				,""
-				,"int" );
+				,"string" );
 
-	cmd.add( pathToRootFilesArg );
-	cmd.add( energyShower1Arg );
+
+	cmd.add( cfgFileArg );
 	cmd.parse( argc, argv );
 
 
+	CfgParser *parser = new CfgParser( cfgFileArg.getValue() );
+	parser->Read();
 
-	vector<int> energies;
-	energies.push_back(10);
-	energies.push_back(20);
-	energies.push_back(30);
-	energies.push_back(40);
-	energies.push_back(50);
+	vector<string> energy1;
+	vector<string> energy2;
+	vector<string> pads;
+	string pathToRootFiles;
 
-	vector<int> pads;
-	pads.push_back(5);
-	pads.push_back(10);
-	pads.push_back(15);
-	pads.push_back(20);
-	pads.push_back(25);
-	pads.push_back(30);
+	parser->GetValue("variables","energy1",&energy1);
+	parser->GetValue("variables","energy2",&energy2);
+	parser->GetValue("variables","pads",&pads);
+	parser->GetValue("paths","pathToRootFiles",&pathToRootFiles);
 
 	TGraph* graphPadsPurity5 = NewTGraph(5,1);
 	TGraph* graphPadsPurity10 = NewTGraph(5,2);
@@ -119,12 +109,33 @@ int main (int argc ,char *argv[]) {
 	TGraph* graphPadsContamination30 = NewTGraph(5,6);
 
 
+	for( unsigned int e1=0 ; e1<energy1.size() ; e1++ ) {
+		for( unsigned int e2=0 ; e2<energy2.size() ; e2++ ) {
+			for( unsigned int p=0 ; p<pads.size() ; p++ ) {
 
-	for( unsigned int e=0 ; e<energies.size() ; e++ ) {
 
-		for(  )
+				string rootFile = pathToRootFiles
+								+ string("/")
+								+ energy1.at(e1)
+								+ string("GeV/")
+								+ string("double_calorimeterhit_pi_")
+								+ energy1.at(e1)
+								+ string("_")
+								+ energy2.at(e2)
+								+ string("GeV_I0_1_overlay_")
+								+ pads.at(p)
+								+ string("pads_new.root");
+
+				TFile *file = new TFile( rootFile.c_str() );
+				TTree *tree = (TTree *) file->Get( rootFile.c_str() );
+
+				TreeProcessor proc( tree );
+				proc.Loop();
+				EstimatorVars vars = proc.GetMeans();
 
 
+			}
+		}
 	}
 
 
