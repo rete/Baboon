@@ -59,6 +59,9 @@ namespace baboon {
 
 		void Loop();
 
+		inline EstimatorVars GetMeans()
+			{ return estimatorMeans; }
+
 
 	protected:
 
@@ -66,8 +69,7 @@ namespace baboon {
 
 		EstimatorVars estimatorMeans;
 
-		inline EstimatorVars GetMeans()
-			{ return estimatorMeans; }
+
 
 	};  // class
 
