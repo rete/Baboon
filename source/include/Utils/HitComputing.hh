@@ -29,7 +29,7 @@
 #include "Geometry/ThreeVector.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*! Return the closest hit from position v ( in x,y,z coordinates ) */
 	Hit *GetClosestHit( const ThreeVector &v , HitCollection *hitCol );

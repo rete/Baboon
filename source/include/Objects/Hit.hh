@@ -36,7 +36,7 @@
 #include "Config/SdhcalConfig.hh"
 #include "Reconstruction/Tag.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 	class Cluster;
 

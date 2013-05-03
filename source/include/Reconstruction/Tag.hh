@@ -21,7 +21,7 @@
 #include <string>
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Enumerator for hit tagging. Allow to classify hits in SDHCAL.

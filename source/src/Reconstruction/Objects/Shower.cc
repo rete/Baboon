@@ -16,7 +16,7 @@
 
 #include "Reconstruction/Objects/Shower.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 Shower::Shower() : RecoObject() {;}
 

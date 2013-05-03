@@ -43,7 +43,7 @@
 #include "Exception.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*
 	 * Class PrincipalComponentAnalysis

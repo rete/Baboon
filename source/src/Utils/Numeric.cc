@@ -21,7 +21,7 @@ using namespace std ;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	double square(double x,double y) {

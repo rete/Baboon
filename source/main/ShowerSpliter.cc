@@ -48,7 +48,7 @@
 #include "Geometry/ThreeVector.hh"
 
 using namespace std;
-using namespace sdhcal;
+using namespace baboon;
 
 
 int main (int argc ,char *argv[]) {

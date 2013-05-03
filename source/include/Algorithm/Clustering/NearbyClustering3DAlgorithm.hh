@@ -31,7 +31,7 @@
 #include "Managers/HitManager.hh"
 #include "Objects/Cluster.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 	/*
 	 * Class NearbyClustering3DAlgorithm

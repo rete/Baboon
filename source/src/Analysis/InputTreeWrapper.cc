@@ -22,7 +22,7 @@ using namespace std;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 
@@ -106,9 +106,11 @@ namespace sdhcal {
 	template void InputTTreeWrapper::GetValue( const std::string &branchName , int &val );
 	template void InputTTreeWrapper::GetValue( const std::string &branchName , double &val );
 	template void InputTTreeWrapper::GetValue( const std::string &branchName , float &val );
+	template void InputTTreeWrapper::GetValue( const std::string &branchName , bool &val );
 	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<int> &val );
 	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<double> &val );
 	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<float> &val );
+	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<bool> &val );
 
 
 }  // namespace 

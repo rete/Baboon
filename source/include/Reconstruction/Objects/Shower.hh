@@ -25,7 +25,7 @@
 #include <cmath> 
 #include <vector> 
 
-namespace sdhcal {
+namespace baboon {
 
 /* 
  * Class Shower

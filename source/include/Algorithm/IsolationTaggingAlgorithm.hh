@@ -32,7 +32,7 @@
 
 #include <omp.h>
 
-namespace sdhcal {
+namespace baboon {
 
 	/*
 	 * Class IsolationTaggingAlgorithm

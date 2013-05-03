@@ -34,7 +34,7 @@
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class HitManager.

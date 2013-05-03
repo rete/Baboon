@@ -37,7 +37,7 @@
 #include "TF2.h"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class JobManager.

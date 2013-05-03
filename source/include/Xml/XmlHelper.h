@@ -14,7 +14,7 @@
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/**
 	 *  XmlHelper class.

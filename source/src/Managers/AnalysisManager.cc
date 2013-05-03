@@ -21,7 +21,7 @@ using namespace std;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 
@@ -49,8 +49,11 @@ namespace sdhcal {
 
 	void AnalysisManager::Kill() {
 		if(instance != NULL) {
+			cout << "debug end" << endl;
 			delete instance;
+			cout << "debug end" << endl;
 			instance = NULL;
+			cout << "debug end" << endl;
 		}
 	}
 
@@ -65,10 +68,13 @@ namespace sdhcal {
 
 
 	void AnalysisManager::End() {
-
+		cout << "debug" << endl;
 		rootOutputFile->cd();
+		cout << "debug" << endl;
 		rootOutputFile->Write();
+		cout << "debug" << endl;
 		rootOutputFile->Close();
+		cout << "debug" << endl;
 		delete rootOutputFile;
 	}
 

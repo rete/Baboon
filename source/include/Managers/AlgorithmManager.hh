@@ -34,7 +34,7 @@
 #include "Exception.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	typedef std::map< std::string , AbstractAlgorithm* > AlgorithmMap;

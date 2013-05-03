@@ -31,7 +31,7 @@
 #include "Objects/Hit.hh"
 #include "Geometry/ThreeVector.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 
 

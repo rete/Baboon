@@ -20,7 +20,7 @@
 using namespace std;
 using namespace cfgparser;
 
-namespace sdhcal {
+namespace baboon {
 
 
 

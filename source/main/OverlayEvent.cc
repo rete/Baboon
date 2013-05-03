@@ -56,7 +56,7 @@
 
 using namespace std;
 using namespace cfgparser;
-using namespace sdhcal;
+using namespace baboon;
 
 // for debug messages (devel)
 #define __DEBUG__ 0

@@ -59,7 +59,7 @@
 
 using namespace std;
 using namespace cfgparser;
-using namespace sdhcal;
+using namespace baboon;
 
 // for debug messages (devel)
 #define __DEBUG__ 0
@@ -579,8 +579,11 @@ int main (int argc ,char *argv[]) {
 
 	lcReader->close();
 	analysisManager->End();
+	cout << "debug end" << endl;
 	AnalysisManager::Kill();
+	cout << "debug end" << endl;
 	SdhcalConfig::Kill();
+	cout << "debug end" << endl;
 	delete lcReader;
 
 

@@ -82,7 +82,7 @@ distribution.
 	#endif
 #endif	
 
-namespace sdhcal   // Added namespace
+namespace baboon   // Added namespace
 {
 
 class TiXmlDocument;

@@ -32,7 +32,7 @@ distribution.
 #include "Xml/tinyxml.h"  // Altered path
 
 
-namespace sdhcal  // Added namespace
+namespace baboon  // Added namespace
 {
 
 //#define DEBUG_PARSER

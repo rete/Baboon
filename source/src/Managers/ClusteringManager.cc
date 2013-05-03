@@ -20,7 +20,7 @@
 using namespace std ;
 
 
-namespace sdhcal {
+namespace baboon {
 
 	ClusteringManager *ClusteringManager::instance = NULL;
 

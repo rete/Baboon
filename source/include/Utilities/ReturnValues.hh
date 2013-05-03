@@ -21,7 +21,7 @@
 #include <string>
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	class Return {

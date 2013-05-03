@@ -32,7 +32,7 @@
 #include "Managers/HitManager.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 /* 
  * Class ConeBeginningAlgorithm

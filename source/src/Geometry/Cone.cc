@@ -16,7 +16,7 @@
 
 #include "Geometry/Cone.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 	Cone::Cone( const ThreeVector &peakPos , double thet , const ThreeVector &u , double r ) {
 

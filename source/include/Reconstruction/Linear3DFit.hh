@@ -28,7 +28,7 @@
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class Linear3DFit.

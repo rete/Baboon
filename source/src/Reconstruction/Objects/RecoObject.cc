@@ -16,7 +16,7 @@
 
 #include "Reconstruction/Objects/RecoObject.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 RecoObject::RecoObject() {;}
 

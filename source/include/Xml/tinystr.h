@@ -57,7 +57,7 @@ distribution.
 #endif
 
 
-namespace sdhcal  // Added namespace
+namespace baboon  // Added namespace
 {
 
 /*

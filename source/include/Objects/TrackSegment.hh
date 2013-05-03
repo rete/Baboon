@@ -30,7 +30,7 @@
 #include "Objects/Hit.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	typedef std::pair<Hit*,Hit*> TrackSegmentExtremities;

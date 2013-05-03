@@ -27,7 +27,7 @@ class TBranch;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-namespace sdhcal {
+namespace baboon {
 
 	typedef std::vector<float>  VectorFloat;
 	typedef std::vector<double> VectorDouble;

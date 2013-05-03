@@ -39,7 +39,7 @@
 #include "CfgParser/Data.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 //	/*!
 //	 * Class HitCollectionComputer.

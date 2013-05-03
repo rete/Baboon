@@ -18,7 +18,7 @@
 
 #include "CLHEP/Matrix/Matrix.h"
 
-namespace sdhcal {
+namespace baboon {
 
 	typedef CLHEP::HepMatrix Matrix;
 

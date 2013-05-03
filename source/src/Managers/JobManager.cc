@@ -23,7 +23,7 @@ using namespace std ;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	JobManager* JobManager::instance = NULL;
 

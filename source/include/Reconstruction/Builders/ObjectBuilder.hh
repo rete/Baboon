@@ -27,7 +27,7 @@
 #include "Utilities/ReturnValues.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 *

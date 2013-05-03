@@ -52,7 +52,7 @@
 #include "SdhcalConfig.hh"
 
 using namespace std;
-using namespace sdhcal;
+using namespace baboon;
 using namespace cfgparser;
 
 

@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace sdhcal {
+namespace baboon {
 
 	typedef std::set<std::string> StringSet;
 	typedef std::vector<std::string> StringVector;

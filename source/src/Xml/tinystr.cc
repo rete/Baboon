@@ -31,7 +31,7 @@ distribution.
 
 #include "Xml/tinystr.h" // Altered path
 
-namespace sdhcal // Added namespace
+namespace baboon // Added namespace
 {
 
 // Error value for find primitive

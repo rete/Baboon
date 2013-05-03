@@ -23,7 +23,7 @@
 #include <cmath>
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class Matrix3D.

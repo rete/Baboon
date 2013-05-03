@@ -16,7 +16,7 @@
 
 #include "Reconstruction/Objects/RecoHit.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 RecoHit::RecoHit() : RecoObject() {;}
 

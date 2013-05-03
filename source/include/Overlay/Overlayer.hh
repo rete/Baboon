@@ -33,7 +33,7 @@
 #include "Config/SdhcalConfig.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class Overlayer.

@@ -21,12 +21,12 @@
 #include <cstdlib>
 #include <exception>
 
-namespace sdhcal {
+namespace baboon {
 
 
 
 	/*!
-	 * @brief : Class Exception. The base class for all exceptions in sdhcal.
+	 * @brief : Class Exception. The base class for all exceptions in baboon.
 	 */
 	class Exception : public std::exception {
 

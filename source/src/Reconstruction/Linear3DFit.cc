@@ -18,7 +18,7 @@
 using namespace std ;
 
 
-namespace sdhcal {
+namespace baboon {
 
 	Linear3DFit::Linear3DFit( std::vector<ThreeVector> pos , std::vector<ThreeVector> w) {
 

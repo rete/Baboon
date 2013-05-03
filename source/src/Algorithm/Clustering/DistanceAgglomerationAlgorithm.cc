@@ -18,7 +18,7 @@
 #include "Algorithm/Clustering/DistanceAgglomerationAlgorithm.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	DistanceAgglomerationAlgorithm::DistanceAgglomerationAlgorithm()
 		: AbstractAlgorithm("DistanceAgglomerationAlgorithm") {

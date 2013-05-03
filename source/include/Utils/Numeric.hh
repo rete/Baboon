@@ -24,7 +24,7 @@
 #include <utility>
 #include <numeric>
 
-namespace sdhcal {
+namespace baboon {
 
 	double square(double x, double y);
 

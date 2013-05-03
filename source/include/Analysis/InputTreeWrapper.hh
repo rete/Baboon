@@ -34,7 +34,7 @@
 #include <TLeaf.h>
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	typedef std::map< std::string , TBranch* > TBranchMap;

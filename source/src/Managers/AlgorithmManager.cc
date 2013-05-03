@@ -22,8 +22,7 @@ using namespace cfgparser;
 
 
 
-namespace sdhcal {
-
+namespace baboon {
 
 
 	AlgorithmManager* AlgorithmManager::instance = NULL;

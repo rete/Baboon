@@ -28,7 +28,7 @@
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	TTreeWrapper::TTreeWrapper()  {
@@ -52,7 +52,7 @@ namespace sdhcal {
 			TTree *tree = itTreeMap->second.first;
 			if (tree) {
 
-				delete itTreeMap->second.first;     // delete the TTree
+//				delete itTreeMap->second.first;     // delete the TTree
 				itTreeMap->second.first = NULL;
 
 				for(BranchMap::iterator itBranchMap = itTreeMap->second.second->begin(), itBranchMapEnd = itTreeMap->second.second->end();

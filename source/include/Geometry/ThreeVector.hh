@@ -18,7 +18,7 @@
 
 #include "CLHEP/Vector/ThreeVector.h"
 
-namespace sdhcal {
+namespace baboon {
 
 	typedef CLHEP::Hep3Vector ThreeVector;
 

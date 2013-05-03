@@ -25,7 +25,7 @@
 #include "Geometry/ThreeVector.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class Cylinder.

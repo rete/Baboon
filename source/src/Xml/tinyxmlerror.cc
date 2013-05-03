@@ -28,7 +28,7 @@ distribution.
 #include "Xml/tinyxml.h"
 
 
-namespace sdhcal  //  Added namespace
+namespace baboon  //  Added namespace
 {
 
 // The goal of the seperate error file is to make the first

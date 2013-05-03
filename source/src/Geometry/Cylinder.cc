@@ -20,7 +20,7 @@ using namespace std ;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	Cylinder::Cylinder(ThreeVector x1 , ThreeVector x2 , double r) {

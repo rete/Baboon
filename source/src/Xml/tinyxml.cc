@@ -36,7 +36,7 @@ distribution.
 
 #include "Xml/tinyxml.h"
 
-namespace sdhcal  // Added namespace
+namespace baboon  // Added namespace
 {
 
 

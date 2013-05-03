@@ -45,7 +45,7 @@
 #include "tclap/ValuesConstraint.h"
 
 using namespace std;
-using namespace sdhcal;
+using namespace baboon;
 //using namespace cfgparser;
 
 // for debug messages (devel)

@@ -21,7 +21,7 @@ using namespace std ;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	Overlayer::Overlayer(IMPL::LCCollectionVec * lcCol1 , IMPL::LCCollectionVec * lcCol2) {
 

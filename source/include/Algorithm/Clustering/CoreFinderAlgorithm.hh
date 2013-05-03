@@ -29,7 +29,7 @@
 #include "Objects/Hit.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	/*!

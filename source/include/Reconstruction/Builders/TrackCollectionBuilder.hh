@@ -31,7 +31,7 @@
 #include "Managers/ClusteringManager.hh"
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*
 	 * Class TrackCollectionBuilder

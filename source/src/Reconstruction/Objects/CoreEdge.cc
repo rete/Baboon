@@ -16,7 +16,7 @@
 
 #include "Reconstruction/Objects/CoreEdge.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 CoreEdge::CoreEdge() : RecoObject() {;}
 

@@ -11,7 +11,7 @@
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	template <typename T>
 	inline Return XmlHelper::ReadValue(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, T &t) {

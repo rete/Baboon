@@ -20,7 +20,7 @@ using namespace std;
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 
 	HoughTransformAlgorithm::HoughTransformAlgorithm()

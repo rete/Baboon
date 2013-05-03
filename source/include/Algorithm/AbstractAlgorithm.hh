@@ -34,7 +34,7 @@
 #include "Reconstruction/Tag.hh"
 #include "Exception.hh"
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class AbstractAlgorithm. Abstract class for Algorithm in SDHCAL studies. \n

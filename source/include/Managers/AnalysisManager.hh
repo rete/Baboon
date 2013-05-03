@@ -38,7 +38,7 @@
 
 
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class AnalysisManager.

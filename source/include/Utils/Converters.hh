@@ -33,7 +33,7 @@
 #include "IMPL/CalorimeterHitImpl.h"
 #include "EVENT/LCCollection.h"
 
-namespace sdhcal {
+namespace baboon {
 
 	/*!
 	 * Class Converter.

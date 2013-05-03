@@ -17,7 +17,7 @@
 
 using namespace std ;
 
-namespace sdhcal {
+namespace baboon {
 
 	Converter::Converter() {}
 

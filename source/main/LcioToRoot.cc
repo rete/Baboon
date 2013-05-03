@@ -47,8 +47,6 @@
 #include "tclap/CmdLine.h"
 
 using namespace std;
-//using namespace log4cplus;
-//using namespace sdhcal;
 
 // for debug messages (devel)
 #define __DEBUG__ 0

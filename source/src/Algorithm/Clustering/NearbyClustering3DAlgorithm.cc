@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace sdhcal {
+namespace baboon {
 
 	NearbyClustering3DAlgorithm::NearbyClustering3DAlgorithm()
 		: AbstractAlgorithm("NearbyClustering3DAlgorithm") {

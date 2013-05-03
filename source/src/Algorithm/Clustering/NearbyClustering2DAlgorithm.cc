@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace sdhcal {
+namespace baboon {
 
 	NearbyClustering2DAlgorithm::NearbyClustering2DAlgorithm()
 		: AbstractAlgorithm("NearbyClustering2DAlgorithm") {

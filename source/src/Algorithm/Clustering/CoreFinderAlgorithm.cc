@@ -18,7 +18,7 @@
 
 using namespace std ;
 
-namespace sdhcal {
+namespace baboon {
 
 
 	CoreFinderAlgorithm::CoreFinderAlgorithm()
