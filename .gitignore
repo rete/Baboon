@@ -3,3 +3,7 @@
 /BaboonConfig.cmake
 /BaboonConfigVersion.cmake
 /bin
+/init_Baboon.sh
+/OverlayEstimatorAll.C
+/OverlayEstimatorAll.h
+/pouette.root
