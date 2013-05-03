@@ -31,6 +31,7 @@ FOREACH( mod Algorithm Analysis Geometry Managers Objects Overlay Reconstruction
 		ARCHIVE DESTINATION lib 
 		LIBRARY DESTINATION lib 
 	)
+	SET( ALL_LIBS ${ALL_LIBS} ${mod} )
 ENDFOREACH()
 
 
@@ -98,6 +99,22 @@ TARGET_LINK_LIBRARIES(
 )
 
 
+
+# ------------------ Overlay Estimator Analysis --------------------
+SET( 
+	OVERLAY_ESTIMATOR_ANALYSIS_SRC_FILES 
+	main/OverlayEstimatorAnalysis.cc 
+)
+ADD_EXECUTABLE( OverlayEstimatorAnalysis ${OVERLAY_ESTIMATOR_ANALYSIS_SRC_FILES} )
+TARGET_LINK_LIBRARIES( 
+	OverlayEstimatorAnalysis 
+	${ROOT_COMPONENT_LIBRARIES} 
+	CfgParser 
+	Analysis
+	Utilities
+)
+
+
 # ------------------ Shower Spliter --------------------
 SET( 
 	SHOWER_SPLITER_SRC_FILES 
@@ -121,10 +138,12 @@ TARGET_LINK_LIBRARIES(
 
 
 
+
+
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent ShowerSpliter OverlayEstimator
+	OverlayEvent LcioToRoot DrawEvent ShowerSpliter OverlayEstimator OverlayEstimatorAnalysis
 	DESTINATION 
 	bin
 )
