@@ -76,7 +76,7 @@ ADD_EXECUTABLE( DrawEvent ${DRAW_EVENT_SRC_FILES} )
 TARGET_LINK_LIBRARIES( DrawEvent ${ROOT_COMPONENT_LIBRARIES} CfgParser Config )
 
 
-# ------------------ Overlay Estiamtor --------------------
+# ------------------ Overlay Estimator --------------------
 SET( 
 	OVERLAY_ESTIMATOR_SRC_FILES 
 	main/OverlayEstimator.cc 
@@ -124,7 +124,7 @@ TARGET_LINK_LIBRARIES(
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent 
+	OverlayEvent LcioToRoot DrawEvent ShowerSpliter OverlayEstimator
 	DESTINATION 
 	bin
 )
