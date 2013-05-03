@@ -1,0 +1,11 @@
+#ifndef BaboonConfig_h
+#define BaboonConfig_h 1
+
+// version macros
+#define Baboon_MAJOR_VERSION @Baboon_VERSION_MAJOR@
+#define Baboon_MINOR_VERSION @Baboon_VERSION_MINOR@
+#define Baboon_PATCH_LEVEL @Baboon_VERSION_PATCH@
+
+#define Baboon_VERSION_GE( MAJV , MINV , PLEV )  ( (Baboon_MAJOR_VERSION > MAJV) || ( (Baboon_MAJOR_VERSION == MAJV) && (Baboon_MINOR_VERSION > MINV) ) || ( (Baboon_MAJOR_VERSION == MAJV) && (Baboon_MINOR_VERSION == MINV) && (Baboon_PATCH_LEVEL >= PLEV) ) )
+
+#endif // BaboonConfig_h

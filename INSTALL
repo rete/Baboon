@@ -1,0 +1,54 @@
+########################################
+# INSTALL file for Baboon soft
+# @author : rete
+# @date : 03/05/13
+########################################
+
+
+//Baboon software for SDHCAL shower splitting
+Copyright (c) 2012 CNRS / IPNL
+All Right Reserved.
+
+Use and copying of this software and preparation of derivative works
+based upon this software are permitted. Any copy of this software or
+of any derivative work must include this copyright notice.
+
+
+
+REQUIREMENTS:
+=============
+
+   ILCSOFT version 01-14 or higher.
+   CMake 2.6 or higher.
+   
+   Needed packages from ILCSoft :
+     - Marlin
+     - LCIO
+     - CLHEP
+     - ROOT (5.27.06 or higher)
+   
+   Useful packages from ILCSOFT :
+     - Doxygen
+
+
+INSTALL:
+=============
+
+  In the Baboon root directory :
+
+    mkdir build (if there's not)
+    cd build
+    cmake -C $ILCSOFT/ILCSoft.cmake ..
+ 
+    make -j N  # for N processor on your machine
+    sudo make install
+ 
+ 
+  Before using the software, do not forget to modify 
+  the init_Baboon.sh script as your need and source it :
+  
+    source init_SDHCAL.sh
+    
+    
+  Enjoy !  :)
+  

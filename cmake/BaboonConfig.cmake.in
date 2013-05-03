@@ -1,0 +1,86 @@
+##############################################################################
+# cmake configuration file for sdhcal utils
+#
+# requires:
+#   MacroCheckPackageLibs.cmake for checking package libraries
+#   MacroExportPackageDeps.cmake for exporting package dependencies
+#
+# returns following variables:
+#
+#   Baboon_FOUND      : set to TRUE if Baboon found
+#       if FIND_PACKAGE called with REQUIRED and COMPONENTS arguments
+#       Baboon_FOUND is only set to TRUE if ALL components are also found
+#       if REQUIRED is NOT set components may or may not be available
+#
+#   Baboon_ROOT       : path to this Baboon installation
+#   Baboon_VERSION    : package version
+#   Baboon_LIBRARIES  : list of Baboon libraries (NOT including COMPONENTS)
+#   Baboon_INCLUDE_DIRS  : list of paths to be used with INCLUDE_DIRECTORIES
+#   Baboon_LIBRARY_DIRS  : list of paths to be used with LINK_DIRECTORIES
+#   Baboon_COMPONENT_LIBRARIES      : list of Baboon component libraries
+#   Baboon_${COMPONENT}_FOUND       : set to TRUE or FALSE for each library
+#   Baboon_${COMPONENT}_LIBRARY     : path to individual libraries
+#   Baboon_${COMPONENT}_LIB_DEPENDS : individual library dependencies
+#
+# @author Jan Engels, Desy
+# Modified for SDHCAL use by : rete
+##############################################################################
+
+SET( Baboon_ROOT "@CMAKE_INSTALL_PREFIX@" )
+SET( Baboon_VERSION "@Baboon_VERSION@" )
+
+
+# ---------- include dirs -----------------------------------------------------
+# do not store find results in cache
+SET( Baboon_INCLUDE_DIRS Baboon_INCLUDE_DIRS-NOTFOUND )
+MARK_AS_ADVANCED( Baboon_INCLUDE_DIRS )
+
+FIND_PATH( Baboon_INCLUDE_DIRS
+	NAMES CfgParser/CfgParser.hh
+	PATHS ${Baboon_ROOT}/source/include
+	NO_DEFAULT_PATH
+)
+
+
+
+# ---------- libraries --------------------------------------------------------
+INCLUDE( "@ILCSOFT_CMAKE_MODULES_ROOT@/MacroCheckPackageLibs.cmake" )
+
+# only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
+# additional components are set by cmake in variable PKG_FIND_COMPONENTS
+# first argument should be the package name
+CHECK_PACKAGE_LIBS( Baboon Overlay Analysis CfgParser Utilities Xml )
+
+
+
+# ---------- dependencies -----------------------------------------------------
+INCLUDE( "@ILCSOFT_CMAKE_MODULES_ROOT@/MacroExportPackageDeps.cmake" )
+# exports following package dependencies (if set)
+# first argument of macro should be the package name
+SET( Baboon_DEPENDS_INCLUDE_DIRS  @Baboon_DEPENDS_INCLUDE_DIRS@ )
+SET( Baboon_DEPENDS_LIBRARY_DIRS  @Baboon_DEPENDS_LIBRARY_DIRS@ )
+SET( Baboon_DEPENDS_LIBRARIES  @Baboon_DEPENDS_LIBRARIES@ )
+EXPORT_PACKAGE_DEPENDENCIES( Baboon )
+
+
+
+# ---------- final checking ---------------------------------------------------
+INCLUDE( FindPackageHandleStandardArgs )
+# set Baboon_FOUND to TRUE if all listed variables are TRUE and not empty
+# Baboon_COMPONENT_VARIABLES will be set if FIND_PACKAGE is called with REQUIRED argument
+FIND_PACKAGE_HANDLE_STANDARD_ARGS( Baboon DEFAULT_MSG Baboon_ROOT Baboon_INCLUDE_DIRS Baboon_LIBRARIES ${Baboon_COMPONENT_VARIABLES} )
+
+SET( Baboon_FOUND ${Baboon_FOUND} )
+
+
+
+# ---------- definitions ------------------------------------------------------
+IF( Baboon_FOUND )
+
+    IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+        CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+        MARK_AS_ADVANCED( Baboon_DEFINITIONS )
+    ENDIF()
+
+ENDIF()
+

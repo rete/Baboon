@@ -1,0 +1,27 @@
+########################################
+# README file for Baboon soft
+# @author : rete
+# @date : 03/05/13
+########################################
+
+
+//Baboon software for SDHCAL shower splitting
+Copyright (c) 2012 CNRS / IPNL
+All Right Reserved.
+
+Use and copying of this software and preparation of derivative works
+based upon this software are permitted. Any copy of this software or
+of any derivative work must include this copyright notice.
+
+
+
+INSTALL:
+=========
+
+See INSTALL file in the main directory
+for more informations about installation.
+
+
+
+
+Report bug to <rete@ipnl.in2p3.fr> 
