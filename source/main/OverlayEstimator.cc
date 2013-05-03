@@ -65,19 +65,16 @@ using namespace sdhcal;
 #define __DEBUG__ 0
 
 
-//extern int gErrorIgnoreLevel;
-//gErrorIgnoreLevel = kWarning;
-
 int main (int argc ,char *argv[]) {
 
-	cout << "Don't forget to source init_SDHCAL.sh script before running this..." << endl;
+	cout << "Don't forget to source init_Baboon.sh script before running this..." << endl;
 	/********************************************
 	 * Grab the most useful environment variable
 	 ********************************************/
 
-	string pathToSDHCAL = "";
-	pathToSDHCAL = getenv("PATH_TO_SDHCAL");
-	if( pathToSDHCAL.empty() ) throw runtime_error("'PATH_TO_SDHCAL' env variable is not set.\n Please source init_SDHCAL.sh before running.");
+	string pathToBaboon = "";
+	pathToBaboon = getenv("BABOON_HOME");
+	if( pathToBaboon.empty() ) throw runtime_error("'BABOON_HOME' env variable is not set.\n Please source init_SDHCAL.sh before running.");
 
 
 	/*********************************
@@ -133,7 +130,7 @@ int main (int argc ,char *argv[]) {
 
 	vector<int> nbOfPadsXYZ;
 	SdhcalConfig *config = SdhcalConfig::GetInstance();
-	config->LoadFile( pathToSDHCAL + "/config/SDHCAL.cfg" );
+	config->LoadFile( pathToBaboon + "/config/SDHCAL.cfg" );
 	config->GetData("pads").GetValue("nbOfPadsXYZ",&nbOfPadsXYZ);
 
 
@@ -151,7 +148,7 @@ int main (int argc ,char *argv[]) {
 	 **********************************/
 
 	AlgorithmManager *algorithmManager = AlgorithmManager::GetInstance();
-	algorithmManager->SetConfigFileName(pathToSDHCAL + "/config/Algorithm.cfg");
+	algorithmManager->SetConfigFileName(pathToBaboon + "/config/Algorithm.cfg");
 
 	// Add pca algorithm
 	algorithmManager->RegisterAlgorithm( new PrincipalComponentAnalysis() );
@@ -208,11 +205,9 @@ int main (int argc ,char *argv[]) {
 		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
 
 			if( hitCollection->at(i)->getType() == 1 ) {
-//				cout << "type 1" << endl;
 				hitColType1->push_back(hitCollection->at(i));
 			}
 			else if( hitCollection->at(i)->getType() == 2 ) {
-//				cout << "type 2" << endl;
 				hitColType2->push_back(hitCollection->at(i));
 			}
 			else if( hitCollection->at(i)->getType() == 3) {
@@ -385,18 +380,6 @@ int main (int argc ,char *argv[]) {
 				for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
 
 					int type = hitCollection->at(i)->getType();
-
-		//			if( type == 1 || type == 3 ) {
-		//				xNew1[id1] = newDataSet(0,i);
-		//				yNew1[id1] = newDataSet(1,i);
-		//				id1++;
-		//			}
-		//			if( type == 2 || type == 3 ) {
-		//				xNew2[id2] = newDataSet(0,i);
-		//				yNew2[id2] = newDataSet(1,i);
-		//				id2++;
-		//			}
-
 					if( newDataSet(0,i) < realCenter && (type == 1 || type == 3)) hitsFrom1in1++;
 					if( newDataSet(0,i) < realCenter && (type == 2 || type == 3)) hitsFrom2in1++;
 					if( newDataSet(0,i) > realCenter && (type == 2 || type == 3)) hitsFrom2in2++;
@@ -521,21 +504,14 @@ int main (int argc ,char *argv[]) {
 
 				if( cylinder1->Contains(ijkPos) ) {
 
-//					if( cylinder2->Contains(ijkPos) ) {
-//						commonHits++;
-//					}
 					hitsFrom1in1++;
 				}
 				if( cylinder2->Contains(ijkPos) ) {
 					hitsFrom1in2++;
 				}
 				if( !cylinder1->Contains(ijkPos) && !cylinder2->Contains(ijkPos) ) {
-	//				misMatch1++;
 					if( ijk.at(0) > planeXPosition ) hitsFrom1Side1OutsideCylinder ++;
 					else hitsFrom2Side1OutsideCylinder ++;
-				//if( planeXPosition - cog1.x() < 0 ) cout << "hits 1 on the right" << endl;
-				//else  cout << "hits 1 on the left" << endl;
-
 
 				}
 
@@ -547,17 +523,12 @@ int main (int argc ,char *argv[]) {
 				ThreeVector ijkPos( ijk.at(0) , ijk.at(1) , ijk.at(2) );
 
 				if( cylinder2->Contains(ijkPos) ) {
-
-//					if( cylinder1->Contains(ijkPos) ) {
-//						commonHits++;
-//					}
 					hitsFrom2in2++;
 				}
 				if( cylinder1->Contains(ijkPos) ) {
 					hitsFrom2in1++;
 				}
 				if( !cylinder2->Contains(ijkPos) && !cylinder1->Contains(ijkPos) ) {
-	//				misMatch2++;
 					if( ijk.at(0) < planeXPosition ) hitsFrom2Side2OutsideCylinder ++;
 					else hitsFrom1Side2OutsideCylinder ++;
 				}
