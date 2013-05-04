@@ -25,7 +25,7 @@ namespace baboon {
 
 
 	TrackCollectionBuilder::TrackCollectionBuilder()
-		: ObjectBuilder() {}
+		: ObjectBuilder<TrackCollection>() {}
 
 	TrackCollectionBuilder::~TrackCollectionBuilder() {
 
