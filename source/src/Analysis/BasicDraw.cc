@@ -46,12 +46,12 @@ namespace baboon {
 	  gROOT->ForceStyle();
 	}
 
-	TPaveText *DrawText( TString string ) {
 
+	TPaveText *DrawText( TString string ) {
 
 	  TPaveText *pt = new TPaveText(0.10, 0.91, 0.43, 0.96, "tbNDC");
 	  pt->SetTextSize(0.035);
-	  pt->SetTextColor(kGray);
+	  pt->SetTextColor(kGray+2);
 	  pt->SetFillColor(0);
 	  pt->SetLineWidth(0);
 	  pt->SetBorderSize(0);
@@ -59,10 +59,9 @@ namespace baboon {
 	  pt->AddText(string);
 	  pt->Draw();
 	  pt->SetTextFont(62);
-
 	  return pt;
-
 	}
+
 
 	TGraph *NewTGraph( unsigned int nbOfPts , unsigned int colorLineID ) {
 
@@ -75,6 +74,7 @@ namespace baboon {
 		return graph;
 	}
 
+
 	TGraph *NewTGraph( unsigned int nbOfPts , double *x , double *y , unsigned int colorLineID ) {
 
 		TGraph *graph = new TGraph(nbOfPts,x,y);
@@ -84,6 +84,18 @@ namespace baboon {
 		graph->SetMarkerColor(1);
 		graph->SetMarkerSize(0.5);
 		return graph;
+	}
+
+
+	TLegend *NewTLegend( double x1 , double y1 , double x2 , double y2 ) {
+
+		TLegend *legend = new TLegend(x1,y1,x2,y2);
+		legend->SetMargin(0.5);
+		legend->SetLineColor(0);
+		legend->SetLineWidth(0);
+		legend->SetFillColor(0);
+		legend->SetFillStyle(0);
+		return legend;
 	}
 
 

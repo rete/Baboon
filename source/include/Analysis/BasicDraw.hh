@@ -28,13 +28,14 @@
 #include "TPaveText.h"
 #include "TString.h"
 #include "TGraph.h"
+#include "TLegend.h"
 
 namespace baboon {
 
 
 	/*!
 	 *
-	 * brief Calice style for plot convention
+	 * brief CALICE style for CALICE plot convention
 	 *
 	 */
 	void CaliceStyle();
@@ -59,6 +60,13 @@ namespace baboon {
 	 *
 	 */
 	TGraph *NewTGraph( unsigned int nbOfPts , double *x , double *y , unsigned int colorLineID );
+
+	/*!
+	 *
+	 * @brief TLegend Factory
+	 *
+	 */
+	TLegend *NewTLegend( double x1 , double y1 , double x2 , double y2 );
 
 
 
