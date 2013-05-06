@@ -16,7 +16,7 @@ IF( OPENMP_FOUND )
 ENDIF()
 
 # create library
-FOREACH( mod Algorithm Analysis Geometry Managers Objects Overlay Reconstruction Config CfgParser Utils Utilities )
+FOREACH( mod Algorithm Analysis Geometry Managers Objects Overlay Reconstruction Config CfgParser Utils Utilities Xml )
 	FILE (
 		GLOB_RECURSE
 		${mod}_FILES
