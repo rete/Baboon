@@ -49,7 +49,7 @@ INCLUDE( "@ILCSOFT_CMAKE_MODULES_ROOT@/MacroCheckPackageLibs.cmake" )
 # only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
 # additional components are set by cmake in variable PKG_FIND_COMPONENTS
 # first argument should be the package name
-CHECK_PACKAGE_LIBS( Baboon Overlay Analysis CfgParser Utilities Xml )
+CHECK_PACKAGE_LIBS( Baboon Overlay Analysis CfgParser Utilities Xml Utils Geometry Objects Reconstruction Config Algorithm Managers )
 
 
 
