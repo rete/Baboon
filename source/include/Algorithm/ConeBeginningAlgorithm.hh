@@ -49,14 +49,10 @@ class ConeBeginningAlgorithm : public AbstractAlgorithm {
 		/*! Default Destructor */
 		virtual ~ConeBeginningAlgorithm();
 
-		/**/
-		inline void SetHitCollection( HitCollection *hitCol )
-			{ hitCollection = hitCol; }
-
 
 	protected:
 
-		/*!  */
+		/*! Hit collection for the algorithm */
 		HitCollection *hitCollection;
 
 		/*! Initialize the algorithm, i.e by initializing specific variables */
