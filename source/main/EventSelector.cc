@@ -39,7 +39,7 @@
 // tclap includes
 #include "tclap/CmdLine.h"
 
-// sdhcal includes
+// baboon includes
 #include "Managers/AlgorithmManager.hh"
 #include "Managers/AnalysisManager.hh"
 #include "Algorithm/AbstractAlgorithm.hh"
@@ -58,20 +58,21 @@ using namespace cfgparser;
 
 int main (int argc ,char *argv[]) {
 
-	cout << "Don't forget to source init_SDHCAL.sh script before running this..." << endl;
-
 
 	/********************************************
 	 * Grab the most useful environment variable
 	 ********************************************/
 
-	string pathToSDHCAL = "";
-	pathToSDHCAL = getenv("PATH_TO_SDHCAL");
-	if( pathToSDHCAL.empty() ) throw runtime_error("'PATH_TO_SDHCAL' env variable is not set.\n Please source init_SDHCAL.sh before running.");
+	char *pathToBab = NULL;
+	pathToBab = getenv("BABOON_HOME");
+	if( pathToBab == NULL )
+		throw runtime_error("'BABOON_HOME' env variable is not set.\n "
+		"Please source init_Baboon.sh before running.");
 
+	string pathToBaboon(pathToBab);
 
 	SdhcalConfig *config = SdhcalConfig::GetInstance();
-	config->LoadFile( pathToSDHCAL + "/config/SDHCAL.cfg" );
+	config->LoadFile( pathToBaboon + "/config/SDHCAL.cfg" );
 
 	/*********************************
 	 * Define the command line parser
@@ -116,7 +117,7 @@ int main (int argc ,char *argv[]) {
 	 ***********************************************************/
 
 	AlgorithmManager *algorithmManager = AlgorithmManager::GetInstance();
-	algorithmManager->SetConfigFileName(pathToSDHCAL + "/config/Algorithm.cfg");
+	algorithmManager->SetConfigFileName( pathToBaboon + "/config/Algorithm.cfg");
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
 	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );

@@ -20,7 +20,7 @@
 #include <vector>
 #include <stdexcept>
 
-// sdhcal includes
+// baboon includes
 #include "Config/SdhcalConfig.hh"
 
 // lcio includes
@@ -65,14 +65,17 @@ int main (int argc ,char *argv[]) {
 	 * Grab the most useful environment variable
 	 ********************************************/
 
-	string pathToSDHCAL = getenv("PATH_TO_SDHCAL");
-	if( pathToSDHCAL.empty() )
-		throw runtime_error("'PATH_TO_SDHCAL' env variable is not set.\n "
-		"Please source init_SDHCAL.sh before running.");
+	char *pathToBab = NULL;
+	pathToBab = getenv("BABOON_HOME");
+	if( pathToBab == NULL )
+		throw runtime_error("'BABOON_HOME' env variable is not set.\n "
+		"Please source init_Baboon.sh before running.");
 
-	string codingPattern ="";
+	string pathToBaboon(pathToBab);
+
+	string codingPattern = "";
 	SdhcalConfig *config = SdhcalConfig::GetInstance();
-	config->LoadFile( pathToSDHCAL + string("/config/SDHCAL.cfg") );
+	config->LoadFile( pathToBaboon + string("/config/SDHCAL.cfg") );
 	config->GetData("general").GetValue("codingPattern",&codingPattern);
 
 

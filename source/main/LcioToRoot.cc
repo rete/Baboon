@@ -42,10 +42,6 @@
 #include "TFile.h"
 #include "TBranch.h"
 
-
-// tclap includes
-#include "tclap/CmdLine.h"
-
 using namespace std;
 
 // for debug messages (devel)

@@ -60,9 +60,13 @@ int main (int argc ,char *argv[]) {
 	 * Grab the most useful environment variable
 	 ********************************************/
 
-	string pathToSDHCAL = "";
-	pathToSDHCAL = getenv("PATH_TO_SDHCAL");
-	if( pathToSDHCAL.empty() ) throw runtime_error("'PATH_TO_SDHCAL' env variable is not set.\n Please source init_SDHCAL.sh before running.");
+	char *pathToBab = NULL;
+	pathToBab = getenv("BABOON_HOME");
+	if( pathToBab == NULL )
+		throw runtime_error("'BABOON_HOME' env variable is not set.\n "
+		"Please source init_Baboon.sh before running.");
+
+	string pathToBaboon(pathToBab);
 
 
 	TApplication app("app",0,0);
@@ -85,7 +89,7 @@ int main (int argc ,char *argv[]) {
 				,"root-output"
 				,"root output file name"
 				,false
-				,pathToSDHCAL + "/output/ShowerSpliter/ShowerSpliter.root"
+				,pathToBaboon + "/output/ShowerSpliter/ShowerSpliter.root"
 				,"string" );
 
 	TCLAP::SwitchArg discreteModeArg(
@@ -106,7 +110,7 @@ int main (int argc ,char *argv[]) {
 	 ********************************/
 
 	SdhcalConfig *config = SdhcalConfig::GetInstance();
-	config->LoadFile( pathToSDHCAL + "/config/SDHCAL.cfg" );
+	config->LoadFile( pathToBaboon + "/config/SDHCAL.cfg" );
 
 
 	/***********************************************************
@@ -114,7 +118,7 @@ int main (int argc ,char *argv[]) {
 	 ***********************************************************/
 
 	AlgorithmManager *algorithmManager = AlgorithmManager::GetInstance();
-	algorithmManager->SetConfigFileName(pathToSDHCAL + "/config/Algorithm.cfg");
+	algorithmManager->SetConfigFileName( pathToBaboon + "/config/Algorithm.cfg");
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
 	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
