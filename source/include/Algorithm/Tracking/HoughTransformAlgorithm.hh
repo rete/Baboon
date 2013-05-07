@@ -31,11 +31,11 @@
 #include "Algorithm/AbstractAlgorithm.hh"
 #include "Objects/TrackSegment.hh"
 #include "Objects/Cluster.hh"
-#include "Managers/ClusteringManager.hh"
 #include "Objects/Hit.hh"
-#include "Reconstruction/Tag.hh"
+#include "Managers/ClusteringManager.hh"
 #include "Managers/HitManager.hh"
-
+#include "Reconstruction/Tag.hh"
+#include "Reconstruction/Builders/TrackCollectionBuilder.hh"
 #include "Utilities/ReturnValues.hh"
 
 namespace baboon {
@@ -60,6 +60,12 @@ namespace baboon {
 			fBad
 		};
 
+
+		/*!
+		 *
+		 * @brief Cluster structure for Hough Transform algorithm. Allows to tag the clusters while processing
+		 *
+		 */
 		typedef struct {
 
 			public :
@@ -76,66 +82,83 @@ namespace baboon {
 		typedef std::vector<HoughCluster*> HoughClusterCollection;
 
 
+		public :
+			/*!
+			 *
+			 * @brief Default Constructor
+			 *
+			 */
+			HoughTransformAlgorithm();
+			/*!
+			 *
+			 * @brief Default Destructor
+			 *
+			 */
+			virtual ~HoughTransformAlgorithm();
+
+
 		protected :
 
-			int thetaMax;
-
-			int rMax;
-
-			int clusterSizeLimit;
-
-			int minimumBinning;
-
-			int deltaPosMax;
-
-			int trackSegmentMinimumSize;
-
-			int maximumDistanceBetweenHitsInPlane;
-
-			int maximumDistanceBetweenHitsForLayers;
-
-			int ** houghSpaceX;
-
-			int ** houghSpaceY;
-
-			TrackSegmentCollection *trackSegmentCollection;
-
-			ClusterCollection *clusterCollection;
-
-			HitCollection *hitCollection;
-
+			/*!
+			 *
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
+			 *
+			 */
 			virtual void Init();
 
+
+			/*!
+			 *
+			 * @brief Execute the algorithm
+			 *
+			 */
 			virtual void Execute();
 
+
+			/*!
+			 *
+			 * @brief Finalize the algorithm
+			 *
+			 */
 			virtual void End();
 
+
+			/*!
+			 *
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
+			 *
+			 */
 			virtual Return CheckConsistency();
 
-			void BuildHoughSpaceX();
 
-			void BuildTrackSegments();
-
-			void TagClusters();
-
+			/*!
+			 *
+			 * @brief Delete the Hough parameter space ( 2D array )
+			 *
+			 */
 			void DeleteHoughSpace();
 
+
+			/*!
+			 *
+			 * @brief Allocate the Hough parameter space ( 2D array )
+			 *
+			 */
 			void AllocateHoughSpace();
 
 
-		public :
-			/*! Default Constructor */
-			HoughTransformAlgorithm();
-			/*! Default Destructor */
-			virtual ~HoughTransformAlgorithm();
+			// Algorithm parameters
+			int thetaMax;
+			int rMax;
+			int clusterSizeLimit;
+			int minimumBinning;
+			int deltaPosMax;
+			int trackSegmentMinimumSize;
+			int maximumDistanceBetweenHitsInPlane;
+			int maximumDistanceBetweenHitsForLayers;
 
-			inline void SetClusterCollection(ClusterCollection *clusterCol)
-				{ clusterCollection = clusterCol; }
-
-			inline TrackSegmentCollection *GetTrackSegmentCollection()
-				{ return trackSegmentCollection; }
-
-
+			int ** houghSpaceX;
+			int ** houghSpaceY;
 
 	};
 
