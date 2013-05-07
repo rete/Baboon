@@ -16,35 +16,57 @@
 
 #include "Reconstruction/Builders/TrackCollectionBuilder.hh"
 
-
+using namespace std;
 
 namespace baboon {
 
 
-
+	TrackCollectionBuilder *TrackCollectionBuilder::instance = 0;
 
 
 	TrackCollectionBuilder::TrackCollectionBuilder()
-		: ObjectBuilder<TrackCollection>() {}
+		: ObjectBuilder<TrackCollection>() {
+		object = new TrackCollection();
+	}
 
 	TrackCollectionBuilder::~TrackCollectionBuilder() {
+		if( object != 0 ) {
+			delete object;
+			object = 0;
+		}
 
+	}
+
+	TrackCollectionBuilder *TrackCollectionBuilder::GetInstance() {
+
+		if( instance == 0 ) instance = new TrackCollectionBuilder();
+		return instance;
+	}
+
+	void TrackCollectionBuilder::Kill() {
+
+		if( instance != 0 ) {
+			delete instance;
+			instance = 0;
+		}
 	}
 
 	Return TrackCollectionBuilder::ClearObject() {
 
 		if( object->empty() ) {
 			delete object;
+			object = 0;
 			return S_OK();
 		}
 
 		for( unsigned int i=0 ; i<object->size() ; i++ ) {
-			delete object->at(i);
+			if(object->at(i) != 0) delete object->at(i);
 			object->at(i) = 0;
 		}
 
 		object->clear();
 		delete object;
+		object = 0;
 
 		return S_OK();
 	}
@@ -62,7 +84,7 @@ namespace baboon {
 		for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) {
 
 			Cluster *cluster = clusterCollection->at( i );
-			if( cluster->GetClusterTag() != fTrack ) continue;
+			if( cluster->GetClusterTag() != fPotentialTrack ) continue;
 
 			if( find(clusterTemp.begin()
 									,clusterTemp.end()
@@ -79,7 +101,7 @@ namespace baboon {
 
 				Cluster *cluster2 = clusterCollection->at( j );
 
-				if( cluster2->GetClusterTag() != fTrack ) continue;
+				if( cluster2->GetClusterTag() != fPotentialTrack ) continue;
 
 				if( find(clusterTemp.begin()
 						,clusterTemp.end()
@@ -102,7 +124,13 @@ namespace baboon {
 				}
 			}
 
-			if( trackClusters.size() < trackSegmentMinimumSize ) continue;
+			if( trackClusters.size() < trackSegmentMinimumSize ) {
+				for( unsigned int k=0 ; k<trackClusters.size() ; k++ )
+					trackClusters.at(k)->SetClusterTag( fUndefined );
+				cout << "track didn't passed the size cut" << endl;
+				continue;
+			}
+			cout << "track passed the size cut" << endl;
 			Track *track = new Track();
 
 			for(unsigned int j=0 ; j<trackClusters.size() ; j++) {
@@ -125,6 +153,7 @@ namespace baboon {
 
 	// template initialization
 	template ObjectBuilder<TrackCollection>::ObjectBuilder();
+	template Return ObjectBuilder<TrackCollection>::SetObject( TrackCollection *obj );
 
 
 }  // namespace 
