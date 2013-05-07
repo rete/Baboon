@@ -31,7 +31,7 @@ namespace baboon {
 
 	/*!
 	 *
-	 * @brief : Class ObjectBuilder
+	 * @brief Class ObjectBuilder
 	 *
 	 */
 
@@ -40,7 +40,7 @@ namespace baboon {
 
 		/*!
 		 *
-		 * @brief : Class to throw in case of error
+		 * @brief Class to throw in case of error
 		 *
 		 */
 		class BadObjectGenerationError {};
@@ -50,7 +50,7 @@ namespace baboon {
 
 				/*!
 				 *
-				 * @brief : Default Constructor
+				 * @brief Default Constructor
 				 *
 				 */
 				ObjectBuilder()
@@ -58,46 +58,34 @@ namespace baboon {
 
 				/*!
 				 *
-				 * @brief : Default Destructor
+				 * @brief Default Destructor
 				 *
 				 */
 				virtual ~ObjectBuilder() {;}
 
 				/*!
 				 *
-				 * @brief : Method to build the object.
+				 * @brief Method to build the object.
 				 *
 				 */
 				virtual void BuildObject() = 0;
 
 				/*!
 				 *
-				 * @brief : Method to clear the object.
+				 * @brief Method to clear the object.
 				 *
 				 */
 				virtual Return ClearObject() = 0;
 
 				T *object;
 				bool forceGenerate;
-				static ObjectBuilder<T> *instance;
+//				static ObjectBuilder<T> *instance;
 
 			public:
 
-				static ObjectBuilder<T> *GetInstance() {
-					if( instance == 0 ) instance = new ObjectBuilder<T>;
-					return instance;
-				}
-
-				static void Kill() {
-					if( instance != 0 ) {
-						delete instance;
-						instance = 0;
-					}
-				}
-
 				/*!
 				 *
-				 * @brief : Force object generation
+				 * @brief Force object generation
 				 *
 				 */
 				Return SetForceGenerate( bool boolVal ) {
@@ -107,7 +95,7 @@ namespace baboon {
 
 				/*!
 				 *
-				 * @brief : return the object. Rebuild it if forceGenerate set to true
+				 * @brief return the object. Rebuild it if forceGenerate set to true
 				 *
 				 */
 				virtual T* GetObject() {
@@ -121,6 +109,22 @@ namespace baboon {
 					}
 					return object;
 
+				}
+
+				/*!
+				 *
+				 * @ brief Set the object. Used if an other specific way to build the object has been implemented somewhere else
+				 *
+				 */
+				virtual Return SetObject( T *obj ) {
+
+					Return ret;
+					if( object != 0 ) {
+						ret = this->ClearObject();
+						if( !ret.OK ) return S_ERROR( ret.message );
+					}
+					object = obj;
+					return S_OK();
 				}
 
 
