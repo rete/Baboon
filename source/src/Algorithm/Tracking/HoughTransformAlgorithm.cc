@@ -28,9 +28,8 @@ namespace baboon {
 
 		thetaMax = 100;
 		rMax = 140;
-		houghSpaceX = NULL;
-		houghSpaceY = NULL;
-		trackSegmentCollection = new TrackSegmentCollection();
+		houghSpaceX = 0;
+		houghSpaceY = 0;
 		needData = true;
 		needParams = true;
 
@@ -39,7 +38,6 @@ namespace baboon {
 	HoughTransformAlgorithm::~HoughTransformAlgorithm() {
 
 		this->DeleteHoughSpace();
-		delete trackSegmentCollection;
 	}
 
 
@@ -54,22 +52,8 @@ namespace baboon {
 		data.GetValue("maximumDistanceBetweenHitsInPlane",&maximumDistanceBetweenHitsInPlane);
 		data.GetValue("maximumDistanceBetweenHitsForLayers",&maximumDistanceBetweenHitsForLayers);
 
-		hitCollection = HitManager::GetInstance()->GetHitCollection();
-
 		this->DeleteHoughSpace();
 		this->AllocateHoughSpace();
-
-
-
-		if(trackSegmentCollection->size() != 0) {
-			for(unsigned int i=0 ; i<trackSegmentCollection->size() ; i++) {
-				if(trackSegmentCollection->at(i) != NULL)
-					delete trackSegmentCollection->at(i);
-			}
-			delete trackSegmentCollection;
-			trackSegmentCollection = new TrackSegmentCollection();
-		}
-
 
 	}
 
@@ -90,34 +74,31 @@ namespace baboon {
 				houghSpaceY[i][j] = 0;
 			}
 		}
-
-
 	}
 
 	void HoughTransformAlgorithm::DeleteHoughSpace() {
 
-		if( houghSpaceX != NULL ) {
+		if( houghSpaceX != 0 ) {
 			for(int i=0 ; i < thetaMax ; ++i) {
 				delete [] houghSpaceX[i];
 			}
 			delete [] houghSpaceX;
 		}
 
-		if( houghSpaceY != NULL ) {
+		if( houghSpaceY != 0 ) {
 			for(int i=0 ; i < thetaMax ; ++i) {
 				delete [] houghSpaceY[i];
 			}
 			delete [] houghSpaceY;
 		}
-
 	}
 
-	void HoughTransformAlgorithm::End() {}
 
 	Return HoughTransformAlgorithm::CheckConsistency() {
 
 		return S_OK();
 	}
+
 
 /////////////////////////////////////////////////////////////////
 //			 _____________________________________________
@@ -135,7 +116,7 @@ namespace baboon {
 
 	void HoughTransformAlgorithm::Execute() {
 
-		clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
+		ClusterCollection *clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
 		HoughClusterCollection *houghClusterCollection = new HoughClusterCollection();
 
 		for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) {
@@ -160,14 +141,33 @@ namespace baboon {
 			}
 		}
 
-
 		for( int t=0 ; t<thetaMax ; t++ ) {
 			for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
 
 				HoughCluster *houghCluster = houghClusterCollection->at(i);
 				if( houghSpaceX [ t ][ houghCluster->rhox.at(t) ] < minimumBinning ) continue;
+
 				houghCluster->tagx = fGood;
-				houghSpaceY[ t ][ houghCluster->rhox.at(t) ] ++;
+				int inc = 0;
+
+				for( unsigned int j=0 ; j<houghClusterCollection->size() ; j++ ) {
+
+					HoughCluster *houghCluster2 = houghClusterCollection->at(j);
+					if( houghCluster->cluster->GetPosition().z() == houghCluster2->cluster->GetPosition().z()
+					 || houghCluster->rhox.at(t) - houghCluster2->rhox.at(t) != 0 )
+						continue;
+
+					if( abs( houghCluster2->cluster->GetPosition().x() - houghCluster->cluster->GetPosition().x() ) < deltaPosMax
+					 && abs( houghCluster2->cluster->GetPosition().y() - houghCluster->cluster->GetPosition().y() ) < deltaPosMax
+					 && abs( houghCluster2->cluster->GetPosition().z() - houghCluster->cluster->GetPosition().z() ) < deltaPosMax )
+						inc++;
+				}
+
+				if( inc < 2 ) continue;
+
+				for( int t2=0 ; t2<thetaMax ; t2++ )
+					houghSpaceY[ t2 ][ houghCluster->rhox.at(t2) ] ++;
+
 			}
 		}
 
@@ -180,38 +180,14 @@ namespace baboon {
 			}
 		}
 
-		for( int t=0 ; t<thetaMax ; t++ ) {
-
-			for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
-
-				HoughCluster *houghCluster = houghClusterCollection->at(i);
-				int inc = 0;
-
-				for( unsigned int j=0 ; j<houghClusterCollection->size() ; j++ ) {
-
-					HoughCluster *houghCluster2 = houghClusterCollection->at(j);
-
-					if( houghCluster->cluster->GetPosition().z() == houghCluster2->cluster->GetPosition().z()
-					 || houghCluster->rhox.at(t) - houghCluster2->rhox.at(t) != 0 )
-						continue;
-
-					if( houghCluster->tagx == fBad || houghCluster2->tagx == fBad )
-						continue;
-
-					if( abs( houghCluster2->cluster->GetPosition().x() - houghCluster->cluster->GetPosition().x() ) < deltaPosMax
-					 && abs( houghCluster2->cluster->GetPosition().y() - houghCluster->cluster->GetPosition().y() ) < deltaPosMax
-					 && abs( houghCluster2->cluster->GetPosition().z() - houghCluster->cluster->GetPosition().z() ) < deltaPosMax )
-						inc++;
-
-					if( inc < 2 ) continue;
-
-					houghCluster->finalTag = fGood;
-					houghCluster->cluster->SetClusterTagRecursive( fTrack );
-				}
+		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
+			HoughCluster *houghCluster = houghClusterCollection->at(i);
+			if( houghCluster->tagx == fGood && houghCluster->tagy == fGood ) {
+				houghCluster->finalTag = fGood;
 			}
 		}
 
-
+		TrackCollection *trackCollection = new TrackCollection();
 		HoughClusterCollection houghClusterTemp;
 
 		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
@@ -257,24 +233,42 @@ namespace baboon {
 				}
 			}
 
-			if( tracks.size() < trackSegmentMinimumSize ) continue;
-			TrackSegment *trackSegment = new TrackSegment();
+			if( tracks.size() < trackSegmentMinimumSize ) {
+				for( unsigned int k=0 ; k<tracks.size() ; k++ )
+					tracks.at(k)->cluster->SetClusterTag( fUndefined );
+				continue;
+			}
+			Track *track = new Track();
 
 			for(unsigned int j=0 ; j<tracks.size() ; j++) {
 				HitCollection *hitColTemp = tracks.at(j)->cluster->GetHitCollection();
 				for(unsigned int k=0 ; k<hitColTemp->size() ; k++ ) {
-					trackSegment->AddHit( hitColTemp->at(k) );
-					hitColTemp->at(k)->SetHitTag( fTrackSegment );
+					track->AddHit( hitColTemp->at(k) );
+					hitColTemp->at(k)->SetHitTag( fTrack );
 				}
 			}
 
-			trackSegment->GetExtremities().first->SetHitTag( fTrackExtremity );
-			trackSegment->GetExtremities().second->SetHitTag( fTrackExtremity );
-			trackSegmentCollection->push_back(trackSegment);
+			track->GetExtremities().first->SetHitTag( fTrackExtremity );
+			track->GetExtremities().second->SetHitTag( fTrackExtremity );
+			trackCollection->push_back( track );
 		}
+
+		houghClusterTemp.clear();
+
+		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ )
+			delete houghClusterCollection->at( i );
+
+		houghClusterCollection->clear();
+		delete houghClusterCollection;
+
+		TrackCollectionBuilder *builder = TrackCollectionBuilder::GetInstance();
+		builder->SetObject( trackCollection );
 
 	}
 
+
+
+	void HoughTransformAlgorithm::End() {}
 }
 
 
