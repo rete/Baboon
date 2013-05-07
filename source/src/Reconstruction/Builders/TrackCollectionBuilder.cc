@@ -84,7 +84,7 @@ namespace baboon {
 		for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) {
 
 			Cluster *cluster = clusterCollection->at( i );
-			if( cluster->GetClusterTag() != fPotentialTrack ) continue;
+			if( cluster->GetClusterTag() != fTrack ) continue;
 
 			if( find(clusterTemp.begin()
 									,clusterTemp.end()
@@ -101,7 +101,7 @@ namespace baboon {
 
 				Cluster *cluster2 = clusterCollection->at( j );
 
-				if( cluster2->GetClusterTag() != fPotentialTrack ) continue;
+				if( cluster2->GetClusterTag() != fTrack ) continue;
 
 				if( find(clusterTemp.begin()
 						,clusterTemp.end()
