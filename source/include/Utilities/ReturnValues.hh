@@ -24,17 +24,34 @@
 namespace baboon {
 
 
+	/*!
+	 *
+	 * @brief Return class.
+	 * Returned object type.
+	 *
+	 */
 	class Return {
 	public:
-		Return(){;}
-		bool OK;
-		std::string message;
+			Return(){;}
+			bool OK;
+			std::string message;
 
 	};
 
 
+	/*!
+	 *
+	 * @brief Return a 'Return' object filled with an error status and a given message.
+	 *
+	 */
 	Return S_ERROR( const std::string &message = "" );
 
+
+	/*!
+	 *
+	 * @brief Return a 'Return' object filled with a OK status and a given message.
+	 *
+	 */
 	Return S_OK( const std::string &message = "" );
 
 }  // namespace 
