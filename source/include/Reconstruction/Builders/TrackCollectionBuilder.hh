@@ -42,6 +42,40 @@ namespace baboon {
 
 		public:
 
+
+			/*!
+			 *
+			 * @brief : Set the maximum distance between hits ( for layers) while reconstructing tracks
+			 *
+			 */
+			inline void SetMaximumDistanceBetweenHitsForLayers( int max )
+				{ maximumDistanceBetweenHitsForLayers = max; }
+
+			/*!
+			 *
+			 * @brief : Set the maximum distance between hits ( in planes ) while reconstructing tracks
+			 *
+			 */
+			inline void SetMaximumDistanceBetweenHitsInPlane( int max )
+				{ maximumDistanceBetweenHitsInPlane = max; }
+
+			/*!
+			 *
+			 * @brief : Set the track minimum size cut while reconstructing tracks.
+			 *
+			 */
+			inline void SetTrackSegmentMinimumSize( int min )
+				{ trackSegmentMinimumSize = min; }
+
+
+			static TrackCollectionBuilder *GetInstance();
+
+			static void Kill();
+
+
+		protected:
+
+
 			/*!
 			 * @brief : Default Constructor
 			 */
@@ -51,33 +85,6 @@ namespace baboon {
 			 * @brief : Default Destructor
 			 */
 			virtual ~TrackCollectionBuilder();
-
-			/*!
-			 *
-			 * @brief : Set the maximum distance between hits ( for layers) while reconstructing tracks
-			 *
-			 */
-			inline void SetMaximumDistanceBetweenHitsForLayers( int max )
-				{ maximumDistanceBetweenHitsForLayers = max;}
-
-			/*!
-			 *
-			 * @brief : Set the maximum distance between hits ( in planes ) while reconstructing tracks
-			 *
-			 */
-			inline void SetMaximumDistanceBetweenHitsInPlane( int max )
-				{ maximumDistanceBetweenHitsInPlane = max;}
-
-			/*!
-			 *
-			 * @brief : Set the track minimum size cut while reconstructing tracks.
-			 *
-			 */
-			inline void SetTrackSegmentMinimumSize( int min )
-				{ trackSegmentMinimumSize = min;}
-
-
-		protected:
 
 			/*!
 			 *
@@ -93,7 +100,7 @@ namespace baboon {
 			 */
 			virtual Return ClearObject();
 
-
+			static TrackCollectionBuilder *instance;
 			int maximumDistanceBetweenHitsForLayers;
 			int maximumDistanceBetweenHitsInPlane;
 			int trackSegmentMinimumSize;
