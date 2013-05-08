@@ -71,12 +71,11 @@ namespace baboon {
 		hitManager->BeginOfEvent(lcCollection);
 		HitCollection *hitCollection = hitManager->GetHitCollection();
 
-
+		// just to keep tree compatibility with the old version. Will be removed in the future
 		analysisManager->Set("SplitterVariables","nbOfClusters",0);
 		analysisManager->Set("SplitterVariables", "nbOfTracks" , 0 );
-		algorithmManager = AlgorithmManager::GetInstance();
 
-//		ClusterCollection *clusterCollection = clusteringManager->Clusterize(hitCollection);
+		algorithmManager = AlgorithmManager::GetInstance();
 
 		vector<int> I;
 		vector<int> J;
@@ -114,14 +113,12 @@ namespace baboon {
 		vector<double> isolationWeights;
 
 
-		if( algorithmManager->AlgorithmIsRegistered("NearbyClustering2DAlgorithm") ) {
-
-			cout << "NearbyClustering2DAlgorithm found" << endl;
-			NearbyClustering2DAlgorithm* clustering2D = (NearbyClustering2DAlgorithm *) algorithmManager->GetAlgorithm("NearbyClustering2DAlgorithm");
-//			clustering2D->SetHitCollection( hitCollection );
-//			clustering2D->SetDistance(2);
-			clustering2D->Process();
-		}
+//		if( algorithmManager->AlgorithmIsRegistered("NearbyClustering2DAlgorithm") ) {
+//
+//			cout << "NearbyClustering2DAlgorithm found" << endl;
+//			NearbyClustering2DAlgorithm* clustering2D = (NearbyClustering2DAlgorithm *) algorithmManager->GetAlgorithm("NearbyClustering2DAlgorithm");
+//			clustering2D->Process();
+//		}
 
 		ClusterCollection *clusterCollection = clusteringManager->GetCluster2D();
 		cout << "nb of clusters : " << clusterCollection->size() << endl;
@@ -142,17 +139,15 @@ namespace baboon {
 
 			cout << "CoreFinderAlgorithm found" << endl;
 			CoreFinderAlgorithm *coreFinder = (CoreFinderAlgorithm *) algorithmManager->GetAlgorithm("CoreFinderAlgorithm");
-			coreFinder->SetHitCollection(hitCollection);
 			coreFinder->Process();
 		}
 
-		if( algorithmManager->AlgorithmIsRegistered("HoughTransformAlgorithm") ) {
-
-			cout << "HoughTransformAlgorithm found" << endl;
-			HoughTransformAlgorithm *houghTransform = (HoughTransformAlgorithm*) algorithmManager->GetAlgorithm("HoughTransformAlgorithm");
-//			houghTransform->SetClusterCollection( clusterCollection );
-			houghTransform->Process();
-		}
+//		if( algorithmManager->AlgorithmIsRegistered("HoughTransformAlgorithm") ) {
+//
+//			cout << "HoughTransformAlgorithm found" << endl;
+//			HoughTransformAlgorithm *houghTransform = (HoughTransformAlgorithm*) algorithmManager->GetAlgorithm("HoughTransformAlgorithm");
+//			houghTransform->Process();
+//		}
 
 
 //		if( algorithmManager->AlgorithmIsRegistered("PrincipalComponentAnalysis") ) {
@@ -168,16 +163,6 @@ namespace baboon {
 //			pca->Process();
 //		}
 
-
-
-//		TH2 *xyProjection = new TH2I("xyProjection","xyProjection",96,0,96,96,0,96);
-//		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
-//			IntVec ijkVec = hitCollection->at(i)->GetIJK();
-//			xyProjection->Fill( ijkVec.at(0) , ijkVec.at(1) );
-//		}
-//		double fitParams[10] = { 50, -50, 50., 0, 50, 50, 50, 50., 0, 50 };
-//		TF2 *doubleGaussian = new TF2("doubleGaussian",doubleGauss2D,0,96,0,96,10);
-//		doubleGaussian->SetParameters(fitParams);
 
 
 //		if( algorithmManager->AlgorithmIsRegistered("HoughTransformAlgorithm") ) {
@@ -262,8 +247,10 @@ namespace baboon {
 		Chi2Vec.push_back( 0 );
 
 		for(unsigned int j=0 ; j<hitCollection->size() ; j++) {
+
 			IntVec ijk = hitCollection->at(j)->GetIJK();
-			if( hitCollection->at(j)->GetHitTag()  == fTrackSegment ) {
+
+			if( hitCollection->at(j)->GetHitTag()  == fTrack ) {
 				ITrack.push_back( ijk.at(0) );
 				JTrack.push_back( ijk.at(1) );
 				KTrack.push_back( ijk.at(2) );
@@ -272,8 +259,6 @@ namespace baboon {
 				ITrackExtr.push_back( ijk.at(0) );
 				JTrackExtr.push_back( ijk.at(1) );
 				KTrackExtr.push_back( ijk.at(2) );
-
-//					cout << "I J K  while push_back : " << ijk.at(0) << " " << ijk.at(1) << " " << ijk.at(2) << endl;
 			}
 			else if( hitCollection->at(j)->GetHitTag() == fCore ) {
 				ICore.push_back( ijk.at(0) );
@@ -291,8 +276,6 @@ namespace baboon {
 				K.push_back( ijk.at(2) );
 			}
 		}
-//		}
-//		cout << "before pushing_back variables" << endl;
 
 		analysisManager->Set("SplitterVariables","Hitx",&I);
 		analysisManager->Set("SplitterVariables","Hity",&J);
