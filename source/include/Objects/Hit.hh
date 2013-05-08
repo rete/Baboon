@@ -24,21 +24,15 @@
 #include <cmath>
 #include <stdexcept>
 
-// lcio includes
-#include "IMPL/CalorimeterHitImpl.h"
-#include "IMPL/LCCollectionVec.h"
-#include "LCIOSTLTypes.h"
-#include "UTIL/CellIDDecoder.h"
-#include "UTIL/CellIDEncoder.h"
-
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
 #include "Config/SdhcalConfig.hh"
 #include "Reconstruction/Tag.hh"
+#include "Utilities/Globals.hh"
+#include "Utilities/ReturnValues.hh"
 
 namespace baboon {
 
-	class Cluster;
 
 	/*!
 	 * Enumerator for hit threshold
@@ -46,15 +40,18 @@ namespace baboon {
 	enum HitThreshold {
 		fThreshold1,
 		fThreshold2,
-		fThreshold3,
-		fThresholdUndefined
+		fThreshold3
 	};
+
+	class Hit;
+
+	typedef std::vector<Hit*> HitCollection;
 
 	/*!
 	 * Class Hit.
 	 * Inherit from 'IMPL::CalorimeterHitImpl' base class from LCIO package.
 	 */
-	class Hit : public IMPL::CalorimeterHitImpl {
+	class Hit {
 
 	protected :
 		/*! Hit tag identifier */
@@ -65,65 +62,61 @@ namespace baboon {
 		int weight;
 		/*! position with ThreeVector */
 		ThreeVector position;
-		/*! ID decoder pattern for hit identification */
-		std::string codingPattern;
 
-		Cluster *cluster2D;
-
-		Cluster *cluster3D;
+		IntVector ijk;
 
 
 	public :
+
 		/*! Default Constructor */
 		Hit();
-		/*! Copy based on CalorimeterHit */
-		Hit(EVENT::CalorimeterHit* hit);
+
 		/*! Default Destructor */
 		virtual ~Hit();
+
 		/*! set the hit position */
-		void SetPosition(const ThreeVector& pos) { position = pos; }
+		Return SetPosition( const ThreeVector& pos );
+
 		/*! set the hit position */
-		inline ThreeVector GetPosition() { return position; }
+		inline ThreeVector GetPosition() const
+			{ return position; }
+
 		/*! set the first threshold of sdhcal */
-		inline void SetThreshold(HitThreshold fThr) { fThreshold = fThr; }
+		Return SetThreshold( const HitThreshold &fThr );
+
 		/*! set the first threshold of sdhcal */
-		inline HitThreshold GetThreshold() const { return fThreshold; }
-		/*! return the hit tag */
-		inline Tag GetHitTag() { return hitTag; }
+		inline HitThreshold GetThreshold() const
+			{ return fThreshold; }
+
 		/*! set the hit tag */
-		inline void SetHitTag(Tag fTag) { hitTag = fTag; }
+		Return SetHitTag( const Tag &fTag );
+
+		/*! return the hit tag */
+		inline Tag GetHitTag() const
+			{ return hitTag; }
+
 		/*! set the hit weight */
-		inline void SetWeight(int w) { weight = w; }
+		Return SetWeight( const int &w );
+
 		/*! set the hit weight */
-		inline int GetWeight() { return weight; }
+		inline int GetWeight() const
+			{ return weight; }
+
 		/*! return the I J K cell id */
-		EVENT::IntVec GetIJK();
+		inline IntVector GetIJK() const
+			{ return ijk; }
 
-		void SetIJK( int I , int J , int K );
 
-		inline void SetIJK( const EVENT::IntVec& ijkVec ) { this->SetIJK(ijkVec.at(0),ijkVec.at(1),ijkVec.at(2)); }
+		Return SetIJK( int I , int J , int K );
 
-		IMPL::CalorimeterHitImpl *ToCalorimeterHitImpl();
 
-		bool IsIsolatedFromHits( const std::vector<Hit*>* hitCol );
+		Return SetIJK( const IntVector &vec );
 
-		inline Cluster *GetCluster3D()
-			{ return cluster3D; }
 
-		inline Cluster *GetCluster2D()
-			{ return cluster2D; }
+//		bool IsIsolatedFromHits( const HitCollection* hitCol );
 
-		void SetCluster2D( Cluster *cl );
-
-		void SetCluster3D( Cluster *cl );
-
-		void MergeClusters2D( Hit *hit );
-
-		void MergeClusters3D( Hit *hit );
 
 	};
-
-	typedef std::vector<Hit*> HitCollection;
 
 }
 
