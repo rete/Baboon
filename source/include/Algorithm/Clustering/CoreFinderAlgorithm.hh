@@ -27,6 +27,7 @@
 #include "Exception.hh"
 #include "Managers/HitManager.hh"
 #include "Objects/Hit.hh"
+#include "Reconstruction/Builders/CoreCollectionBuilder.hh"
 
 
 namespace baboon {
@@ -77,8 +78,8 @@ namespace baboon {
 			virtual Return CheckConsistency();
 
 			/*! Set the hit collection needed for the algorithm */
-			inline void SetHitCollection( HitCollection *hitCol )
-				{ hitCollection = hitCol; }
+//			inline void SetHitCollection( HitCollection *hitCol )
+//				{ hitCollection = hitCol; }
 
 			/*! Set the distance between two pads to clusterize core hits */
 			inline void SetDistance( int d )
