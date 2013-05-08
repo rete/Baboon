@@ -16,11 +16,53 @@
 
 #include "Reconstruction/Objects/Core.hh"
 
+using namespace std;
+
 namespace baboon {
 
-Core::Core() : RecoObject() {;}
 
-Core::~Core() {;}
+	Core::Core()
+		: RecoObject() {
+
+		hitCollection = new HitCollection();
+	}
+
+	Core::~Core() {
+		delete hitCollection;
+
+	}
+
+	Return Core::AddHit( Hit *hit ) {
+
+		if( hitCollection == 0 )
+			return S_ERROR("Hit collection is a null pointer. Something very bad happened...");
+
+		if( hitCollection->empty() ) {
+			hitCollection->push_back( hit );
+			return S_OK();
+		}
+
+		if( std::find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() )
+			return S_OK("Warning : hit is already in the collection");
+		else {
+			hitCollection->push_back( hit );
+			return S_OK();
+		}
+	}
+
+
+	Return Core::RemoveHit( Hit *hit ) {
+
+		if( hitCollection == 0 )
+			return S_ERROR("Hit collection is a null pointer. Something very bad happened...");
+
+		if( hitCollection->empty() )
+			return S_OK(string("Warning : Try to remove a hit from an empty hit collection.") + string(__FUNCTION__) );
+
+		HitCollection::iterator it = std::find( hitCollection->begin() , hitCollection->end() , hit );
+
+		return S_OK();
+	}
 
 
 }  // namespace 

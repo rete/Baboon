@@ -17,33 +17,71 @@
 #ifndef CORE_HH
 #define CORE_HH
 
-#include "RecoObject.hh"
+#include "Reconstruction/Objects/RecoObject.hh"
 
 #include <iostream> 
 #include <string> 
 #include <cstdlib> 
 #include <cmath> 
-#include <vector> 
+#include <vector>
+#include <algorithm>
+
+#include "Objects/Hit.hh"
+#include "Managers/HitManager.hh"
+#include "Utilities/ReturnValues.hh"
 
 namespace baboon {
 
-/* 
- * Class Core
- * Inherits from base class RecoObject
- */ 
 
-class Core : public RecoObject {
-
-  public:
-    /*! Default Constructor */
-    Core();
-    /*! Default Destructor */
-    virtual ~Core();
-
-  protected:
+	class Core;
 
 
-};  // class 
+	typedef std::vector<Core*> CoreCollection;
+
+	/*!
+	 *
+	 * @brief Class Core
+	 * Inherits from base class RecoObject
+	 *
+	 */
+	class Core : public RecoObject {
+
+		public:
+
+			/*!
+			 *
+			 * @brief Default Constructor
+			 *
+			 */
+			Core();
+
+			/*!
+			 *
+			 * @brief Default Destructor
+			 *
+			 */
+			virtual ~Core();
+
+			/*!
+			 *
+			 * @brief Add a hit to the hit collection of the core
+			 *
+			 */
+			Return AddHit( Hit *hit );
+
+			/*!
+			 *
+			 * @brief Remove a hit from the hit collection of the core
+			 *
+			 */
+			Return RemoveHit( Hit *hit );
+
+		protected:
+
+			HitCollection *hitCollection;
+
+
+	};  // class
 
 }  // namespace 
 
