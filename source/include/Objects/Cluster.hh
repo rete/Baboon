@@ -27,15 +27,14 @@
 #include "Geometry/ThreeVector.hh"
 #include "Objects/Hit.hh"
 #include "Config/SdhcalConfig.hh"
+#include "Utilities/Globals.hh"
+#include "Utilities/ReturnValues.hh"
 
 
 
 
 namespace baboon {
 
-
-class Hit;
-typedef std::vector<Hit*> HitCollection;
 
 	/*!
 	 * Class SDHCALCluster.
@@ -98,8 +97,6 @@ typedef std::vector<Hit*> HitCollection;
 		bool ContainsHit( Hit *hit );
 
 		void AddHit( Hit *hit );
-
-//		void AddHitRecursive( Hit *hit );
 
 		void RemoveHit( Hit *hit );
 

@@ -14,19 +14,13 @@
 
 
 #include "Objects/Cluster.hh"
-#include "Objects/Hit.hh"
-
-
 
 using namespace std ;
-
-
 
 namespace baboon {
 
 	Cluster::Cluster() {
 
-		SdhcalConfig::GetInstance()->GetData("general").GetValue(string("codingPattern"),&codingPattern);
 		associatedClusters = new ClusterCollection();
 		associatedClusters->push_back(this);
 		hitCollection = new HitCollection();
@@ -37,7 +31,10 @@ namespace baboon {
 
 	void Cluster::SetHitCollection( HitCollection *hitCol ) {
 
-		delete hitCollection;
+		if( hitCollection != 0 ) {
+			hitCollection->clear();
+			delete hitCollection;
+		}
 		hitCollection = hitCol;
 
 	}
@@ -45,7 +42,7 @@ namespace baboon {
 	Cluster::~Cluster() {
 
 		if( hitCollection != 0 ) {
-			if( !hitCollection->empty() ) hitCollection->clear();
+			hitCollection->clear();
 			delete hitCollection;
 		}
 	}
@@ -58,7 +55,7 @@ namespace baboon {
 		if(position == pos) {
 			for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
 				Hit *hit = hitCollection->at(i);
-				IntVec hitIJK = hit->GetIJK();
+				IntVector hitIJK = hit->GetIJK();
 
 				pos.set( pos.x() + hitIJK.at(0)
 				        ,pos.y() + hitIJK.at(1)
@@ -80,8 +77,6 @@ namespace baboon {
 		for(int clustID=0 ; clustID<clusters->size() ; clustID++) {
 
 			ThreeVector pos(clusters->at(clustID)->GetPosition() );
-
-
 
 			if(abs(position.x()-pos.x())>1
 			&& abs(position.x()-pos.x())<10
@@ -154,19 +149,10 @@ namespace baboon {
 
 	void Cluster::AddHit( Hit *hit ) {
 
-		if( !this->ContainsHit(hit) ) hitCollection->push_back(hit);
+		if( !this->ContainsHit(hit) )
+			hitCollection->push_back(hit);
 		else return;
 	}
-
-
-//	void Cluster::AddHitRecursive( Hit *hit ) {
-//
-//		HitCollection *hitCol = hit->GetCluster()->GetHitCollection();
-//		if(hitCol->empty()) return;
-//		for ( unsigned int i=0 ; i<hitCol->size() ; i++ ) {
-//			this->AddHit(hitCol->at(i));
-//		}
-//	}
 
 
 	void Cluster::RemoveHit( Hit *hit ) {
@@ -178,14 +164,12 @@ namespace baboon {
 			hitCollection->erase( hitIterator );
 			return;
 		}
-
 	}
 
 
 	bool Cluster::ContainsHit( Hit *hit ) {
 
 		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
-
 	}
 
 	void Cluster::MergeClusters( Cluster *cl ) {
@@ -193,10 +177,10 @@ namespace baboon {
 		HitCollection *hitCol = cl->GetHitCollection();
 //		for( unsigned int i=0 ; i<hitCol->size() ; i++ ) this->AddHit(hitCol->at(i));
 //		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) cl->AddHit( hitCollection->at(i) );
-		if( !hitCol->empty() && !hitCollection->empty() ) {
-			hitCol->at(0)->MergeClusters2D( hitCollection->at(0) );
-			hitCol->at(0)->MergeClusters3D( hitCollection->at(0) );
-		}
+//		if( !hitCol->empty() && !hitCollection->empty() ) {
+////			hitCol->at(0)->MergeClusters2D( hitCollection->at(0) );
+////			hitCol->at(0)->MergeClusters3D( hitCollection->at(0) );
+//		}
 
 	}
 
