@@ -22,7 +22,7 @@ namespace baboon {
 
 	ConeBeginningAlgorithm::ConeBeginningAlgorithm()
 		: AbstractAlgorithm("ConeBeginningAlgorithm") {
-		needData = true;
+		needData = false;
 	}
 
 	ConeBeginningAlgorithm::~ConeBeginningAlgorithm() {
