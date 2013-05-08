@@ -42,7 +42,13 @@ namespace baboon {
 
 	}
 
-	Cluster::~Cluster() {}
+	Cluster::~Cluster() {
+
+		if( hitCollection != 0 ) {
+			if( !hitCollection->empty() ) hitCollection->clear();
+			delete hitCollection;
+		}
+	}
 
 
 	void Cluster::ComputePosition() {
