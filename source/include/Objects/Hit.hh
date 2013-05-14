@@ -59,6 +59,8 @@ namespace baboon {
 			HitThreshold threshold;
 			IntVector ijk;
 			ThreeVector position;
+			int type;
+			double time;
 	};
 
 	/*!
@@ -75,6 +77,8 @@ namespace baboon {
 		int weight;
 		ThreeVector position;
 		IntVector ijk;
+		int type;
+		double time;
 
 
 	public :
@@ -122,6 +126,16 @@ namespace baboon {
 
 
 		Return SetIJK( const IntVector &vec );
+
+		inline int GetType()
+			{ return type; }
+
+		Return SetType( int t );
+
+		inline double GetTime()
+			{ return time; }
+
+		Return SetTime( double t );
 
 
 //		bool IsIsolatedFromHits( const HitCollection* hitCol );

@@ -25,6 +25,8 @@ namespace baboon {
 		position = params.position;
 		fThreshold = params.threshold;
 		ijk = params.ijk;
+		type = params.type;
+		time = params.time;
 		hitTag = fUndefined;
 	}
 
@@ -72,6 +74,18 @@ namespace baboon {
 	Return Hit::SetIJK( const IntVector &vec ) {
 
 		ijk = vec;
+		return S_OK();
+	}
+
+	Return Hit::SetType( int t ) {
+
+		type = t;
+		return S_OK();
+	}
+
+	Return Hit::SetTime( double t ) {
+
+		time = t;
 		return S_OK();
 	}
 
