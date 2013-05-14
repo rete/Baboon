@@ -21,11 +21,7 @@ namespace baboon {
 
 	Cluster::Cluster() {
 
-		associatedClusters = new ClusterCollection();
-		associatedClusters->push_back(this);
 		hitCollection = new HitCollection();
-		hitCollection->clear();
-
 	}
 
 
@@ -111,39 +107,47 @@ namespace baboon {
 	}
 
 
-	void Cluster::SetClusterTagRecursive(Tag clustTag) {
+	void Cluster::SetClusterTagRecursive( const Tag &clustTag ) {
 
 		for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
 			Hit *hit = hitCollection->at(i);
-			if(hit->GetHitTag() != clustTag) hit->SetHitTag(clustTag);
+			if(hit->GetHitTag() != clustTag)
+				hit->SetHitTag(clustTag);
 		}
 		fClusterTag = clustTag;
 	}
 
 
-	void Cluster::AssociateCluster( Cluster* cl ) {
+//	void Cluster::AssociateCluster( Cluster* cl ) {
+//
+//		if( find( associatedClusters->begin(), associatedClusters->end(), cl  ) != associatedClusters->end() )
+//			return;
+//		else
+//			associatedClusters->push_back(cl);
+//
+//		unsigned int nbOfClusters = cl->GetAssociatedClusters()->size();
+//
+//		for(unsigned int clID=0 ; clID<nbOfClusters ; clID++ ) {
+//
+//			Cluster *cluster = cl->GetAssociatedClusters()->at(clID);
+//			cluster->AssociateCluster(this);
+//		}
+//	}
 
-		if( find( associatedClusters->begin(), associatedClusters->end(), cl  ) != associatedClusters->end() )
-			return;
-		else
-			associatedClusters->push_back(cl);
 
-		unsigned int nbOfClusters = cl->GetAssociatedClusters()->size();
-
-		for(unsigned int clID=0 ; clID<nbOfClusters ; clID++ ) {
-
-			Cluster *cluster = cl->GetAssociatedClusters()->at(clID);
-			cluster->AssociateCluster(this);
-		}
-	}
+//	bool Cluster::IsAssociatedToCluster( Cluster* cl ) {
+//
+//		ClusterCollection *clusters = cl->GetAssociatedClusters();
+//		if( find( clusters->begin() , clusters->end() , this ) != clusters->end() )
+//			return true;
+//		else return false;
+//	}
 
 
-	bool Cluster::IsAssociatedToCluster( Cluster* cl ) {
+	Return Cluster::SetType( const ClusterType &type ) {
 
-		ClusterCollection *clusters = cl->GetAssociatedClusters();
-		if( find( clusters->begin() , clusters->end() , this ) != clusters->end() )
-			return true;
-		else return false;
+		fType = type;
+		return S_OK();
 	}
 
 
@@ -172,16 +176,5 @@ namespace baboon {
 		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
 	}
 
-	void Cluster::MergeClusters( Cluster *cl ) {
-
-		HitCollection *hitCol = cl->GetHitCollection();
-//		for( unsigned int i=0 ; i<hitCol->size() ; i++ ) this->AddHit(hitCol->at(i));
-//		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) cl->AddHit( hitCollection->at(i) );
-//		if( !hitCol->empty() && !hitCollection->empty() ) {
-////			hitCol->at(0)->MergeClusters2D( hitCollection->at(0) );
-////			hitCol->at(0)->MergeClusters3D( hitCollection->at(0) );
-//		}
-
-	}
 
 }
