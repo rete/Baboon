@@ -40,6 +40,35 @@ TARGET_LINK_LIBRARIES( Managers Analysis CfgParser )
 TARGET_LINK_LIBRARIES( Config CfgParser )
 TARGET_LINK_LIBRARIES( Algorithm Objects Reconstruction )
 
+FILE (
+	GLOB_RECURSE
+	ShowerSplitterProcessor_FILES
+	include/MarlinProcessor/ShowerSplitterProcessor.hh
+	src/MarlinProcessor/ShowerSplitterProcessor.cc
+	include/MarlinProcessor/CaloHitCreator.hh
+	src/MarlinProcessor/CaloHitCreator.cc
+)
+ADD_LIBRARY( ShowerSpliter_lib SHARED ${ShowerSplitterProcessor_FILES} )
+SET_TARGET_PROPERTIES( ShowerSpliter_lib PROPERTIES OUTPUT_NAME ShowerSplitter )
+INSTALL(
+	TARGETS ShowerSpliter_lib
+	LIBRARY DESTINATION lib 
+)
+
+TARGET_LINK_LIBRARIES( 
+	ShowerSpliter_lib 
+	${ROOT_COMPONENT_LIBRARIES} 
+	CfgParser 
+	Config 
+	Analysis
+	Objects
+	Geometry
+	Algorithm
+	Managers
+	${TSPECTRUM_LIB}
+	Utils
+	Utilities 
+)
 
 FIND_LIBRARY( TSPECTRUM_LIB libSpectrum.so )
 
