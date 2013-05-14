@@ -60,6 +60,8 @@ namespace baboon {
 
 			TFile *rootOutputFile;
 
+			void PrintAnalysisFooter();
+
 
 		public :
 

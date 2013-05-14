@@ -25,8 +25,7 @@ namespace baboon {
 
 
 
-
-	AnalysisManager *AnalysisManager::instance = NULL;
+	AnalysisManager *AnalysisManager::instance = 0;
 
 
 
@@ -49,11 +48,8 @@ namespace baboon {
 
 	void AnalysisManager::Kill() {
 		if(instance != NULL) {
-			cout << "debug end" << endl;
 			delete instance;
-			cout << "debug end" << endl;
-			instance = NULL;
-			cout << "debug end" << endl;
+			instance = 0;
 		}
 	}
 
@@ -61,20 +57,40 @@ namespace baboon {
 	void AnalysisManager::Init() {
 
 		rootOutputFile = TFile::Open( outputFileName.c_str() ,"RECREATE" );
+		cout << "ROOT output file '" << outputFileName << "' correctly opened" << endl;
+	}
 
+	void AnalysisManager::PrintAnalysisFooter() {
+
+		TreeMap::iterator treeMapIt;
+
+		cout << endl;
+		cout << "***************************************************************************" << endl;
+		cout << "* Analysis Manager terminated with the following Tree/Branch structure :" << endl;
+		cout << "*" << endl;
+		for( treeMapIt=m_treeMap.begin() ; treeMapIt!=m_treeMap.end() ; treeMapIt++ ) {
+			cout << "*     T " << treeMapIt->first << " : " << endl;
+			cout << "*" << endl;
+			BranchMap *branchMap = treeMapIt->second.second;
+			BranchMap::iterator branchMapIt;
+			for( branchMapIt=branchMap->begin() ; branchMapIt!=branchMap->end() ; branchMapIt++ ) {
+				cout << "*        B  " << branchMapIt->first << endl;
+			}
+			cout << "*"<< endl;
+		}
+		cout << "***************************************************************************" << endl;
+		cout << endl;
 	}
 
 
-
-
 	void AnalysisManager::End() {
-		cout << "debug" << endl;
+
+		instance->PrintAnalysisFooter();
 		rootOutputFile->cd();
-		cout << "debug" << endl;
+		cout << "Writing in '" << outputFileName << "' root file..." << endl;
 		rootOutputFile->Write();
-		cout << "debug" << endl;
+		cout << "Closing root file..." << endl;
 		rootOutputFile->Close();
-		cout << "debug" << endl;
 		delete rootOutputFile;
 	}
 
