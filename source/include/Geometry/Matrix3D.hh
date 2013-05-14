@@ -57,7 +57,7 @@ namespace baboon {
 
 			/*! Default Destructor */
 			virtual ~Matrix3D()
-				{ if(buffer!=NULL) delete buffer; }
+				{ if(buffer!=0) delete buffer; }
 
 			/*! */
 			void Fill(T* p)
