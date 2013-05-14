@@ -93,13 +93,18 @@ namespace baboon {
 
 	Return Track::RemoveHit( Hit *hit ) {
 
-		HitCollection::iterator pos = find( hitCollection->begin() ,hitCollection->end() ,hit );
+		HitCollection::iterator pos = find( hitCollection->begin() , hitCollection->end() , hit );
 		if( pos == hitCollection->end() )
-			return S_OK("Hit was already in track");
+			return S_ERROR("Hit was not in track");
 		else {
 			hitCollection->erase(pos);
-			return S_OK();
+			return S_OK("Hit removed from a track");
 		}
+	}
+
+
+	bool Track::Contains( Hit *hit ) {
+		return ( std::find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
 	}
 
 }  // namespace 

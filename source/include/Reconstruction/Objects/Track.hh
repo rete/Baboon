@@ -83,6 +83,8 @@ namespace baboon {
 			inline unsigned int Size()
 				{ return hitCollection->size(); }
 
+			bool Contains( Hit *hit );
+
 		protected:
 
 			HitCollection *hitCollection;
