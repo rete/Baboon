@@ -47,29 +47,40 @@ namespace baboon {
 
 	typedef std::vector<Hit*> HitCollection;
 
+
 	/*!
-	 * Class Hit.
-	 * Inherit from 'IMPL::CalorimeterHitImpl' base class from LCIO package.
+	 *
+	 * @brief HitParameters helper class.
+	 *
+	 */
+	class HitParameters {
+
+		public:
+			HitThreshold threshold;
+			IntVector ijk;
+			ThreeVector position;
+	};
+
+	/*!
+	 *
+	 * @brief Class Hit.
+	 *
 	 */
 	class Hit {
 
 	protected :
-		/*! Hit tag identifier */
-		Tag hitTag;
-		/*! Hit threshold of sdhcal */
-		HitThreshold fThreshold;
-		/*! Hit weight */
-		int weight;
-		/*! position with ThreeVector */
-		ThreeVector position;
 
+		Tag hitTag;
+		HitThreshold fThreshold;
+		int weight;
+		ThreeVector position;
 		IntVector ijk;
 
 
 	public :
 
-		/*! Default Constructor */
-		Hit();
+		/*! Constructor with hit parameters */
+		Hit( const HitParameters &params );
 
 		/*! Default Destructor */
 		virtual ~Hit();

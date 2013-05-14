@@ -20,10 +20,16 @@ using namespace std ;
 
 namespace baboon {
 
-	Hit::Hit() {
+	Hit::Hit( const HitParameters &params ) {
 
+		position = params.position;
+		fThreshold = params.threshold;
+		ijk = params.ijk;
 		hitTag = fUndefined;
 	}
+
+
+	Hit::~Hit() {}
 
 	Return Hit::SetPosition( const ThreeVector& pos ) {
 
@@ -69,87 +75,6 @@ namespace baboon {
 		return S_OK();
 	}
 
-
-//	Hit::Hit(EVENT::CalorimeterHit* hit) {
-//
-//		SdhcalConfig::GetInstance()->GetData("general").GetValue("codingPattern",&codingPattern);
-//		hitTag = fUndefined;
-//		if(hit == NULL) cout << "hit pointer null" << endl;
-//	    _cellID0 = hit->getCellID0();
-//	    _cellID1 = hit->getCellID1();
-//	    _energy = hit->getEnergy();
-//	    _energyError = hit->getEnergyError();
-//	    _time = hit->getTime();
-//	    position = ThreeVector( hit->getPosition()[0] , hit->getPosition()[1] , hit->getPosition()[2] );
-//	    _type = hit->getType();
-////	    _rawHit = hit->getRawHit()->clone();
-//	    hitTag = fUndefined;
-//	    if(_energy == 2.0) fThreshold = fThreshold1;
-//	    if(_energy == 1.0) fThreshold = fThreshold2;
-//	    if(_energy == 3.0) fThreshold = fThreshold3;
-//
-//	}
-
-	Hit::~Hit() {}
-
-
-//	bool Hit::IsIsolatedFromHits( const HitCollection* hitCol ) {
-//
-//		unsigned int isolCond = 3;
-//
-//		for(unsigned int i=0 ; i<hitCol->size() ; i++) {
-//
-//			Hit *hit1 = hitCol->at(i);
-//
-//			unsigned int inc = 0;
-//			while (inc != isolCond ) {
-//
-//
-//
-//				inc++;
-//			}
-//
-//		}
-//
-//
-//	}
-
-
-//	void Hit::SetCluster3D( Cluster *cl ) {
-//		cluster3D = cl;
-//	}
-//
-//	void Hit::SetCluster2D( Cluster *cl ) {
-//		cluster2D = cl;
-//	}
-//
-//	void Hit::MergeClusters3D( Hit *hit ) {
-//
-//		HitCollection *hitCol = hit->GetCluster3D()->GetHitCollection();
-//
-//		for( unsigned int i=0 ; i<hitCol->size() ; i++ ) {
-//			cluster3D->AddHit(hitCol->at(i));
-//		}
-//		if( cluster3D != hitCol->at(0)->GetCluster3D() ) {
-//			delete hitCol->at(0)->GetCluster3D();
-//			for( unsigned int i=0 ; i<hitCol->size() ; i++ ) hitCol->at(i)->SetCluster3D(cluster3D);
-//		}
-//
-//	}
-//
-//	void Hit::MergeClusters2D( Hit *hit ) {
-//
-//		HitCollection *hitCol = hit->GetCluster2D()->GetHitCollection();
-//
-//		for( unsigned int i=0 ; i<hitCol->size() ; i++ ) {
-//			cluster2D->AddHit(hitCol->at(i));
-//		}
-//		if( cluster2D != hitCol->at(0)->GetCluster2D() ) {
-//			delete hitCol->at(0)->GetCluster2D();
-//			for( unsigned int i=0 ; i<hitCol->size() ; i++ ) hitCol->at(i)->SetCluster2D(cluster2D);
-//		}
-//
-//	}
 
 
 }
