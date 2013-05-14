@@ -47,8 +47,6 @@ namespace baboon {
 
 		static ClusteringManager *instance;
 
-		std::string codingPattern;
-
 		ClusterCollection *clusters3D;
 
 		ClusterCollection *clusters2D;
@@ -58,12 +56,31 @@ namespace baboon {
 
 		static ClusteringManager *GetInstance();
 
+
 		static void Kill();
 
-		ClusterCollection *GetCluster3D();
 
-		ClusterCollection *GetCluster2D();
+		inline ClusterCollection *GetCluster3D()
+			{ return clusters2D; }
 
+
+		inline ClusterCollection *GetCluster2D()
+			{ return clusters3D; }
+
+
+		Return AddCluster( Cluster *cluster );
+
+
+		Return RemoveCluster( Cluster *cluster );
+
+
+		Return ClearAllContent();
+
+
+		bool ClusterContainsHit( Cluster *cluster , Hit *hit );
+
+
+		Return MergeAndDeleteClusters( Cluster *clusterToEnlarge , Cluster *clusterToDelete );
 
 	};
 

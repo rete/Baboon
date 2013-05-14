@@ -22,7 +22,7 @@ using namespace std ;
 
 namespace baboon {
 
-	ClusteringManager *ClusteringManager::instance = NULL;
+	ClusteringManager *ClusteringManager::instance = 0;
 
 	ClusteringManager::ClusteringManager() {
 
@@ -38,7 +38,9 @@ namespace baboon {
 
 
 	ClusteringManager *ClusteringManager::GetInstance() {
-		if(instance == NULL) instance = new ClusteringManager;
+
+		if(instance == 0)
+			instance = new ClusteringManager;
 		return instance;
 	}
 
@@ -50,37 +52,99 @@ namespace baboon {
 	}
 
 
-	ClusterCollection *ClusteringManager::GetCluster3D() {
+	Return ClusteringManager::AddCluster( Cluster *cluster ) {
 
-		HitCollection *hitCollection = HitManager::GetInstance()->GetHitCollection();
-		clusters3D->clear();
-		for( unsigned int hitID=0 ; hitID<hitCollection->size() ; hitID++ ) {
+		if( cluster == 0 )
+			return S_ERROR("While adding a cluster : assertion cluster != 0 failed");
 
-			Cluster *cluster = hitCollection->at(hitID)->GetCluster3D();
-			if( std::find( clusters3D->begin() , clusters3D->end() , cluster ) != clusters3D->end() ) continue;
-			clusters3D->push_back( cluster );
-
+		if( cluster->GetType() == fCluster2D ) {
+			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
+			if( clusterIt != clusters2D->end() )
+				return S_ERROR("Cluster already exists in cluster collection");
+			else clusters2D->push_back( cluster );
 		}
-
-		return clusters3D;
-
+		else if( cluster->GetType() == fCluster3D ) {
+			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
+			if( clusterIt != clusters3D->end() )
+				return S_ERROR("Cluster already exists in cluster collection");
+			else clusters3D->push_back( cluster );
+		}
+		return S_ERROR("Cluster type undefined...");
 	}
 
-	ClusterCollection *ClusteringManager::GetCluster2D() {
 
-		HitCollection *hitCollection = HitManager::GetInstance()->GetHitCollection();
+	Return ClusteringManager::RemoveCluster( Cluster *cluster ) {
+
+		if( cluster == 0 )
+			return S_ERROR("While removing a cluster : assertion cluster != 0 failed");
+
+		if( cluster->GetType() == fCluster2D ) {
+			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
+			if( clusterIt != clusters2D->end() ) {
+				delete cluster;
+				clusters2D->erase(clusterIt);
+			}
+			else return S_ERROR("While removing cluster : cluster was not registered in the cluster collection 2D");
+		}
+		else if( cluster->GetType() == fCluster3D ) {
+			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
+			if( clusterIt != clusters3D->end() ) {
+				delete cluster;
+				clusters3D->erase(clusterIt);
+			}
+			else return S_ERROR("While removing cluster : cluster was not registered in the cluster collection 3D");
+		}
+		return S_ERROR("Cluster type undefined...");
+	}
+
+
+	Return ClusteringManager::ClearAllContent() {
+
+		if( clusters2D == 0 )
+			return S_ERROR("While clearing all content in clustering manager : assertion clusters2D != 0 failed");
+		if( clusters3D == 0 )
+			return S_ERROR("While clearing all content in clustering manager : assertion clusters3D != 0 failed");
+
+		for( unsigned int i=0 ; i<clusters2D->size() ; i++ ) {
+			if( clusters2D->at(i) != 0 )
+				delete clusters2D->at(i);
+		}
+		for( unsigned int i=0 ; i<clusters3D->size() ; i++ ) {
+			if( clusters3D->at(i) != 0 )
+				delete clusters3D->at(i);
+		}
 		clusters2D->clear();
-		for( unsigned int hitID=0 ; hitID<hitCollection->size() ; hitID++ ) {
+		clusters3D->clear();
 
-			Cluster *cluster = hitCollection->at(hitID)->GetCluster2D();
-			if( std::find( clusters2D->begin() , clusters2D->end() , cluster ) != clusters2D->end() ) continue;
-			clusters2D->push_back( cluster );
-
-		}
-
-		return clusters2D;
-
+		return S_OK("Content cleared in clustering manager");
 	}
 
 
+	bool ClusteringManager::ClusterContainsHit( Cluster *cluster , Hit *hit ) {
+
+		return cluster->ContainsHit( hit );
+	}
+
+
+	Return ClusteringManager::MergeAndDeleteClusters( Cluster *clusterToEnlarge , Cluster *clusterToDelete ) {
+
+		if( clusterToEnlarge == 0 || clusterToDelete == 0 )
+			return S_ERROR("While merging clusters : assertion cluster != 0 failed");
+
+		if( clusterToEnlarge == clusterToDelete )
+			return S_ERROR("While merging clusters : cluster are the same. Can't merge the same clusters!");
+
+		HitCollection *hitCollection = clusterToDelete->GetHitCollection();
+
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+
+			clusterToEnlarge->AddHit( hitCollection->at(i) );
+			clusterToDelete->RemoveHit( hitCollection->at(i) );
+		}
+
+		Return ret = this->RemoveCluster( clusterToDelete );
+		if( !ret.OK ) delete clusterToDelete;
+
+		return S_OK();
+	}
 }
