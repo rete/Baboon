@@ -23,10 +23,9 @@
 #include <cmath> 
 #include <vector> 
 
-#include "EVENT/LCCollection.h"
-
 #include "Objects/Hit.hh"
 #include "Geometry/ThreeVector.hh"
+#include "Utilities/Globals.hh"
 
 
 namespace baboon {
@@ -40,8 +39,6 @@ namespace baboon {
 	/*! Return the center of gravity of the hit collection pondered by thresholds */
 	ThreeVector GetCenterOfGravity( HitCollection * hitCol );
 
-	/*! Return the center of gravity of the hit collection pondered by thresholds */
-	ThreeVector GetCenterOfGravity( LCCollection *lcCollection );
 
 
 }  // namespace 
