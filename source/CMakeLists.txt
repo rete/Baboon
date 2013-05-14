@@ -39,6 +39,7 @@ TARGET_LINK_LIBRARIES( Utils Objects )
 TARGET_LINK_LIBRARIES( Managers Analysis CfgParser Reconstruction )
 TARGET_LINK_LIBRARIES( Config CfgParser )
 TARGET_LINK_LIBRARIES( Algorithm Objects Reconstruction )
+#TARGET_LINK_LIBRARIES( Reconstruction Algorithm )
 
 FILE (
 	GLOB_RECURSE
@@ -80,7 +81,8 @@ FILE( GLOB_RECURSE
 )
 ADD_EXECUTABLE( OverlayEvent ${OVERLAY_EVENT_SRC_FILES} )
 TARGET_LINK_LIBRARIES( 
-	OverlayEvent  
+	OverlayEvent
+	Algorithm
 	Managers
 	Objects
 	Overlay
