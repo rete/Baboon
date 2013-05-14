@@ -33,6 +33,7 @@
 #include "Objects/Hit.hh"
 #include "Managers/ClusteringManager.hh"
 #include "Managers/HitManager.hh"
+#include "Managers/TrackManager.hh"
 #include "Reconstruction/Tag.hh"
 #include "Reconstruction/Builders/TrackCollectionBuilder.hh"
 #include "Utilities/ReturnValues.hh"
