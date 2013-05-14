@@ -48,13 +48,13 @@ namespace baboon {
 
 	void ConeBeginningAlgorithm::Execute() {
 
-		vector<IntVec> padsPositionsTemp;
+		vector<IntVector> padsPositionsTemp;
 		HitManager* hitMan = HitManager::GetInstance();
 
 		for( unsigned int hitID=0 ; hitID<hitCollection->size() ; hitID++ ) {
 
 			Hit* hit = hitCollection->at(hitID);
-			IntVec ijk = hit->GetIJK();
+			IntVector ijk = hit->GetIJK();
 
 
 		}

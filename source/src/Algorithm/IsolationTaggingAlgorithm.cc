@@ -69,7 +69,7 @@ namespace baboon {
 		for( hitID=0 ; hitID<size ; hitID++ ) {
 
 			Hit *hit = hitCollection->at(hitID);
-			IntVec ijk1 = hit->GetIJK();
+			IntVector ijk1 = hit->GetIJK();
 
 			int hitCount = 0;
 
@@ -81,25 +81,21 @@ namespace baboon {
 						if( !hitManager->PadIsTouched( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k ) ) continue;
 
 						hitCount++;
-//						Hit *hit2 = hitManager->GetHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
+						Hit *hit2 = hitManager->GetHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
 
 					}
 				}
 			}
 			isolationWeights.push_back( double(hitCount) / volume );
 
-			int clusterSize = hit->GetCluster3D()->GetClusterSize();
-
-//			if( clusterSize < 4 ) {
 			if( double(hitCount) / volume < concentrationLimit ) {
 				hit->SetHitTag( fIsolated );
 			}
 		}
 	}
 
-
-
 	void IsolationTaggingAlgorithm::End() {
+
 		hitCollection = 0;
 	}
 
