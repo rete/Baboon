@@ -70,6 +70,8 @@ namespace baboon {
 				ijk.push_back( I );
 				ijk.push_back( J );
 				ijk.push_back( K );
+				hitParams.type = caloHit->getType();
+				hitParams.time = caloHit->getTime();
 				hitParams.ijk = ijk;
 
 				HitManager::GetInstance()->RegisterNewHit( hitParams );
