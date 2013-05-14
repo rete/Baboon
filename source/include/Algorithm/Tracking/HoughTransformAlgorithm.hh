@@ -29,7 +29,6 @@
 
 // sdhcal includes
 #include "Algorithm/AbstractAlgorithm.hh"
-#include "Objects/TrackSegment.hh"
 #include "Objects/Cluster.hh"
 #include "Objects/Hit.hh"
 #include "Managers/ClusteringManager.hh"
