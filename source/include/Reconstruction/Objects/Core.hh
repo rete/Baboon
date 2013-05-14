@@ -76,6 +76,8 @@ namespace baboon {
 			 */
 			Return RemoveHit( Hit *hit );
 
+			bool Contains( Hit *hit );
+
 		protected:
 
 			HitCollection *hitCollection;

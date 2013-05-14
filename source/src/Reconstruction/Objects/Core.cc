@@ -64,6 +64,11 @@ namespace baboon {
 		return S_OK();
 	}
 
+	bool Core::Contains( Hit *hit ) {
+
+		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
+	}
+
 
 }  // namespace 
 
