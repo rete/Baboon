@@ -64,7 +64,7 @@ namespace baboon {
 			 * @brief : Set the track minimum size cut while reconstructing tracks.
 			 *
 			 */
-			inline void SetTrackSegmentMinimumSize( int min )
+			inline void SetTrackMinimumSize( int min )
 				{ trackSegmentMinimumSize = min; }
 
 

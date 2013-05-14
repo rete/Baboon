@@ -81,7 +81,8 @@ namespace baboon {
 
 		ClusteringAlgorithm *clustAlgo = new ClusteringAlgorithm();
 		clustAlgo->SetClusterCollection( clusterCollection );
-		clustAlgo->SetHitTagToCluster( fCore );
+		clustAlgo->SetTaggingMode( fClusterTagMode );
+		clustAlgo->AddHitTagToCluster( fCore );
 		clustAlgo->Process();
 		delete clustAlgo;
 
