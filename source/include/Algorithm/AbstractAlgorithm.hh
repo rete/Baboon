@@ -90,7 +90,10 @@ namespace baboon {
 					this->Execute();
 					this->End();
 				}
-				else throw AlgorithmException( ret.message );
+				else {
+					std::cerr << ret.message << std::endl;
+					throw AlgorithmException( ret.message );
+				}
 
 			}
 
