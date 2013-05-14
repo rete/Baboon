@@ -181,7 +181,7 @@ int main (int argc ,char *argv[]) {
 //	TCanvas *cc = new TCanvas("c1","PCA");
 //	cc->Divide(3,0);
 
-
+/*
 	while( (evt = lcReader->readNextEvent()) != 0 ) {
 
 		evtID = evt->getEventNumber();
@@ -244,9 +244,6 @@ int main (int argc ,char *argv[]) {
 
 		if( estimatorModeArg.getValue() == "pca" ) {
 
-			/***************
-			 * PC Analysis
-			 ***************/
 
 			TVectorD pcaEigenValues(2);
 			TMatrixD pcaEigenVectors(2,2);
@@ -574,6 +571,7 @@ int main (int argc ,char *argv[]) {
 
 	}
 
+//*/
 
 	/*******************
 	 * Finalize the task
