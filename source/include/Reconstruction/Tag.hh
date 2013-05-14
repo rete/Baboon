@@ -28,7 +28,6 @@ namespace baboon {
 	 */
 	enum Tag {
 		fIsolated,
-		fTrackSegment,
 		fTrack,
 		fTrackExtremity,
 		fCore,

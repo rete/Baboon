@@ -23,7 +23,6 @@ namespace baboon {
 	Tag StringToTag( const std::string tagString ) {
 
 		if( tagString == "fIsolated" )             return fIsolated;
-		else if( tagString == "fTrackSegment" )    return fTrackSegment;
 		else if( tagString == "fTrack" )           return fTrack;
 		else if( tagString == "fTrackExtremity" )  return fTrackExtremity;
 		else if( tagString == "fCore" )            return fCore;
@@ -34,7 +33,6 @@ namespace baboon {
 	std::string TagToString( Tag tag ) {
 
 		      if( tag == fIsolated )       return std::string("fIsolated");
-		else if( tag == fTrackSegment )   return std::string("fTrackSegment");
 		else if( tag == fTrack )          return std::string("fTrack");
 		else if( tag == fTrackExtremity ) return std::string("fTrackExtremity");
 		else if( tag == fCore )           return std::string("fCore");
