@@ -108,7 +108,6 @@ namespace baboon {
 
 		for( it=algorithmMap.begin() ; it!=algorithmMap.end() ; it++ ) {
 			string algoName = (*it).first;
-			cout << "Algorithm " << algoName << " has been registered!" << endl;
 
 			try {
 
@@ -129,10 +128,27 @@ namespace baboon {
 	}
 
 
+	void AlgorithmManager::PrintAlgorithmHeader() {
+
+		AlgorithmMap::iterator it;
+
+		cout << "*********************************************************" << endl;
+		cout << "* Algorithm Manager registered the following algorithms :" << endl;
+		cout << "*" << endl;
+		for( it=algorithmMap.begin() ; it!=algorithmMap.end() ; it++ ) {
+			string algoName = (*it).first;
+			cout << "*    - " << algoName << endl;
+		}
+		cout << "*" << endl;
+		cout << "*********************************************************" << endl;
+
+	}
+
+
 	void AlgorithmManager::Initialize() {
 
 		instance->LoadAlgorithms();
-
+		instance->PrintAlgorithmHeader();
 	}
 
 

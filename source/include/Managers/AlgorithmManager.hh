@@ -65,6 +65,13 @@ namespace baboon {
 			/*! Load the algorithm parameters from the cfg file */
 			void LoadAlgorithms();
 
+			/*!
+			 *
+			 * @brief Print the algorithm header while initializing.
+			 *
+			 */
+			void PrintAlgorithmHeader();
+
 		public :
 
 			/*! Only way to get an instance of this class. Part of the singleton patter */
