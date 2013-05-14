@@ -29,6 +29,8 @@
 #include "Objects/Cluster.hh"
 #include "Objects/Hit.hh"
 #include "Managers/HitManager.hh"
+#include "Utilities/Globals.hh"
+#include "Utilities/ReturnValues.hh"
 
 #include <omp.h>
 
