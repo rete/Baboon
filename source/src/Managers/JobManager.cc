@@ -60,8 +60,9 @@ namespace baboon {
 	}
 
 
-	void JobManager::ProcessEvent( LCEvent* event) {
+	void JobManager::ProcessEvent( EVENT::LCEvent* event) {
 
+		/*
 		int evtNb = event->getEventNumber();
 
 		analysisManager->Set("SplitterVariables","event",evtNb);
@@ -315,6 +316,7 @@ namespace baboon {
 		// should be the two last lines
 		analysisManager->Fill("SplitterVariables");
 		hitManager->EndOfEvent();
+		//*/
 	}
 
 

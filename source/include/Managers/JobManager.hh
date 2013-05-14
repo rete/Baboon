@@ -22,6 +22,8 @@
 #include <cmath>
 
 
+#include "EVENT/LCEvent.h"
+
 // sdhcla includes
 #include "Managers/ClusteringManager.hh"
 #include "Objects/Cluster.hh"
@@ -67,7 +69,7 @@ namespace baboon {
 
 			void Init();
 
-			void ProcessEvent( LCEvent* );
+			void ProcessEvent( EVENT::LCEvent* );
 
 			void End();
 	};
