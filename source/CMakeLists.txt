@@ -85,6 +85,7 @@ TARGET_LINK_LIBRARIES(
 	Objects
 	Overlay
 	Utils
+	Utilities
 	Config
 	CfgParser
 )
