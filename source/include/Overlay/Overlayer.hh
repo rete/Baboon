@@ -31,6 +31,7 @@
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
 #include "Config/SdhcalConfig.hh"
+#include "Objects/Hit.hh"
 
 
 namespace baboon {
@@ -44,43 +45,40 @@ namespace baboon {
 		protected :
 
 			std::vector<int> nbOfPadsXYZ;
-
 			int lostHits;
-
-			std::string codingPattern;
-
-			IMPL::LCCollectionVec* lcCollection1;
-
-			IMPL::LCCollectionVec* lcCollection2;
-
-			IMPL::LCCollectionVec* lcOverlaidCollection;
-
+			HitCollection* collection1;
+			HitCollection* collection2;
+			HitCollection* overlaidCollection;
 			ThreeVector *collectionTranslation1;
-
 			ThreeVector *collectionTranslation2;
+			std::vector<double> padsSize;
+			std::vector<double> interpadSize;
+			double layerThickness;
+			bool collectionsTranslated;
+
 
 			void TranslateCollections();
 
-			bool collectionsTranslated;
-
 		public :
 			/*! Default Constructor with two collections */
-			Overlayer(IMPL::LCCollectionVec *lcCol1 , IMPL::LCCollectionVec *lcCol2) ;
+			Overlayer( HitCollection *col1 , HitCollection *col2) ;
 			/*! Default Destructor */
 			virtual ~Overlayer() ;
 			/*! Overlay the two collection */
 			void OverlayCollections();
 
-			IMPL::LCCollectionVec* GetOverlaidCollection()
-				{ return lcOverlaidCollection; }
+			inline HitCollection* GetOverlaidCollection()
+				{ return overlaidCollection; }
 
-			inline void SetTranslations(ThreeVector* trans1 , ThreeVector* trans2)
-				{ collectionTranslation1 = trans1; //std::cout << "trans1 : " << *trans1 << std::endl;
-				  collectionTranslation2 = trans2; //std::cout << "trans1 : " << *trans2 << std::endl;
-				  }
+			inline void SetTranslations(ThreeVector* trans1 , ThreeVector* trans2) {
+				collectionTranslation1 = trans1;
+				collectionTranslation2 = trans2;
+			}
 
 			inline int GetNumberOfLostHits()
 				{ return lostHits; }
+
+			int ThresholdToInt( HitThreshold fThr );
 
 
 

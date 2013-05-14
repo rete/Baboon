@@ -23,97 +23,99 @@ using namespace std ;
 
 namespace baboon {
 
-	Overlayer::Overlayer(IMPL::LCCollectionVec * lcCol1 , IMPL::LCCollectionVec * lcCol2) {
+	Overlayer::Overlayer( HitCollection *col1 , HitCollection *col2) {
 
-		lcCollection1 = lcCol1;
-		lcCollection2 = lcCol2;
-		collectionTranslation1 = NULL;
-		collectionTranslation2 = NULL;
-		SdhcalConfig::GetInstance()->GetData("general").GetValue("codingPattern",&codingPattern);
+		collection1 = col1;
+		collection2 = col2;
+		collectionTranslation1 = 0;
+		collectionTranslation2 = 0;
 		SdhcalConfig::GetInstance()->GetData("pads").GetValue("nbOfPadsXYZ",&nbOfPadsXYZ);
-
-		lcOverlaidCollection = new IMPL::LCCollectionVec(LCIO::CALORIMETERHIT);
+		SdhcalConfig::GetInstance()->GetData("pads").GetValue("size",&padsSize);
+		SdhcalConfig::GetInstance()->GetData("pads").GetValue("interpadSize",&interpadSize);
+		SdhcalConfig::GetInstance()->GetData("layers").GetValue("thickness",&layerThickness);
+		overlaidCollection = new HitCollection();
 		collectionsTranslated = false;
 	}
 
 	Overlayer::~Overlayer() {
 
-		delete lcOverlaidCollection;
+		delete overlaidCollection;
 		delete collectionTranslation1;
 		delete collectionTranslation2;
 	}
 
 	void Overlayer::TranslateCollections() {
 
-		if(!collectionsTranslated) {
+		if( !collectionsTranslated ) {
 
 			lostHits = 0;
 
-			if(collectionTranslation1 == NULL) return;
-			if(collectionTranslation2 == NULL) return;
+			if( collectionTranslation1 == 0 ) return;
+			if( collectionTranslation2 == 0 ) return;
 
-			UTIL::CellIDDecoder<IMPL::CalorimeterHitImpl> idDecoderTr(codingPattern);
-			UTIL::CellIDEncoder<IMPL::CalorimeterHitImpl> idEncoder1 (codingPattern,lcCollection1);
-			UTIL::CellIDEncoder<IMPL::CalorimeterHitImpl> idEncoder2 (codingPattern,lcCollection2);
+			for(int eltID=0 ; eltID<collection1->size() ; eltID++) {
 
-			for(int eltID=0 ; eltID<lcCollection1->getNumberOfElements() ; eltID++) {
-
-				IMPL::CalorimeterHitImpl* hit = static_cast<IMPL::CalorimeterHitImpl*> ( lcCollection1->getElementAt( eltID ) );
-				int I = idDecoderTr(hit)["I"];
-				int J = idDecoderTr(hit)["J"];
-				int K = idDecoderTr(hit)["K-1"];
+				Hit *hit = collection1->at( eltID );
+				IntVector ijk = hit->GetIJK();
 
 				// if the hit is outside of the sdhcal remove it from the collection!
-				if( ( I + round( collectionTranslation1->x()) ) < 0
-				||  ( J + round( collectionTranslation1->y()) ) < 0
-				||  ( K + round( collectionTranslation1->z()) ) < 0
-				||  ( I + round( collectionTranslation1->x()) ) > nbOfPadsXYZ.at(0)
-				||  ( J + round( collectionTranslation1->y()) ) > nbOfPadsXYZ.at(1)
-				||  ( K + round( collectionTranslation1->z()) ) > nbOfPadsXYZ.at(2) ) {
+				if( ( ijk.at(0) + round( collectionTranslation1->x()) ) < 0
+				||  ( ijk.at(1) + round( collectionTranslation1->y()) ) < 0
+				||  ( ijk.at(2) + round( collectionTranslation1->z()) ) < 0
+				||  ( ijk.at(0) + round( collectionTranslation1->x()) ) > nbOfPadsXYZ.at(0)
+				||  ( ijk.at(1) + round( collectionTranslation1->y()) ) > nbOfPadsXYZ.at(1)
+				||  ( ijk.at(2) + round( collectionTranslation1->z()) ) > nbOfPadsXYZ.at(2) ) {
 
-					lcCollection1->removeElementAt(eltID);
+					delete hit;
+					collection1->erase( collection1->begin() + eltID );
 					lostHits++;
 				}
 				else {
-					idEncoder1["I"] = I + round( collectionTranslation1->x() );
-					idEncoder1["J"] = J + round( collectionTranslation1->y() );
-					idEncoder1["K-1"] = K + round( collectionTranslation1->z() );
-					idEncoder1.setCellID( hit );
-					float pos[3];
-					pos[0] = hit->getPosition()[0] + 10.408*round(collectionTranslation1->x());
-					pos[1] = hit->getPosition()[1] + 10.408*round(collectionTranslation1->y());
-					pos[2] = hit->getPosition()[2] + 26.131*round(collectionTranslation1->z());
-					hit->setPosition(pos);
+					hit->SetIJK( ijk.at(0) + round( collectionTranslation1->x() )
+										,ijk.at(1) + round( collectionTranslation1->y() )
+										,ijk.at(2) + round( collectionTranslation1->z() ) );
+
+					ThreeVector pos;
+					double xShift = padsSize.at(0) + interpadSize.at(0);
+					double yShift = padsSize.at(1) + interpadSize.at(1);
+					double zShift = layerThickness;
+					pos.setX( hit->GetPosition().x() + xShift*round(collectionTranslation1->x()) );
+					pos.setY( hit->GetPosition().y() + yShift*round(collectionTranslation1->y()) );
+					pos.setZ( hit->GetPosition().z() + zShift*round(collectionTranslation1->z()) );
+					hit->SetPosition(pos);
 				}
 			}
 
-			for(int eltID=0 ; eltID<lcCollection2->getNumberOfElements() ; eltID++) {
+			for(int eltID=0 ; eltID<collection2->size() ; eltID++) {
 
-				IMPL::CalorimeterHitImpl* hit = static_cast<IMPL::CalorimeterHitImpl*> ( lcCollection2->getElementAt( eltID ) );
-				int I = idDecoderTr(hit)["I"];
-				int J = idDecoderTr(hit)["J"];
-				int K = idDecoderTr(hit)["K-1"];
+				Hit *hit = collection2->at( eltID );
+				IntVector ijk = hit->GetIJK();
 
-				if( ( I + round( collectionTranslation2->x()) ) < 0
-				||  ( J + round( collectionTranslation2->y()) ) < 0
-				||  ( K + round( collectionTranslation2->z()) ) < 0
-				||  ( I + round( collectionTranslation2->x()) ) > nbOfPadsXYZ.at(0)
-				||  ( J + round( collectionTranslation2->y()) ) > nbOfPadsXYZ.at(1)
-				||  ( K + round( collectionTranslation2->z()) ) > nbOfPadsXYZ.at(2) ) {
+				// if the hit is outside of the sdhcal remove it from the collection!
+				if( ( ijk.at(0) + round( collectionTranslation2->x()) ) < 0
+				||  ( ijk.at(1) + round( collectionTranslation2->y()) ) < 0
+				||  ( ijk.at(2) + round( collectionTranslation2->z()) ) < 0
+				||  ( ijk.at(0) + round( collectionTranslation2->x()) ) > nbOfPadsXYZ.at(0)
+				||  ( ijk.at(1) + round( collectionTranslation2->y()) ) > nbOfPadsXYZ.at(1)
+				||  ( ijk.at(2) + round( collectionTranslation2->z()) ) > nbOfPadsXYZ.at(2) ) {
 
-					lcCollection2->removeElementAt(eltID);
+					delete hit;
+					collection2->erase( collection2->begin() + eltID );
 					lostHits++;
 				}
 				else {
-					idEncoder2["I"] = I + round( collectionTranslation2->x() );
-					idEncoder2["J"] = J + round( collectionTranslation2->y() );
-					idEncoder2["K-1"] = K + round( collectionTranslation2->z() );
-					idEncoder2.setCellID( hit );
-					float pos[3];
-					pos[0] = hit->getPosition()[0] + 10.408*round(collectionTranslation2->x());
-					pos[1] = hit->getPosition()[1] + 10.408*round(collectionTranslation2->y());
-					pos[2] = hit->getPosition()[2] + 26.131*round(collectionTranslation2->z());
-					hit->setPosition(pos);
+					hit->SetIJK( ijk.at(0) + round( collectionTranslation2->x() )
+								,ijk.at(1) + round( collectionTranslation2->y() )
+								,ijk.at(2) + round( collectionTranslation2->z() ) );
+
+					ThreeVector pos;
+					double xShift = padsSize.at(0) + interpadSize.at(0);
+					double yShift = padsSize.at(1) + interpadSize.at(1);
+					double zShift = layerThickness;
+					pos.setX( hit->GetPosition().x() + xShift*round(collectionTranslation2->x()) );
+					pos.setY( hit->GetPosition().y() + yShift*round(collectionTranslation2->y()) );
+					pos.setZ( hit->GetPosition().z() + zShift*round(collectionTranslation2->z()) );
+					hit->SetPosition(pos);
 				}
 			}
 			collectionsTranslated = true;
@@ -125,64 +127,60 @@ namespace baboon {
 
 		this->TranslateCollections();
 
-		UTIL::CellIDDecoder<IMPL::CalorimeterHitImpl> idDecoder1(codingPattern);
-		UTIL::CellIDDecoder<IMPL::CalorimeterHitImpl> idDecoder2(codingPattern);
-
-		for(int i=0 ; i<lcCollection1->getNumberOfElements() ; i++) {
-			IMPL::CalorimeterHitImpl* hit = static_cast<IMPL::CalorimeterHitImpl*> ( lcCollection1->getElementAt( i ) );
-			lcOverlaidCollection->addElement(hit);
-		}
+		for( unsigned int i=0 ; i<collection1->size() ; i++ )
+			overlaidCollection->push_back( collection1->at(i) );
 
 		int count = 0;
 
-		for(int j=0 ; j<lcCollection2->getNumberOfElements() ; j++) {
+		for( unsigned int j=0 ; j<collection2->size() ; j++ ) {
 
-			IMPL::CalorimeterHitImpl* hit2 = NULL;
-			hit2 = static_cast<IMPL::CalorimeterHitImpl*> ( lcCollection2->getElementAt( j ) );
-
-			int I2 = idDecoder2(hit2)["I"];
-			int J2 = idDecoder2(hit2)["J"];
-			int K2 = idDecoder2(hit2)["K-1"];
+			Hit *hit2 = collection2->at(j);
+			IntVector ijk2 = hit2->GetIJK();
 
 			bool hitIsOverlaid = false;
 
-			for(int i=0 ; i<lcCollection1->getNumberOfElements() ; i++) {
+			for( int i=0 ; i<collection1->size() ; i++ ) {
 
-				IMPL::CalorimeterHitImpl* hit1 = static_cast<IMPL::CalorimeterHitImpl*> ( lcCollection1->getElementAt( i ) );
-				int I1 = idDecoder1(hit1)["I"];
-				int J1 = idDecoder1(hit1)["J"];
-				int K1 = idDecoder1(hit1)["K-1"];
+				Hit *hit1 = collection1->at(i);
+				IntVector ijk1 = hit1->GetIJK();
 
-				if(I1==I2 && J1==J2 && K1==K2) {
+				if( ijk1.at(0) == ijk2.at(0)
+				 && ijk1.at(1) == ijk2.at(1)
+				 && ijk1.at(2) == ijk2.at(2) ) {
+
 					hitIsOverlaid = true;
-//					cout << "toto" << endl;
 					count ++;
-					hit1->setType(3);    // Overlaid hit type
-					float thresholdTable[3][3] = { 2.0 , 1.0 , 3.0 ,
-									 	 	 	    1.0 , 1.0 , 3.0 ,
-									 	 	 	    3.0 , 3.0 , 3.0 };
-					float fThr1 = hit1->getEnergy();
-					float fThr2 = hit2->getEnergy();
-					float newThr = thresholdTable [int(fThr1)][int(fThr2)];
+					hit1->SetType(3);    // Overlaid hit type
+					HitThreshold thresholdTable[3][3] = { fThreshold1 , fThreshold2 , fThreshold3 ,
+														  fThreshold2 , fThreshold2 , fThreshold3 ,
+														  fThreshold3 , fThreshold3 , fThreshold3 };
+					HitThreshold fThr1 = hit1->GetThreshold();
+					HitThreshold fThr2 = hit2->GetThreshold();
+					cout << "ThresholdToInt(fThr1) : " << ThresholdToInt(fThr1) << endl;
+					cout << "ThresholdToInt(fThr2) : " << ThresholdToInt(fThr2) << endl;
+					HitThreshold newThr = thresholdTable [ThresholdToInt(fThr1)][ThresholdToInt(fThr2)];
 
-					if(newThr == fThr1) continue;
+					if( newThr == fThr1 ) continue;
 					else {
-						hit1->setEnergy(newThr);
+						hit1->SetThreshold( newThr );
 					}
 
 				}
-				if(hitIsOverlaid) break;
+				if( hitIsOverlaid ) break;
 			}
 
-			if(!hitIsOverlaid) lcOverlaidCollection->addElement( hit2 );
+			if( !hitIsOverlaid ) overlaidCollection->push_back( hit2 );
 		}
-
-//		cout << "count : " << count << endl;
-//		cout << "lcCollection1->getNumberOfElements() : " << lcCollection1->getNumberOfElements() << endl;
-//		cout << "lcCollection2->getNumberOfElements() : " << lcCollection2->getNumberOfElements() << endl;
 	}
 
 
+
+	int Overlayer::ThresholdToInt( HitThreshold fThr ) {
+
+		if( fThr == fThreshold1 ) return 0;
+		if( fThr == fThreshold2 ) return 1;
+		if( fThr == fThreshold3 ) return 2;
+	}
 
 
 
