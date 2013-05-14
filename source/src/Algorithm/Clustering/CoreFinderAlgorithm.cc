@@ -51,13 +51,11 @@ namespace baboon {
 	void CoreFinderAlgorithm::Execute() {
 
 		HitManager *hitManager = HitManager::GetInstance();
-
-//		HitCollection *hitCollectionCore = new HitCollection();
 		int nbOfCoreHits = 0;
 		for( unsigned int l=0 ; l<hitCollection->size() ; l++ ) {
 
 			Hit *hit = hitCollection->at(l);
-			IntVec ijk = hit->GetIJK();
+			IntVector ijk = hit->GetIJK();
 			HitThreshold thresh = hit->GetThreshold();
 
 
@@ -79,31 +77,12 @@ namespace baboon {
 				}
 			}
 
-//			cout << "count : " << count << endl;
-//			if( count >= coreCountThreshold ) {
 			if(count / 27.0 >= minimumThresholdConcentration ) {
-//				hitCollectionCore->push_back(hit);
 				hit->SetHitTag( fCore );
 				nbOfCoreHits++;
 			}
 		}
 
-		CoreCollectionBuilder *coreBuilder = CoreCollectionBuilder::GetInstance();
-		coreBuilder->SetForceGenerate( true );
-		coreBuilder->GetObject();
-
-		cout << "nb of core hits : " << nbOfCoreHits << endl;
-		ClusteringManager * clustMan = ClusteringManager::GetInstance();
-		ClusterCollection *coreClusters = clustMan->GetCluster3D();
-//		cout << "coreClusters->size() (avant): " << coreClusters->size() << endl;
-//		for( unsigned int l=0 ; l<coreClusters->size() ; l++ ) {
-//			if( coreClusters->at(l)->GetHitCollection()->size() < 10 ) {
-//				coreClusters->at(l)->SetClusterTagRecursive(fUndefined);
-//				coreClusters->erase( coreClusters->begin()+l );
-//			}
-//		}
-
-//		cout << "coreClusters->size() (apres): " << coreClusters->size() << endl;
 	}
 
 	void CoreFinderAlgorithm::End() {
