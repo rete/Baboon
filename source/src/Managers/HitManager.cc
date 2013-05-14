@@ -20,23 +20,31 @@ using namespace std ;
 namespace baboon {
 
 
-	HitManager *HitManager::instance = NULL;
+	HitManager *HitManager::instance = 0;
 
 	HitManager::HitManager() {
+
 		SdhcalConfig::GetInstance()->GetData("pads").GetValue("nbOfPadsXYZ",&nbOfPadsXYZ);  // vector 3 elts
 		SdhcalConfig::GetInstance()->GetData("pads").GetValue("size",&padsSize);  // vector 2 elts
 		SdhcalConfig::GetInstance()->GetData("pads").GetValue("interpadSize",&interpadSize);  // vector 2 elts
 		SdhcalConfig::GetInstance()->GetData("layers").GetValue("thickness",&layerThickness);  // double
-		hitCollection = NULL;
-		showerSpliterMode = false;
+
+		hitCollection = new HitCollection();
+		Hit **hitMapVolumePtrBuffer = new Hit*[ (nbOfPadsXYZ.at(0)+1) * (nbOfPadsXYZ.at(1)+1) * (nbOfPadsXYZ.at(2)+1)];
+		hitMapVolumePtr.Initialize(hitMapVolumePtrBuffer,nbOfPadsXYZ.at(0)+1,nbOfPadsXYZ.at(1)+1,nbOfPadsXYZ.at(2)+1);
 	}
 
 
-	HitManager::~HitManager() {}
+	HitManager::~HitManager() {
+		ClearAllContent();
+		hitMapVolumePtr.Clear();
+	}
 
 
 	HitManager *HitManager::GetInstance() {
-		if (instance == NULL) instance = new HitManager();
+
+		if (instance == 0)
+			instance = new HitManager();
 		return instance;
 	}
 
@@ -49,41 +57,66 @@ namespace baboon {
 		}
 	}
 
+	Return HitManager::RegisterNewHit( const HitParameters &params ) {
 
-	void HitManager::BeginOfEvent( EVENT::LCCollection* lcCol) {
+		Hit *hit = new Hit(params);
+		hitCollection->push_back(hit);
+		return S_OK();
+	}
 
-		if(hitCollection != NULL) delete hitCollection;
-		hitCollection = new  HitCollection();
 
-		for(int eltID=0 ; eltID<lcCol->getNumberOfElements() ; eltID++) {
-			EVENT::CalorimeterHit *calHit = dynamic_cast<EVENT::CalorimeterHit*> (lcCol->getElementAt(eltID));
-			Hit *hit = new Hit(calHit);
-			hitCollection->push_back(hit);
+	Return HitManager::DeleteHit( Hit *hit ) {
+
+		if( hit == 0 )
+			return S_ERROR("while deleting a hit : assertion hit  != 0 failed");
+
+		HitCollection::iterator hitIt = std::find( hitCollection->begin() , hitCollection->end() , hit );
+
+		if( hitIt != hitCollection->end() ) {
+			if( *hitIt != 0 )
+				delete hit;
+			hitCollection->erase( hitIt );
+			return S_OK("Hit found and correctly deleted");
 		}
+		return S_ERROR("Hit was not registered by the hit manager. Couldn't delete it!");
+	}
 
-		instance->BuildVolumeMap();
+
+
+	Return HitManager::ClearAllContent() {
+
+//		cerr << "ok" << endl;
+		hitMapVolumePtr.Clear();
+//		cerr << "ok" << endl;
+
+		if( hitCollection != 0 ) {
+//			cerr << "ok" << endl;
+//			cout << "hit col size = " << hitCollection->size() << endl;
+			for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+				if( hitCollection->at(i) != 0 ) {
+//					cout << "i = " << i << endl;
+					delete hitCollection->at(i);
+				}
+
+			}
+			hitCollection->clear();
+		}
+		else {
+//			cerr << "ok" << endl;
+			hitCollection = new HitCollection();
+		}
+//		cerr << "ok" << endl;
+		return S_OK("Content cleared!");
+
 	}
 
 
 	void HitManager::BuildVolumeMap() {
 
-		Hit **hitMapVolumePtrBuffer = new Hit*[ (nbOfPadsXYZ.at(0)+1) * (nbOfPadsXYZ.at(1)+1) * (nbOfPadsXYZ.at(2)+1)];
-		hitMapVolumePtr.Initialize(hitMapVolumePtrBuffer,nbOfPadsXYZ.at(0)+1,nbOfPadsXYZ.at(1)+1,nbOfPadsXYZ.at(2)+1);
-
 		for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
-			IntVec ijk = hitCollection->at(i)->GetIJK();
+			IntVector ijk = hitCollection->at(i)->GetIJK();
 			hitMapVolumePtr.SetValue( ijk.at(0) , ijk.at(1) , ijk.at(2) , hitCollection->at(i) );
 		}
-
-	}
-
-
-	void HitManager::EndOfEvent() {
-
-		delete hitMapVolumePtr.GetPtr();
-		hitCollection->clear();
-		delete hitCollection;
-		hitCollection = NULL;
 	}
 
 
@@ -94,43 +127,14 @@ namespace baboon {
 	}
 
 
-	EVENT::CalorimeterHitVec *HitManager::GetCalorimeterHitCollection() {
-
-		EVENT::CalorimeterHitVec *calHitCollection = new vector<EVENT::CalorimeterHit*>;
-
-		for(int eltID=0 ; eltID<hitCollection->size() ; eltID++) {
-			IMPL::CalorimeterHitImpl *calHitImpl = hitCollection->at(eltID)->ToCalorimeterHitImpl();
-			calHitCollection->push_back( calHitImpl);
-		}
-		return calHitCollection;
-	}
-
-
-
-	Matrix3D<Hit*> HitManager::GetHitCubeAt( unsigned int I, unsigned int J, unsigned int K, unsigned int size) {
-
-		Matrix3D<bool> retMat;
-		bool *retMatBuffer = new bool[ (2*size+1) * (2*size+1) * (2*size+1) ];
-		retMat.Initialize( retMatBuffer, 2*size+1 , 2*size+1 , 2*size+1 );
-
-		for( int i=-size ; i<=size ; i++) {
-			for( int j=-size ; j<=size ; j++) {
-				for( int k=-size ; k<=size ; k++) {
-					retMat.SetValue( i , j , k , hitMapVolumePtr.GetValue( I+i , J+j , K+k  ) );
-				}
-			}
-		}
-	}
-
-
 	Hit *HitManager::GetHitAt( unsigned int I , unsigned int J , unsigned int K ) {
 		return hitMapVolumePtr.GetValue( I , J , K );
 	}
 
 
-	DoubleVec HitManager::PositionToIJK( const ThreeVector& v ) {
+	DoubleVector HitManager::PositionToIJK( const ThreeVector& v ) {
 
-		DoubleVec retVec;
+		DoubleVector retVec;
 		double I = (nbOfPadsXYZ.at(0)/2.0) + v.x()/(padsSize.at(0)+interpadSize.at(0)); retVec.push_back(I);
 		double J = (nbOfPadsXYZ.at(1)/2.0) + v.y()/(padsSize.at(1)+interpadSize.at(1)); retVec.push_back(J);
 		double K = (nbOfPadsXYZ.at(2)/2.0) + v.z()/layerThickness; retVec.push_back(K);
@@ -143,32 +147,10 @@ namespace baboon {
 		if( I <= nbOfPadsXYZ.at(0) && I > 0
 		 && J <= nbOfPadsXYZ.at(1) && K > 0
 		 && K <= nbOfPadsXYZ.at(2) && K > 0 )
-
 			return true;
 
 		return false;
-
 	}
-
-
-	HitCollection *HitManager::GetNewHitCollection( EVENT::LCCollection* lcCol ) {
-
-		HitCollection *hitCol = new HitCollection();
-
-		for(int eltID=0 ; eltID<lcCol->getNumberOfElements() ; eltID++) {
-			EVENT::CalorimeterHit *calHit = dynamic_cast<EVENT::CalorimeterHit*> (lcCol->getElementAt(eltID));
-			Hit *hit = new Hit(calHit);
-			hitCol->push_back(hit);
-		}
-		return hitCol;
-
-	}
-
-
-
-
-
-
 
 
 }

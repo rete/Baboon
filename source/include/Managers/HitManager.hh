@@ -20,17 +20,20 @@
 #include <string>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
-// lcio includes
-#include "EVENT/LCCollection.h"
-#include "EVENT/CalorimeterHit.h"
-#include "IMPL/CalorimeterHitImpl.h"
+//// lcio includes
+//#include "EVENT/LCCollection.h"
+//#include "EVENT/CalorimeterHit.h"
+//#include "IMPL/CalorimeterHitImpl.h"
 
 
 // sdhcal includes
 #include "Objects/Hit.hh"
 #include "Geometry/Matrix3D.hh"
 #include "Config/SdhcalConfig.hh"
+#include "Utilities/Globals.hh"
+#include "Utilities/ReturnValues.hh"
 
 
 
@@ -52,19 +55,15 @@ namespace baboon {
 
 			HitCollection *hitCollection;
 
-			IntVec nbOfPadsXYZ;
+			IntVector nbOfPadsXYZ;
 
-			DoubleVec padsSize;
+			DoubleVector padsSize;
 
-			DoubleVec interpadSize;
+			DoubleVector interpadSize;
 
 			double layerThickness;
 
-			bool showerSpliterMode;
-
 			Matrix3D<Hit*> hitMapVolumePtr;
-
-			void BuildVolumeMap();
 
 		public :
 
@@ -72,9 +71,17 @@ namespace baboon {
 
 			static void Kill();
 
-			void BeginOfEvent( EVENT::LCCollection* );
+			Return RegisterNewHit( const HitParameters &params );
 
-			void EndOfEvent();
+			Return DeleteHit( Hit *hit );
+
+			Return ClearAllContent();
+
+			void BuildVolumeMap();
+
+//			void BeginOfEvent( EVENT::LCCollection* );
+
+//			void EndOfEvent();
 
 			bool PadIsTouched( unsigned int I , unsigned int J , unsigned int K );
 
@@ -83,13 +90,13 @@ namespace baboon {
 
 			Matrix3D<Hit*> GetHitCubeAt( unsigned int I, unsigned int J, unsigned int K, unsigned int size);
 
-			EVENT::CalorimeterHitVec *GetCalorimeterHitCollection();
+//			EVENT::CalorimeterHitVec *GetCalorimeterHitCollection();
 
 			Hit *GetHitAt( unsigned int I , unsigned int J , unsigned int K );
 
-			DoubleVec PositionToIJK( const ThreeVector& v );
+			DoubleVector PositionToIJK( const ThreeVector& v );
 
-			static HitCollection *GetNewHitCollection( EVENT::LCCollection* lcCol );
+//			static HitCollection *GetNewHitCollection( EVENT::LCCollection* lcCol );
 
 			bool PadExists( int I , int J , int K );
 
