@@ -35,6 +35,10 @@
 
 namespace baboon {
 
+	enum ClusterType {
+		fCluster2D,
+		fCluster3D
+	};
 
 	/*!
 	 * Class SDHCALCluster.
@@ -47,13 +51,15 @@ namespace baboon {
 
 		ThreeVector position;
 
-		std::string codingPattern;
+//		std::string codingPattern;
 
 		HitCollection *hitCollection;
 
-		std::vector<Cluster*> *associatedClusters;
+//		std::vector<Cluster*> *associatedClusters;
 
 		Tag fClusterTag;
+
+		ClusterType fType;
 
 		void ComputePosition();
 
@@ -76,10 +82,10 @@ namespace baboon {
 
 		bool IsIsolatedFromClusters(const std::vector<Cluster*>* clusters);
 
-		inline int GetClusterSize()
+		inline int GetClusterSize() const
 			{ return hitCollection->size(); }
 
-		void SetClusterTagRecursive(Tag clustTag);
+		void SetClusterTagRecursive( const Tag &clustTag );
 
 		inline void SetClusterTag(Tag clustTag)
 			{ fClusterTag = clustTag; }
@@ -87,12 +93,17 @@ namespace baboon {
 		inline Tag GetClusterTag() const
 			{ return fClusterTag; }
 
-		void AssociateCluster( Cluster* );
+		Return SetType( const ClusterType &type );
 
-		std::vector<Cluster*> *GetAssociatedClusters()
-			{ return associatedClusters; }
+		inline ClusterType GetType() const
+			{ return fType; }
 
-		bool IsAssociatedToCluster( Cluster* );
+//		void AssociateCluster( Cluster* );
+
+//		std::vector<Cluster*> *GetAssociatedClusters()
+//			{ return associatedClusters; }
+
+//		bool IsAssociatedToCluster( Cluster* );
 
 		bool ContainsHit( Hit *hit );
 
@@ -100,7 +111,7 @@ namespace baboon {
 
 		void RemoveHit( Hit *hit );
 
-		void MergeClusters( Cluster *cl );
+//		void MergeClusters( Cluster *cl );
 
 
 	};
