@@ -40,6 +40,11 @@ namespace baboon {
 		fClustering3D
 	};
 
+	enum TaggingMode {
+		fAvoidTagMode,
+		fClusterTagMode
+	};
+
 	/*!
 	 *
 	 * @brief Class ClusteringAlgorithm
@@ -53,14 +58,14 @@ namespace baboon {
 
 			/*!
 			 *
-			 * Default Constructor
+			 * @brief Default Constructor
 			 *
 			 */
 			ClusteringAlgorithm();
 
 			/*!
 			 *
-			 * Default Destructor
+			 * @brief Default Destructor
 			 *
 			 */
 			virtual ~ClusteringAlgorithm();
@@ -69,13 +74,15 @@ namespace baboon {
 
 		protected:
 
-			ClusteringMode fMode;
-			Tag hitTagToCluster;
+			ClusteringMode fClusteringMode;
+			TaggingMode fTaggingMode;
+			std::vector<Tag> hitTagToCluster;
+			std::vector<Tag> hitTagToAvoid;
 			ClusterCollection *clusterCollection;
 
 			/*!
 			 *
-			 * @brief : Initialize the algorithm, i.e by initializing specific variables
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
 			virtual void Init();
@@ -83,7 +90,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Execute the algorithm
+			 * @brief Execute the algorithm
 			 *
 			 */
 			virtual void Execute();
@@ -91,7 +98,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Finalize the algorithm
+			 * @brief Finalize the algorithm
 			 *
 			 */
 			virtual void End();
@@ -99,10 +106,31 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Allow to check if everything is well set in the algorithm before starting it
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
 			 *
 			 */
 			virtual Return CheckConsistency();
+
+			/*!
+			 *
+			 * @brief Return true if the given tag is to be avoided while clustering
+			 *
+			 */
+			bool AvoidTag( const Tag &fTag );
+
+			/*!
+			 *
+			 * @brief Return true if the given tag has to be kept while clustering
+			 *
+			 */
+			bool KeepTag( const Tag &fTag );
+
+			/*!
+			 *
+			 * @brief
+			 *
+			 */
+			bool CheckTag( const Tag &fTag );
 
 
 		public:
@@ -113,7 +141,15 @@ namespace baboon {
 			 *
 			 */
 			inline void SetClusteringMode( ClusteringMode mode )
-				{ fMode = mode; }
+				{ fClusteringMode = mode; }
+
+			/*!
+			 *
+			 * @brief Set the tagging mode : avoid tag or cluster them
+			 *
+			 */
+			inline void SetTaggingMode( TaggingMode mode )
+				{ fTaggingMode = mode; }
 
 			/*!
 			 *
@@ -128,8 +164,17 @@ namespace baboon {
 			 * @brief Set the hit tag to cluster hits
 			 *
 			 */
-			inline void SetHitTagToCluster( Tag fTag )
-				{ hitTagToCluster = fTag; }
+			Return AddHitTagToCluster( const Tag &fTag );
+
+			/*!
+			 *
+			 * @brief Set the hit tag to be avoided while clustering
+			 *
+			 */
+			Return AddHitTagToAvoid( const Tag &fTag );
+
+
+
 
 	};  // class
 

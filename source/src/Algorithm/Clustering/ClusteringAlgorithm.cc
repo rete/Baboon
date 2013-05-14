@@ -25,9 +25,11 @@ namespace baboon {
 
 	ClusteringAlgorithm::ClusteringAlgorithm()
 		: AbstractAlgorithm("ClusteringAlgorithm") {
+
 		needData = false;
-		fMode = fClustering2D;
-		hitTagToCluster = fUndefined;
+		fClusteringMode = fClustering2D;
+		fTaggingMode = fClusterTagMode;
+		clusterCollection = 0;
 	}
 
 	ClusteringAlgorithm::~ClusteringAlgorithm() {
@@ -44,83 +46,138 @@ namespace baboon {
 
 		HitManager *hitManager = HitManager::GetInstance();
 		HitCollection *hitCollection = hitManager->GetHitCollection();
-
-		HitCollection tempCollection;
+		HitCollection treatedHits;
 
 		for( unsigned int hitID=0 ; hitID<hitCollection->size() ; hitID++ ) {
 
-
-			if( find( tempCollection.begin() , tempCollection.end() , hitCollection->at(hitID) ) != tempCollection.end() )
+			if( find( treatedHits.begin() , treatedHits.end() , hitCollection->at(hitID) ) != treatedHits.end() )
 				continue;
 
-			if( hitTagToCluster != fUndefined && hitTagToCluster != hitCollection->at(hitID)->GetHitTag() )
-				continue;
+			if ( !CheckTag( hitCollection->at(hitID)->GetHitTag() ) ) continue;
 
-			cout << "hit tag : " << TagToString( hitCollection->at(hitID)->GetHitTag() ) << endl;
-
-			tempCollection.push_back( hitCollection->at(hitID) );
+			treatedHits.push_back( hitCollection->at(hitID) );
 			HitCollection *hitCol = new HitCollection();
 			hitCol->push_back( hitCollection->at(hitID) );
 			IntVector ijk = hitCollection->at(hitID)->GetIJK();
 
-			for( int i=-1 ; i<=1 ; i++ ) {
-				for( int j=-1 ; j<=1 ; j++ ) {
-					for( int k=-1 ; k<=1 ; k++ ) {
+			for( unsigned int hitID2=0 ; hitID2<hitCollection->size() ; hitID2++ ) {
 
-						if( !hitManager->PadExists( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) ) continue;
-						if( !hitManager->PadIsTouched( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) ) continue;
+				Hit *hit2 = hitCollection->at(hitID2);
 
-						Hit *hit2 = hitManager->GetHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
+				if ( !CheckTag( hit2->GetHitTag() ) )
+					continue;
 
-						if( hitTagToCluster != fUndefined && hitTagToCluster != hit2->GetHitTag() )
-							continue;
+				if( find( treatedHits.begin() , treatedHits.end() , hit2 ) != treatedHits.end() )
+					continue;
 
-						if( find( tempCollection.begin() , tempCollection.end() , hit2 ) != tempCollection.end() )
-							continue;
+				IntVector ijk2 = hitCollection->at(hitID2)->GetIJK();
 
-						for( unsigned int hitID2=0 ; hitID2<hitCol->size() ; hitID2++ ) {
+				if( fClusteringMode == fClustering2D )
+					if( abs( ijk.at(2) == ijk2.at(2) ) )
+						continue;
 
-							if( abs( hitCol->at(hitID2)->GetIJK().at(0) - hit2->GetIJK().at(0) ) < 2
-							 && abs( hitCol->at(hitID2)->GetIJK().at(1) - hit2->GetIJK().at(1) ) < 2
-							 && abs( hitCol->at(hitID2)->GetIJK().at(2) - hit2->GetIJK().at(2) ) < 2 )  {
 
-								hitCollection->push_back( hit2 );
-								tempCollection.push_back( hit2 );
-								break;
+				for( unsigned int hitID3=0 ; hitID3<hitCol->size() ; hitID3++ ) {
 
-							}
-						}
+					IntVector ijk3 = hitCol->at(hitID3)->GetIJK();
 
-					} // end k
-				} // end j
-			} // end i
+					if( abs( ijk3.at(0)-ijk2.at(0) ) < 2
+					 && abs( ijk3.at(1)-ijk2.at(1) ) < 2
+					 && abs( ijk3.at(2)-ijk2.at(2) ) < 2 ) {
+
+						treatedHits.push_back( hit2 );
+						hitCol->push_back( hit2 );
+						break;
+					}
+				}
+			}
 
 			Cluster *cluster = new Cluster();
 			cluster->SetHitCollection( hitCol );
 			clusterCollection->push_back( cluster );
+//			getchar();
 		}
-		tempCollection.clear();
+		treatedHits.clear();
 
 	}
 
 
 	void ClusteringAlgorithm::End() {
 
+		hitTagToCluster.clear();
+		hitTagToAvoid.clear();
 	}
 
 
 	Return ClusteringAlgorithm::CheckConsistency() {
 
+		Return ret;
 		if( clusterCollection == 0 || clusterCollection == NULL )
 			return S_ERROR("While checking consistency : Cluster collection not set or set to 0 in ClusteringAlgorithm. ");
 		if( !clusterCollection->empty() ) {
-			for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) delete clusterCollection->at(i);
+			for( unsigned int i=0 ; i<clusterCollection->size() ; i++ )
+				delete clusterCollection->at(i);
 			clusterCollection->clear();
-			return S_OK("Warning : ClusterCollection has been cleared while checking consistency");
+			ret = S_OK("Warning : ClusterCollection has been cleared while checking consistency");
 		}
-		return S_OK();
+		for( unsigned int i=0 ; i<hitTagToCluster.size() ; i++ ) {
+			if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , hitTagToCluster.at(i) ) != hitTagToAvoid.end() ) {
+				return S_ERROR("Tag to be avoided also set to be clustered ... Check your inputs!");
+			}
+		}
+		return ret;
 	}
 
+
+	Return ClusteringAlgorithm::AddHitTagToCluster( const Tag &fTag ) {
+
+		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , fTag ) == hitTagToCluster.end() ) {
+			hitTagToCluster.push_back( fTag );
+			return S_OK();
+		}
+		else return S_OK("Warning : hit tag was already added");
+	}
+
+
+	Return ClusteringAlgorithm::AddHitTagToAvoid( const Tag &fTag ) {
+
+		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , fTag ) == hitTagToAvoid.end() ) {
+			hitTagToAvoid.push_back( fTag );
+			return S_OK();
+		}
+		else return S_OK("Warning : hit tag was already added");
+	}
+
+
+	bool ClusteringAlgorithm::AvoidTag( const Tag &fTag ) {
+
+		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , fTag ) != hitTagToAvoid.end() ) {
+			return true;
+		}
+		return false;
+	}
+
+
+	bool ClusteringAlgorithm::KeepTag( const Tag &fTag ) {
+
+		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , fTag ) != hitTagToCluster.end() ) {
+			return true;
+		}
+		return false;
+	}
+
+	bool ClusteringAlgorithm::CheckTag( const Tag &fTag ) {
+
+		if( fTaggingMode == fAvoidTagMode ) {
+			if( hitTagToAvoid.empty() ) return true;
+			else return AvoidTag( fTag );
+		}
+		else if( fTaggingMode == fClusterTagMode ) {
+			if( hitTagToCluster.empty() ) return true;
+			else return KeepTag( fTag );
+		}
+
+	}
 
 
 }  // namespace 
