@@ -46,7 +46,7 @@ namespace baboon {
 		for (int j=0 ; j<hitCol->size() ; j++) {
 
 			Hit *hit = hitCol->at(j);
-			IntVec ijkVec = hit->GetIJK();
+			IntVector ijkVec = hit->GetIJK();
 			HitThreshold fThr = hit->GetThreshold();
 
 			if( fThr == fThreshold3 )      weightVec.set(3,3,3);
@@ -74,53 +74,13 @@ namespace baboon {
 	}
 
 
-	ThreeVector GetCenterOfGravity( LCCollection *lcCollection ) {
-
-		ThreeVector weightVec(0,0,0);
-		ThreeVector centOfGrav(0,0,0);
-		ThreeVector sumWeightVec(0,0,0);
-
-		for (int j=0; j<lcCollection->getNumberOfElements(); ++j) {
-			IMPL::CalorimeterHitImpl *hitImpl = static_cast<IMPL::CalorimeterHitImpl*> ( lcCollection->getElementAt(j) );
-			Hit *hit = new Hit(hitImpl);
-
-			IntVec cell = hit->GetIJK();
-
-			float fThr = hit->getEnergy();
-
-			if(fThr>=2.5)      weightVec.set(3,3,3);
-			else if(fThr>=1.5) weightVec.set(1,1,1);
-			else if(fThr>=0.5) weightVec.set(2,2,2);
-			centOfGrav.set( centOfGrav.x() + weightVec.x()*cell.at(0)
-							,centOfGrav.y() + weightVec.y()*cell.at(1)
-							,centOfGrav.z() + weightVec.z()*cell.at(2) );
-
-			sumWeightVec.set(sumWeightVec.x()+weightVec.x()
-							,sumWeightVec.y()+weightVec.y()
-							,sumWeightVec.z()+weightVec.z());
-
-			delete hit;
-		}
-
-		centOfGrav.setX( centOfGrav.x()/sumWeightVec.x() );
-		centOfGrav.setY( centOfGrav.y()/sumWeightVec.y() );
-		centOfGrav.setZ( centOfGrav.z()/sumWeightVec.z() );
-
-		centOfGrav.setX( round( centOfGrav.x() ) );
-		centOfGrav.setY( round( centOfGrav.y() ) );
-		centOfGrav.setZ( round( centOfGrav.z() ) );
-
-		return centOfGrav;
-	}
-
-
 	double GetRMSDispersion( HitCollection *hitCol ) {
 
 		ThreeVector cog = GetCenterOfGravity(hitCol);
 		double rms = 0;
 
 		for( unsigned int i=0 ; i<hitCol->size() ; i++ ) {
-			IntVec ijk = hitCol->at(i)->GetIJK();
+			IntVector ijk = hitCol->at(i)->GetIJK();
 			rms += (cog.x()-ijk.at(0))*(cog.x()-ijk.at(0)) + (cog.y()-ijk.at(1))*(cog.y()-ijk.at(1));
 		}
 		if(hitCol->size() == 0) return 0;
