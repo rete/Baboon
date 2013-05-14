@@ -57,7 +57,7 @@ namespace baboon {
 
 			tempStorageCollection.push_back( hitCollection->at(hitID) );
 
-			IntVec ijk1 = hitCollection->at(hitID)->GetIJK();
+			IntVector ijk1 = hitCollection->at(hitID)->GetIJK();
 
 			for( int i=-1 ; i<=1 ; i++ ) {
 				for( int j=-1 ; j<=1 ; j++ ) {
@@ -67,7 +67,7 @@ namespace baboon {
 
 					Hit *hit2 = hitManager->GetHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2) );
 
-					hitCollection->at(hitID)->MergeClusters2D( hit2 );
+//					hitCollection->at(hitID)->MergeClusters2D( hit2 );
 					tempStorageCollection.push_back( hit2 );
 
 				}
