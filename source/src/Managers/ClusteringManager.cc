@@ -61,13 +61,19 @@ namespace baboon {
 			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
 			if( clusterIt != clusters2D->end() )
 				return S_ERROR("Cluster already exists in cluster collection");
-			else clusters2D->push_back( cluster );
+			else {
+				clusters2D->push_back( cluster );
+				return S_OK();
+			}
 		}
 		else if( cluster->GetType() == fCluster3D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
 			if( clusterIt != clusters3D->end() )
 				return S_ERROR("Cluster already exists in cluster collection");
-			else clusters3D->push_back( cluster );
+			else {
+				clusters3D->push_back( cluster );
+				return S_OK();
+			}
 		}
 		return S_ERROR("Cluster type undefined...");
 	}
