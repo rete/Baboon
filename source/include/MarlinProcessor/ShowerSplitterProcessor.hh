@@ -27,7 +27,13 @@
 #include <cmath> 
 #include <vector> 
 
-namespace baboon {
+
+#include "Config/SdhcalConfig.hh"
+#include "Algorithm/AlgorithmHeaders.hh"
+#include "Managers/AlgorithmManager.hh"
+#include "Managers/AnalysisManager.hh"
+
+#include "MarlinProcessor/CaloHitCreator.hh"
 
 /* 
  * Class ShowerSplitterProcessor
@@ -71,9 +77,15 @@ class ShowerSplitterProcessor : public marlin::Processor {
 
 	protected:
 
+		std::string baboonHome;
+		std::string configFileName;
+		std::string algorithmFileName;
+		std::string rootOutputFile;
+		std::string decoderString;
+		std::string collectionName;
+
 
 };  // class 
 
-}  // namespace 
 
 #endif  //  SHOWERSPLITTERPROCESSOR_HH
