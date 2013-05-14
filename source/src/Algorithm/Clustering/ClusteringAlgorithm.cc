@@ -73,7 +73,7 @@ namespace baboon {
 				IntVector ijk2 = hitCollection->at(hitID2)->GetIJK();
 
 				if( fClusteringMode == fClustering2D )
-					if( abs( ijk.at(2) == ijk2.at(2) ) )
+					if(  ijk.at(2) != ijk2.at(2) )
 						continue;
 
 
@@ -94,6 +94,8 @@ namespace baboon {
 
 			Cluster *cluster = new Cluster();
 			cluster->SetHitCollection( hitCol );
+			if( fClusteringMode == fClustering2D ) cluster->SetType( fCluster2D );
+			else if( fClusteringMode == fClustering3D ) cluster->SetType( fCluster3D );
 			clusterCollection->push_back( cluster );
 //			getchar();
 		}
