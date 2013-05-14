@@ -30,36 +30,6 @@ ShowerSplitterProcessor::ShowerSplitterProcessor()
 
 	  // register steering parameters: name, description, class-variable, default value
 
-//	  std::vector<std::string> hcalCollections;
-//	  hcalCollections.push_back(std::string("HCALBarrel"));
-//	  registerInputCollections( LCIO::CALORIMETERHIT,
-//				   "HCALCollections",
-//				   "HCAL Collection Names",
-//				   _hcalCollections,
-//				   hcalCollections);
-//
-//	  registerOutputCollection( LCIO::LCRELATION,
-//				    "RelationOutputCollection" ,
-//				    "CaloHit Relation Collection" ,
-//				    _outputRelCollection ,
-//				    std::string("RelationCalorimeterHit")) ;
-//
-//	  registerProcessorParameter( "Energy" ,
-//				      "Pion energy",
-//				      energy_,
-//				      (int) 0 );
-//
-//
-//	  std::vector<float> thresholdHcal;
-//	  thresholdHcal.push_back(0.114);
-//	  thresholdHcal.push_back(1.45);
-//	  thresholdHcal.push_back(3.80);
-//	  registerProcessorParameter("HCALThreshold" ,
-//	  			       "Threshold for HCAL Hits in GeV" ,
-//	  			       _thresholdHcal,
-//	  			       thresholdHcal);
-//
-
 	  registerProcessorParameter( "BABOON_HOME" ,
 				      "Path to Baboon directory install",
 				      baboonHome,
@@ -91,7 +61,6 @@ ShowerSplitterProcessor::ShowerSplitterProcessor()
 				     "collection name for SDHCAL hits" ,
 				     collectionName,
 				     string("HCALBarrel"));
-//	  cout << "debug" << endl;
 
 }
 
@@ -117,16 +86,13 @@ void ShowerSplitterProcessor::init() {
 	algorithmManager->SetConfigFileName( baboonHome + algorithmFileName );
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
-//	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
+	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
 
 	// Add isolation tagging algorithm
 	algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() );
 
 	// Add clustering (2D) algorithm
 	algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() );
-
-	// Add clustering (3D) algorithm
-//	algorithmManager->RegisterAlgorithm( new NearbyClustering3DAlgorithm() );
 
 	// Add core finder algorithm
 	algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() );
@@ -209,14 +175,7 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 	vector<double> Chi2Vec;
 	vector<double> isolationWeights;
 
-//	if( algorithmManager->AlgorithmIsRegistered("NearbyClustering2DAlgorithm") ) {
-//
-//		cout << "NearbyClustering2DAlgorithm found" << endl;
-//		NearbyClustering2DAlgorithm* clustering2D = (NearbyClustering2DAlgorithm *) algorithmManager->GetAlgorithm("NearbyClustering2DAlgorithm");
-//		clustering2D->Process();
-//	}
 	AlgorithmManager *algorithmManager = AlgorithmManager::GetInstance();
-//	HitManager *hitManager = HitManager::GetInstance();
 	ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 
 	HitCollection * hitCollection = hitManager->GetHitCollection();
@@ -228,54 +187,79 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 
 	if( algorithmManager->AlgorithmIsRegistered("IsolationTaggingAlgorithm") ) {
 
-//		cout << "IsolationTaggingAlgorithm found" << endl;
+		cout << "IsolationTaggingAlgorithm found" << endl;
 		IsolationTaggingAlgorithm* isolationAlgo = (IsolationTaggingAlgorithm *) algorithmManager->GetAlgorithm("IsolationTaggingAlgorithm");
-//		isolationAlgo->SetHitCollection( hitCollection );
 		isolationAlgo->Process();
 		isolationWeights = isolationAlgo->GetIsolationWeights();
-
 	}
 
 	if( algorithmManager->AlgorithmIsRegistered("CoreFinderAlgorithm") ) {
 
-//		cout << "CoreFinderAlgorithm found" << endl;
+		cout << "CoreFinderAlgorithm found" << endl;
 		CoreFinderAlgorithm *coreFinder = (CoreFinderAlgorithm *) algorithmManager->GetAlgorithm("CoreFinderAlgorithm");
 		coreFinder->Process();
 	}
 
 	if( algorithmManager->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
 
-//		cout << "ClusteringAlgorithm found" << endl;
+		cout << "ClusteringAlgorithm found" << endl;
 		ClusterCollection *clustCol = new ClusterCollection();
 		ClusteringAlgorithm* clusteringAlgo = (ClusteringAlgorithm *) algorithmManager->GetAlgorithm("ClusteringAlgorithm");
-		clusteringAlgo->SetClusteringMode( fClustering3D );
+		clusteringAlgo->SetClusteringMode( fClustering2D );
 		clusteringAlgo->SetTaggingMode( fClusterTagMode );
 		clusteringAlgo->AddHitTagToCluster( fCore );
-//		clusteringAlgo->AddHitTagToCluster( fIsolated );   //  for tests...
 		clusteringAlgo->SetClusterCollection( clustCol );
 		clusteringAlgo->Process();
-//		cout << "nb of core clusters : " << clustCol->size() << endl;
+		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
+			Core *core = new Core();
+			for( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
+				core->AddHit( hitCol->at(j) );
+			}
+			Return ret = CoreManager::GetInstance()->AddCore( core );
+			if( !ret.OK )
+				cout << ret.message << endl;
+		}
+		clustCol->clear();
 		delete clustCol;
 	}
 
-//	if( algorithmManager->AlgorithmIsRegistered("HoughTransformAlgorithm") ) {
-//
-//		cout << "HoughTransformAlgorithm found" << endl;
-//		HoughTransformAlgorithm *houghTransform = (HoughTransformAlgorithm*) algorithmManager->GetAlgorithm("HoughTransformAlgorithm");
-//		houghTransform->Process();
-//	}
+	if( algorithmManager->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
+
+		cout << "ClusteringAlgorithm found" << endl;
+		ClusterCollection *clustCol = new ClusterCollection();
+		ClusteringAlgorithm* clusteringAlgo = (ClusteringAlgorithm *) algorithmManager->GetAlgorithm("ClusteringAlgorithm");
+		clusteringAlgo->SetClusteringMode( fClustering2D );
+		clusteringAlgo->SetTaggingMode( fClusterTagMode );
+		clusteringAlgo->SetClusterCollection( clustCol );
+		clusteringAlgo->Process();
+		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+			Return ret = ClusteringManager::GetInstance()->AddCluster( clustCol->at(i) );
+			if( !ret.OK )
+				cout << ret.message << endl;
+		}
+		clustCol->clear();
+		delete clustCol;
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("HoughTransformAlgorithm") ) {
+
+		cout << "HoughTransformAlgorithm found" << endl;
+		HoughTransformAlgorithm *houghTransform = (HoughTransformAlgorithm*) algorithmManager->GetAlgorithm("HoughTransformAlgorithm");
+		houghTransform->Process();
+	}
 
 
 	for(unsigned int j=0 ; j<hitCollection->size() ; j++) {
 
 		IntVec ijk = hitCollection->at(j)->GetIJK();
 
-		if( hitCollection->at(j)->GetHitTag()  == fTrack ) {
+		if( hitCollection->at(j)->GetHitTag() == fTrack ) {
 			ITrack.push_back( ijk.at(0) );
 			JTrack.push_back( ijk.at(1) );
 			KTrack.push_back( ijk.at(2) );
 		}
-		else if (hitCollection->at(j)->GetHitTag()  == fTrackExtremity) {
+		else if (hitCollection->at(j)->GetHitTag() == fTrackExtremity) {
 			ITrackExtr.push_back( ijk.at(0) );
 			JTrackExtr.push_back( ijk.at(1) );
 			KTrackExtr.push_back( ijk.at(2) );
@@ -335,12 +319,9 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 	analysisManager->Fill("SplitterVariables");
 
 	clusteringManager->ClearAllContent();
-//	cout << "nb of hits after clearing clusters : " << hitCollection->size() << endl;
 	hitManager->ClearAllContent();
-//	cout << "nb of hits after clearing hits : " << hitCollection->size() << endl;
+
 	delete caloHitCreator;
-//	cout << "nb of hits after clearing calo hit creator : " << hitCollection->size() << endl;
-//	getchar();
 }
 
 
