@@ -36,7 +36,7 @@ ENDFOREACH()
 
 
 TARGET_LINK_LIBRARIES( Utils Objects )
-TARGET_LINK_LIBRARIES( Managers Analysis CfgParser )
+TARGET_LINK_LIBRARIES( Managers Analysis CfgParser Reconstruction )
 TARGET_LINK_LIBRARIES( Config CfgParser )
 TARGET_LINK_LIBRARIES( Algorithm Objects Reconstruction )
 
