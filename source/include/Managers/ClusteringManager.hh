@@ -61,11 +61,11 @@ namespace baboon {
 
 
 		inline ClusterCollection *GetCluster3D()
-			{ return clusters2D; }
+			{ return clusters3D; }
 
 
 		inline ClusterCollection *GetCluster2D()
-			{ return clusters3D; }
+			{ return clusters2D; }
 
 
 		Return AddCluster( Cluster *cluster );
