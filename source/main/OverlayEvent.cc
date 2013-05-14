@@ -36,10 +36,12 @@
 #include "IMPL/LCFlagImpl.h"
 #include "IMPL/LCTOOLS.h"
 
-// sdhcal includes
+// baboon includes
 #include "Utils/Converters.hh"
 #include "Utils/HitComputing.hh"
 #include "Overlay/Overlayer.hh"
+#include "Objects/Hit.hh"
+#include "Utilities/ReturnValues.hh"
 
 
 
@@ -82,12 +84,12 @@ int main (int argc ,char *argv[]) {
 
 	string footer = "Please report bug to <rete@ipnl.in2p3.fr>";
 	TCLAP::CmdLine cmd(footer, ' ', "1.0");
-	TCLAP::ValueArg<std::string> pathToSdhcalArg(
+	TCLAP::ValueArg<std::string> baboonHomeArg(
 				"p"
-				,"path-to-sdhcal"
-				,"path to sdhcal to run the script"
+				,"baboon-home"
+				,"path to baboon to run the script"
 				,false
-				,"/home/remi/ilcsoft/SDHCAL"
+				,"/home/remi/ilcsoft/SDHCAL/Baboon"
 				,"string" );
 	TCLAP::ValueArg<std::string> cfgFileArg(
 				"f"
@@ -111,10 +113,10 @@ int main (int argc ,char *argv[]) {
 	cmd.add( cfgFileArg );
 	cmd.add( discreteModeArg );
 	cmd.add( gridModeArg );
-	cmd.add( pathToSdhcalArg );
+	cmd.add( baboonHomeArg );
 	cmd.parse( argc, argv );
 
-	string pathToSDHCAL = pathToSdhcalArg.getValue();
+	string baboonHome = baboonHomeArg.getValue();
 	bool discreteMode = discreteModeArg.getValue();
 
 
@@ -127,7 +129,7 @@ int main (int argc ,char *argv[]) {
 
 	vector<int> nbOfPadsXYZ;
 	SdhcalConfig *config = SdhcalConfig::GetInstance();
-	config->LoadFile( pathToSDHCAL + "/config/SDHCAL.cfg" );
+	config->LoadFile( baboonHome + "/config/SDHCAL.cfg" );
 	config->GetData("pads").GetValue("nbOfPadsXYZ",&nbOfPadsXYZ);
 
 
@@ -137,7 +139,10 @@ int main (int argc ,char *argv[]) {
 	string inputFile2 = "";
 	string inputCollectionName2 = "";
 	string slcioOutputFile = "";
+	string codingPattern1 = "";
+	string codingPattern2 = "";
 	string outputCollectionName = "";
+	string outputCodingPattern = "";
 	int separationDistance = 0;
 	int nbOfEventsToOverlay = 0;
 
@@ -151,14 +156,17 @@ int main (int argc ,char *argv[]) {
 
 	parser->GetValue("input1","slcioFile",&inputFile1);
 	parser->GetValue("input1","collectionName",&inputCollectionName1);
+	parser->GetValue("input1","codingPattern",&codingPattern1);
 
 	parser->GetValue("input2","slcioFile",&inputFile2);
 	parser->GetValue("input2","collectionName",&inputCollectionName2);
+	parser->GetValue("input2","codingPattern",&codingPattern2);
 
 	parser->GetValue("output","nbOfEventsToOverlay",&nbOfEventsToOverlay);
 	parser->GetValue("output","separationDistance",&separationDistance);
 	parser->GetValue("output","slcioFile",&slcioOutputFile);
 	parser->GetValue("output","collectionName",&outputCollectionName);
+	parser->GetValue("output","codingPattern",&outputCodingPattern);
 
 
 	/*****************************************
@@ -225,9 +233,6 @@ int main (int argc ,char *argv[]) {
 
 	while( nbOfOverlaidEvents != nbOfEventsToOverlay ) {
 
-		// avoid to be out of the collection range
-//		if(evtID == maxNbOfEvents) break;
-
 		// Progress display
 		if(!discreteMode) {
 			double percent = (nbOfOverlaidEvents*1.0) / (1.0*nbOfEventsToOverlay) * 10;
@@ -241,49 +246,92 @@ int main (int argc ,char *argv[]) {
 		evt2 = lcReader2->readNextEvent();
 
 
-		/************************************************
-		 * Make a copy of the input collections to avoid
-		 * read-only exception while overlapping events.
-		 * Each collection is tagged via hit->setType(1)
-		 * or hit->setType(2)
-		 ************************************************/
+		/*****************************************************************
+		 * Make a copy of the input collections in HitCollection type
+		 * Each collection is tagged via hit->setType(1) or hit->setType(2)
+		 ******************************************************************/
 
 		EVENT::LCCollection *lcCollection1 = evt1->getCollection(inputCollectionName1);
 		EVENT::LCCollection *lcCollection2 = evt2->getCollection(inputCollectionName2);
 
-		IMPL::LCCollectionVec *newLCCollection1 = new IMPL::LCCollectionVec(inputCollectionName1);
-		IMPL::LCCollectionVec *newLCCollection2 = new IMPL::LCCollectionVec(inputCollectionName2);
+		HitCollection *collection1 = new HitCollection();
+		HitCollection *collection2 = new HitCollection();
 
 		// Copy collection 1
+		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern1 );
+		UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder1( lcCollection1 );
+
 		for(int hitID=0 ; hitID<lcCollection1->getNumberOfElements() ; hitID++) {
-			IMPL::CalorimeterHitImpl *hitImpl = static_cast<IMPL::CalorimeterHitImpl*> (lcCollection1->getElementAt(hitID) );
-			IMPL::CalorimeterHitImpl *newHitImpl = Converter::CopyCalorimeterHitImpl(hitImpl);
-			newHitImpl->setType(1);  // Tag it as hit collection 1
-			newLCCollection1->addElement( newHitImpl );
+
+			EVENT::CalorimeterHit *caloHit = static_cast<EVENT::CalorimeterHit *> (lcCollection1->getElementAt(hitID) );
+
+			HitParameters params;
+			ThreeVector position;
+			position.setX( caloHit->getPosition()[0] );
+			position.setY( caloHit->getPosition()[1] );
+			position.setZ( caloHit->getPosition()[2] );
+			params.position = position;
+			int I = cellIdDecoder1( caloHit )["I"];
+			int J = cellIdDecoder1( caloHit )["J"];
+			int K = cellIdDecoder1( caloHit )["K-1"];
+			IntVector ijk1;
+			ijk1.push_back(I);
+			ijk1.push_back(J);
+			ijk1.push_back(K);
+			params.ijk = ijk1;
+			params.type = 1;
+			params.time = caloHit->getTime();
+			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold2;
+			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold1;
+			else if( caloHit->getEnergy() == 3.0 ) params.threshold = fThreshold3;
+			else throw runtime_error("Calo hit energy is not 1.0 , 2.0 or 3.0 as expected for SDHCAL. Check your inputs!");
+
+			Hit *hit = new Hit( params );
+			collection1->push_back( hit );
 		}
+
 		// Copy collection 2
+		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern2 );
+		UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder2( lcCollection2 );
+
 		for(int hitID=0 ; hitID<lcCollection2->getNumberOfElements() ; hitID++) {
-			IMPL::CalorimeterHitImpl *hitImpl = static_cast<IMPL::CalorimeterHitImpl*> (lcCollection2->getElementAt(hitID) );
-			IMPL::CalorimeterHitImpl *newHitImpl = Converter::CopyCalorimeterHitImpl(hitImpl);
-			newHitImpl->setType(2);  // Tag it as hit collection 2
-			newLCCollection2->addElement( newHitImpl );
+
+			EVENT::CalorimeterHit *caloHit = static_cast<EVENT::CalorimeterHit *> (lcCollection2->getElementAt(hitID) );
+
+			HitParameters params;
+			ThreeVector position;
+			position.setX( caloHit->getPosition()[0] );
+			position.setY( caloHit->getPosition()[1] );
+			position.setZ( caloHit->getPosition()[2] );
+			params.position = position;
+			int I = cellIdDecoder2( caloHit )["I"];
+			int J = cellIdDecoder2( caloHit )["J"];
+			int K = cellIdDecoder2( caloHit )["K-1"];
+			IntVector ijk2;
+			ijk2.push_back(I);
+			ijk2.push_back(J);
+			ijk2.push_back(K);
+			params.ijk = ijk2;
+			params.type = 2;
+			params.time = caloHit->getTime();
+			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold2;
+			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold1;
+			else if( caloHit->getEnergy() == 3.0 ) params.threshold = fThreshold3;
+			else throw runtime_error("Calo hit energy is not 1.0 , 2.0 or 3.0 as expected for SDHCAL. Check your inputs!");
+
+			Hit *hit = new Hit( params );
+			collection2->push_back( hit );
 		}
 
-		// HitCollectionComputer is used to compute general things
-		// for hit collections like cog, first hit layer...
-//		HitCollectionComputer hitCollectionComputer (newLCCollection1);
+		// Compute the centers of gravity
+		ThreeVector cog1 = GetCenterOfGravity( collection1 );
+		ThreeVector cog2 = GetCenterOfGravity( collection2 );
 
-//		ThreeVector cog1 = hitCollectionComputer.GetCenterOfGravity();
-		ThreeVector cog1 = GetCenterOfGravity(newLCCollection1);
-//		hitCollectionComputer.SetLCCollection(newLCCollection2);
-//		ThreeVector cog2 = hitCollectionComputer.GetCenterOfGravity();
-		ThreeVector cog2 = GetCenterOfGravity(newLCCollection2);
-
-		Overlayer overlayer(newLCCollection1,newLCCollection2);
-
+		Overlayer overlayer(collection1,collection2);
 
 		// Separate the two events by the given separation distance
-		// and center it at the center of the sdhcal in the x direction.
+		// and center it at the center of the SDHCAL in the x direction
+		// and re-center them on the y axis
 		overlayer.SetTranslations(
 				new ThreeVector( nbOfPadsXYZ.at(0)/2.0 + separationDistance / 2.0 - cog1.x()
 								 ,nbOfPadsXYZ.at(1)/2.0 - cog1.y()
@@ -298,32 +346,47 @@ int main (int argc ,char *argv[]) {
 
 		// Grab the final overlaid collection and fill more
 		// information in the collection and in the event.
-		IMPL::LCCollectionVec *outputLCCollection = overlayer.GetOverlaidCollection();
+		HitCollection *outputCollection = overlayer.GetOverlaidCollection();
 
-		int count = 0;
-		for( unsigned int i=0 ; i<outputLCCollection->getNumberOfElements() ; i ++) {
-			IMPL::CalorimeterHitImpl *hitImpl = static_cast<IMPL::CalorimeterHitImpl*> (outputLCCollection->getElementAt(i) );
-			if( hitImpl->getType() != 3 ) {
-				count ++;
-//				cout << "hitImpl->getType() : " << hitImpl->getType() <<  endl;
-			}
+		// Fill the new LCIO collection
+		IMPL::LCCollectionVec *lcOutputCollection = new IMPL::LCCollectionVec( LCIO::CALORIMETERHIT );
+		UTIL::CellIDEncoder<IMPL::CalorimeterHitImpl> idEncoder (outputCodingPattern,lcOutputCollection);
+
+		for( unsigned int i=0 ; i<outputCollection->size() ; i++ ) {
+
+			Hit *hit = outputCollection->at(i);
+			IMPL::CalorimeterHitImpl *hitImpl = new IMPL::CalorimeterHitImpl();
+
+			float pos[3] = { float(hit->GetPosition().x())
+							, float(hit->GetPosition().y())
+							, float(hit->GetPosition().z()) };
+			hitImpl->setPosition( pos );
+			hitImpl->setType( hit->GetType() );
+			hitImpl->setTime( float(hit->GetTime()) );
+			if( hit->GetThreshold() == fThreshold1 ) hitImpl->setEnergy(1.0);
+			if( hit->GetThreshold() == fThreshold2 ) hitImpl->setEnergy(2.0);
+			if( hit->GetThreshold() == fThreshold3 ) hitImpl->setEnergy(3.0);
+			idEncoder["I"] = hit->GetIJK().at(0);
+			idEncoder["J"] = hit->GetIJK().at(1);
+			idEncoder["K-1"] = hit->GetIJK().at(2);
+			idEncoder.setCellID( hitImpl );
+
+			lcOutputCollection->addElement( hitImpl );
 		}
-//		cout << "count after overlay : " << count << endl;
-//		cout << "overlayer.GetNumberOfLostHits() : " << overlayer.GetNumberOfLostHits() << endl;
 
-
+		// Fill the final event
 		IMPL::LCEventImpl *outputEvent = new IMPL::LCEventImpl();
 
-		IMPL::LCFlagImpl chFlag(0) ;
+		IMPL::LCFlagImpl chFlag(0);
 		EVENT::LCIO bitinfo;
-		chFlag.setBit(bitinfo.CHBIT_LONG ) ;   // sim calorimeter hit position
-		chFlag.setBit(bitinfo.CHBIT_ID1 ) ;    // cell ID
-		chFlag.setBit(bitinfo.CHBIT_STEP ) ;   // step info
+		chFlag.setBit(bitinfo.CHBIT_LONG );   // sim calorimeter hit position
+		chFlag.setBit(bitinfo.CHBIT_ID1 );    // cell ID
+		chFlag.setBit(bitinfo.CHBIT_STEP );   // step info
 
-		outputLCCollection->setFlag( chFlag.getFlag()  ) ;
+		lcOutputCollection->setFlag( chFlag.getFlag()  ) ;
 		nbOfOverlaidEvents++;
 
-		outputEvent->addCollection( (LCCollection*) outputLCCollection,outputCollectionName);
+		outputEvent->addCollection( (LCCollection*) lcOutputCollection,outputCollectionName);
 		outputEvent->setRunNumber(0);
 		outputEvent->setEventNumber(nbOfOverlaidEvents);
 		outputEvent->setDetectorName( evt1->getDetectorName() );
@@ -334,6 +397,7 @@ int main (int argc ,char *argv[]) {
 //		delete outputEvent;
 		nbOfLostHits += overlayer.GetNumberOfLostHits();
 		evtID++;
+//*/
 	}
 
 
