@@ -70,7 +70,7 @@ namespace baboon {
 
 					void Set(T variable);
 
-				private:
+				protected:
 					std::string             m_name;                     ///<
 					TTree                  *m_pTree;                    ///<
 					TBranch                *m_pBranch;                  ///<
@@ -93,7 +93,7 @@ namespace baboon {
 					bool Set(VectorInt *ptr);
 					bool Set(VectorBool *ptr);
 
-				private:
+				protected:
 					// possible types
 					enum BranchType {
 
@@ -124,7 +124,7 @@ namespace baboon {
 					std::string             m_branchName;               ///<
 			};
 
-		private:
+		protected:
 			typedef std::map<const std::string, BranchHandler*> BranchMap;
 			typedef std::pair<TTree*, BranchMap*> TreeInfo;
 			typedef std::map<const std::string, TreeInfo> TreeMap;
