@@ -156,8 +156,6 @@ namespace baboon {
 														  fThreshold3 , fThreshold3 , fThreshold3 };
 					HitThreshold fThr1 = hit1->GetThreshold();
 					HitThreshold fThr2 = hit2->GetThreshold();
-					cout << "ThresholdToInt(fThr1) : " << ThresholdToInt(fThr1) << endl;
-					cout << "ThresholdToInt(fThr2) : " << ThresholdToInt(fThr2) << endl;
 					HitThreshold newThr = thresholdTable [ThresholdToInt(fThr1)][ThresholdToInt(fThr2)];
 
 					if( newThr == fThr1 ) continue;
