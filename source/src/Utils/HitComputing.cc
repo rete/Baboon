@@ -42,13 +42,13 @@ namespace baboon {
 		ThreeVector weightVec(0,0,0);
 		ThreeVector centOfGrav(0,0,0);
 		ThreeVector sumWeightVec(0,0,0);
-
-		for (int j=0 ; j<hitCol->size() ; j++) {
-
+		
+		for ( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
+		
 			Hit *hit = hitCol->at(j);
 			IntVector ijkVec = hit->GetIJK();
 			HitThreshold fThr = hit->GetThreshold();
-
+			
 			if( fThr == fThreshold3 )      weightVec.set(3,3,3);
 			else if( fThr == fThreshold2 ) weightVec.set(2,2,2);
 			else if( fThr == fThreshold1 ) weightVec.set(1,1,1);
@@ -69,7 +69,7 @@ namespace baboon {
 		centOfGrav.setX( round( centOfGrav.x() ) );
 		centOfGrav.setY( round( centOfGrav.y() ) );
 		centOfGrav.setZ( round( centOfGrav.z() ) );
-
+		
 		return centOfGrav;
 	}
 
