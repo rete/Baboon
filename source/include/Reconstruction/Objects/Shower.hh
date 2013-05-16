@@ -17,33 +17,86 @@
 #ifndef SHOWER_HH
 #define SHOWER_HH
 
-#include "RecoObject.hh"
+#include "Reconstruction/Objects/RecoObject.hh"
 
 #include <iostream> 
 #include <string> 
 #include <cstdlib> 
-#include <cmath> 
-#include <vector> 
+#include <cmath>
+#include <map>
+#include <vector>
+#include <algorithm>
+
+#include "Objects/Hit.hh"
+#include "Utilities/ReturnValues.hh"
+#include "Utilities/Globals.hh"
+#include "Geometry/ThreeVector.hh"
+#include "Geometry/Cone.hh"
+#include "Reconstruction/Objects/Track.hh"
+
 
 namespace baboon {
 
-/* 
- * Class Shower
- * Inherits from base class RecoObject
- */ 
+	typedef std::map<Hit*,double> HitToWeightsMap;
 
-class Shower : public RecoObject {
+	/*
+	 * Class Shower
+	 * Inherits from base class RecoObject
+	 */
 
-  public:
-    /*! Default Constructor */
-    Shower();
-    /*! Default Destructor */
-    virtual ~Shower();
+	class Shower : public RecoObject {
 
-  protected:
+		public:
+
+			/*! Default Constructor */
+			Shower();
+			/*! Default Destructor */
+			virtual ~Shower();
+
+			Return AddHit( Hit *hit );
+
+			Return AddHit( Hit *hit , const double &weight );
+
+			Return SetHitWeight( Hit *hit , const double &weight );
+
+			Return RemoveHit( Hit *hit );
+
+			bool Contains( Hit *hit );
+
+			Return SetStartingPoint( const ThreeVector &startingVec );
+
+			Return SetStartingCone( Cone *cone );
+
+			Return SetThrust( Track *th );
+
+			bool HasThrust();
 
 
-};  // class 
+		protected:
+
+			HitToWeightsMap *hitToWeightsMap;
+			ThreeVector startingPoint;
+			Track *thrust;
+			Cone *startingCone;
+
+
+		public:
+
+			inline ThreeVector GetStartingPoint()
+				{ return startingPoint; }
+
+			inline int Size()
+				{ return hitToWeightsMap->size(); }
+
+			inline Track *GetThrust()
+				{ return thrust; }
+
+
+	};  // class
+
+
+	typedef std::vector<Shower*> ShowerCollection;
+
 
 }  // namespace 
 
