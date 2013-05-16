@@ -18,10 +18,121 @@
 
 namespace baboon {
 
-Shower::Shower() : RecoObject() {;}
+	Shower::Shower()
+		: RecoObject() {
+		hitToWeightsMap = new HitToWeightsMap;
+		startingCone = 0;
+		thrust = 0;
+	}
 
-Shower::~Shower() {;}
 
+	Shower::~Shower() {
+
+		hitToWeightsMap->clear();
+		delete hitToWeightsMap;
+	}
+
+
+	Return Shower::AddHit( Hit *hit , const double &weight ) {
+
+		if( hit == 0 )
+			return S_ERROR("While adding a hit in Shower : assertion hit != 0 failed.");
+
+		if( hitToWeightsMap->empty() ) {
+			(*hitToWeightsMap)[ hit ] = weight;
+			return S_OK();
+		}
+
+		if( hitToWeightsMap->find( hit ) != hitToWeightsMap->end() )
+			return S_OK("Warning : hit is already in the collection");
+		else {
+			(*hitToWeightsMap)[ hit ] = weight;
+			return S_OK();
+		}
+	}
+
+
+
+	Return Shower::AddHit( Hit *hit ) {
+
+		return AddHit( hit , 1.0 );
+	}
+
+
+	Return Shower::SetHitWeight( Hit *hit , const double &weight ) {
+
+		if( hit == 0 )
+			return S_ERROR("While setting the hit weight in Shower : assertion hit != 0 failed.");
+
+		if( hitToWeightsMap->empty() ) {
+			return S_ERROR("Hit map is empty. Can't set a weight");
+		}
+
+		HitToWeightsMap::iterator it = hitToWeightsMap->find( hit );
+		if( it != hitToWeightsMap->end() )
+			return S_ERROR("Hit is not in shower. Can't set a weight");
+		else {
+			it->second = weight;
+			return S_OK();
+		}
+	}
+
+	Return Shower::RemoveHit( Hit *hit ) {
+
+		if( hitToWeightsMap->empty() )
+			return S_OK("Warning : Try to remove a hit from an empty hit collection.");
+
+		HitToWeightsMap::iterator it = hitToWeightsMap->find( hit );
+
+		if( it != hitToWeightsMap->end() ) {
+			hitToWeightsMap->erase( it );
+			return S_OK();
+		}
+		else {
+			return S_OK("Hit was not in the collection.");
+		}
+
+	}
+
+	bool Shower::Contains( Hit *hit ) {
+
+		return ( hitToWeightsMap->find( hit ) != hitToWeightsMap->end() );
+	}
+
+
+	Return Shower::SetStartingPoint( const ThreeVector &startingVec ) {
+
+		startingPoint = startingVec;
+		return S_OK();
+	}
+
+
+	Return Shower::SetStartingCone( Cone *cone ) {
+
+		if( cone == 0 )
+			return S_ERROR("While setting the cone in Shower : assertion cone != 0 failed.");
+
+		if( startingCone != 0 )
+			delete startingCone;
+
+		startingCone = cone;
+		return S_OK();
+	}
+
+
+	Return Shower::SetThrust( Track *th ) {
+
+		if( th == 0 )
+			return S_ERROR("While setting the thrust in Shower : assertion thrust != 0 failed.");
+		thrust = th;
+		return S_OK();
+	}
+
+	bool Shower::HasThrust() {
+
+		if( thrust == 0 ) return false;
+		return true;
+	}
 
 }  // namespace 
 
