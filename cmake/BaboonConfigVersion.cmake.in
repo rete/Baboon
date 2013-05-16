@@ -2,7 +2,7 @@
 # this file is parsed when FIND_PACKAGE is called with version argument
 #
 # @author Jan Engels, Desy IT
-# Modified for SDHCAL use by : rete
+# Modified for Baboon use by : rete
 ##############################################################################
 
 
