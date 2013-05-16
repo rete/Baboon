@@ -26,6 +26,13 @@ FOREACH( mod Algorithm Analysis Geometry Managers Objects Overlay Reconstruction
 	)
 ENDFOREACH()
 
+SET( 
+	BABOON_LIBRARY_FILES 
+	${BABOON_LIBRARY_FILES} 
+	src/MarlinProcessor/CaloHitCreator.cc
+	include/MarlinProcessor/CaloHitCreator.hh
+)
+
 ADD_LIBRARY( Baboon SHARED ${BABOON_LIBRARY_FILES} )
 ADD_LIBRARY( Baboon_STATIC STATIC ${BABOON_LIBRARY_FILES} )
 SET_TARGET_PROPERTIES( Baboon_STATIC PROPERTIES OUTPUT_NAME Baboon )
