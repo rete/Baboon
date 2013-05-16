@@ -17,25 +17,27 @@
 #ifndef SHOWERMANAGER_HH
 #define SHOWERMANAGER_HH
 
-#include <iostream> 
-#include <string> 
-#include <cstdlib> 
-#include <cmath> 
-#include <vector> 
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cmath>
+#include <vector>
 
 #include "Reconstruction/Objects/Shower.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 
+
 namespace baboon {
 
-	/*
+	/*!
 	 * Class ShowerManager
 	 */
 
 	class ShowerManager {
 
 		public:
+
 			/*! Return a single instance of this class. Singleton pattern */
 			static ShowerManager *GetInstance();
 			/*! Kill the instance carefully. Singleton pattern */
@@ -48,6 +50,7 @@ namespace baboon {
 			bool ShowerContainsHit( Shower *shower , Hit *hit );
 
 		protected:
+
 			/*! Unique instance of this class. Singleton pattern */
 			static ShowerManager* instance;
 			/*! Protected constructor. Singleton pattern */
