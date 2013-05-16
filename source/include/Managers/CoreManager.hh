@@ -83,6 +83,11 @@ namespace baboon {
 
 			CoreCollection *coreCollection;
 
+		public:
+
+			inline CoreCollection *GetCoreCollection()
+				{ return coreCollection; }
+
 	};  // class
 
 }  // namespace 
