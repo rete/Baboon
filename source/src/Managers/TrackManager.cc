@@ -16,6 +16,8 @@
 
 #include "Managers/TrackManager.hh"
 
+using namespace std;
+
 namespace baboon {
 
 	TrackManager *TrackManager::instance = 0;
@@ -78,6 +80,22 @@ namespace baboon {
 
 		return S_ERROR("While removing a track. Track was not registered by the Track Manager!");
 	}
+
+
+	Return TrackManager::ClearAllContent() {
+
+		if( trackCollection == 0 )
+			return S_ERROR("While clearing all content in track manager : assertion trackCollection != 0 failed");
+
+		for( unsigned int i=0 ; i<trackCollection->size() ; i++ ) {
+			if( trackCollection->at(i) != 0 )
+				delete trackCollection->at(i);
+		}
+		trackCollection->clear();
+
+		return S_OK("Content cleared in track manager");
+	}
+
 
 	bool TrackManager::TrackContainsHit( Track *track , Hit *hit ) {
 

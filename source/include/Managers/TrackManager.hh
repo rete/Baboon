@@ -49,6 +49,8 @@ namespace baboon {
 
 			bool TrackContainsHit( Track *track , Hit *hit );
 
+			Return ClearAllContent();
+
 
 		protected:
 
