@@ -117,7 +117,10 @@ namespace baboon {
 	void HoughTransformAlgorithm::Execute() {
 
 		ClusterCollection *clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
-		cout << "in hough , cluster size : " << clusterCollection->size()  << endl;
+
+		if( clusterCollection->empty() )
+			return;
+
 		HoughClusterCollection *houghClusterCollection = new HoughClusterCollection();
 
 		for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) {
@@ -262,17 +265,12 @@ namespace baboon {
 
 		houghClusterCollection->clear();
 		delete houghClusterCollection;
-
-//		TrackCollectionBuilder *builder = TrackCollectionBuilder::GetInstance();
-//		builder->SetObject( trackCollection );
-
-
-
 	}
 
 
 
 	void HoughTransformAlgorithm::End() {}
+
 }
 
 
