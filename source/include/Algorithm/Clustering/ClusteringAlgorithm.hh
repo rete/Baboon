@@ -79,6 +79,8 @@ namespace baboon {
 			std::vector<Tag> hitTagToCluster;
 			std::vector<Tag> hitTagToAvoid;
 			ClusterCollection *clusterCollection;
+			unsigned int clusterSizeLowerLimit;
+			unsigned int neighborDistance;
 
 			/*!
 			 *
@@ -172,6 +174,20 @@ namespace baboon {
 			 *
 			 */
 			Return AddHitTagToAvoid( const Tag &fTag );
+
+			/*!
+			 *
+			 * @brief Set a lower limit for clusters.
+			 *
+			 */
+			Return SetClusterSizeLowerLimit( unsigned int );
+
+			/*!
+			 *
+			 * @brief Set the neighbor distance while clustering
+			 *
+			 */
+			Return SetNeighborDistance( unsigned int );
 
 
 

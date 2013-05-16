@@ -30,6 +30,9 @@ namespace baboon {
 		fClusteringMode = fClustering2D;
 		fTaggingMode = fClusterTagMode;
 		clusterCollection = 0;
+		clusterSizeLowerLimit = 0;
+		neighborDistance = 1;
+
 	}
 
 	ClusteringAlgorithm::~ClusteringAlgorithm() {
@@ -81,9 +84,9 @@ namespace baboon {
 
 					IntVector ijk3 = hitCol->at(hitID3)->GetIJK();
 
-					if( abs( ijk3.at(0)-ijk2.at(0) ) < 2
-					 && abs( ijk3.at(1)-ijk2.at(1) ) < 2
-					 && abs( ijk3.at(2)-ijk2.at(2) ) < 2 ) {
+					if( abs( ijk3.at(0)-ijk2.at(0) ) <= neighborDistance
+					 && abs( ijk3.at(1)-ijk2.at(1) ) <= neighborDistance
+					 && abs( ijk3.at(2)-ijk2.at(2) ) <= neighborDistance ) {
 
 						treatedHits.push_back( hit2 );
 						hitCol->push_back( hit2 );
@@ -91,7 +94,11 @@ namespace baboon {
 					}
 				}
 			}
-
+			if( hitCol->size() < clusterSizeLowerLimit ) {
+				hitCol->clear();
+				delete hitCol;
+				continue;
+			}
 			Cluster *cluster = new Cluster();
 			cluster->SetHitCollection( hitCol );
 			if( fClusteringMode == fClustering2D ) cluster->SetType( fCluster2D );
@@ -108,6 +115,8 @@ namespace baboon {
 
 		hitTagToCluster.clear();
 		hitTagToAvoid.clear();
+		neighborDistance = 1;
+		clusterSizeLowerLimit = 0;
 	}
 
 
@@ -181,6 +190,17 @@ namespace baboon {
 
 	}
 
+	Return ClusteringAlgorithm::SetClusterSizeLowerLimit( unsigned int limit ) {
+
+		clusterSizeLowerLimit = limit;
+		return S_OK();
+	}
+
+	Return ClusteringAlgorithm::SetNeighborDistance( unsigned int distance ) {
+
+		neighborDistance = distance;
+		return S_OK();
+	}
 
 }  // namespace 
 
