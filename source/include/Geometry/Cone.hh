@@ -80,11 +80,8 @@ namespace baboon {
 		protected:
 
 			ThreeVector peakPosition;
-
 			ThreeVector direcVector;
-
 			double radius;
-
 			double theta;
 
 
