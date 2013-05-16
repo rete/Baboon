@@ -32,12 +32,13 @@ namespace baboon {
 	 */
 	class Return {
 	public:
-			Return(){;}
+			Return() : OK(true) , message("") {;}
 			bool OK;
 			std::string message;
-
+			Return& operator =(const Return& ret);
 	};
 
+	bool operator == ( Return const &r1 , Return const &r2 );
 
 	/*!
 	 *
