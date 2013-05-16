@@ -29,6 +29,7 @@
 #include "Objects/Hit.hh"
 #include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
+#include "Utils/HitComputing.hh"
 
 namespace baboon {
 
@@ -78,9 +79,23 @@ namespace baboon {
 
 			bool Contains( Hit *hit );
 
+			ThreeVector CenterOfGravity();
+
+			int GetFirstHitLayer();
+
+			int GetLastHitLayer();
+
 		protected:
 
 			HitCollection *hitCollection;
+
+		public:
+
+			inline unsigned int Size()
+				{ return hitCollection->size(); }
+
+			inline HitCollection *GetHitCollection()
+				{ return hitCollection; }
 
 
 	};  // class
