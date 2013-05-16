@@ -35,13 +35,13 @@ ShowerSplitterProcessor::ShowerSplitterProcessor()
 				      baboonHome,
 				      string("/home/remi/ilcsoft/SDHCAL/Baboon") );
 
-	  string cfgFileName = string("/config/SDHCAL.cfg");
+	  string cfgFileName = string("/home/remi/ilcsoft/SDHCAL/Baboon/config/SDHCAL.cfg");
 	  registerProcessorParameter("SDHCAL_cfg" ,
 				     "SDHCAL configurations" ,
 				     configFileName,
 				     cfgFileName);
 
-	  string algoFileName = string("/config/Algorithm.cfg");
+	  string algoFileName = string("/home/remi/ilcsoft/SDHCAL/Baboon/config/Algorithm.cfg");
 	  registerProcessorParameter("Algorithm_cfg" ,
 				     "Algorithm configurations" ,
 				     algorithmFileName,
@@ -74,8 +74,8 @@ void ShowerSplitterProcessor::init() {
 	 ************************/
 
 	SdhcalConfig *config = SdhcalConfig::GetInstance();
-	cout << "Loading configuration file : " << baboonHome + configFileName << endl;
-	config->LoadFile( baboonHome + configFileName );
+	cout << "Loading configuration file : " << configFileName << endl;
+	config->LoadFile( configFileName );
 
 	/***********************************************************
 	 * Define all algorithms, add them in the algorithm manager
@@ -83,7 +83,7 @@ void ShowerSplitterProcessor::init() {
 
 	AlgorithmManager *algorithmManager = AlgorithmManager::GetInstance();
 
-	algorithmManager->SetConfigFileName( baboonHome + algorithmFileName );
+	algorithmManager->SetConfigFileName( algorithmFileName );
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
 	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
@@ -98,20 +98,20 @@ void ShowerSplitterProcessor::init() {
 	algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() );
 
 	// Add cone beginning algorithm
-//	algorithmManager->RegisterAlgorithm( new ConeBeginningAlgorithm() );
+	algorithmManager->RegisterAlgorithm( new ConeBeginningAlgorithm() );
 
 	// Add pca algorithm
 //	algorithmManager->RegisterAlgorithm( new PrincipalComponentAnalysis() );
 
-	cout << "Loading configuration file for algorithm : " << baboonHome + algorithmFileName << endl;
-	// Initialize it
+	cout << "Loading configuration file for algorithm : " << algorithmFileName << endl;
 	algorithmManager->Initialize();
 
 	/****************************************************************
-	 * Define the analysis manager and give it the configuration file
+	 * Define the analysis manager and give it the root output file
 	 ****************************************************************/
 
 	AnalysisManager *analysisManager = AnalysisManager::GetInstance();
+	cout << "ROOT output file : " << rootOutputFile << endl;
 	analysisManager->SetRootFileName( rootOutputFile );
 	analysisManager->Init();
 
@@ -177,9 +177,12 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 
 	AlgorithmManager *algorithmManager = AlgorithmManager::GetInstance();
 	ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
+	TrackManager *trackManager = TrackManager::GetInstance();
+	CoreManager *coreManager = CoreManager::GetInstance();
 
 	HitCollection * hitCollection = hitManager->GetHitCollection();
 	ClusterCollection *clusterCollection = clusteringManager->GetCluster2D();
+
 //	cout << "nb of clusters : " << clusterCollection->size() << endl;
 //	cout << "nb of hits : " << hitCollection->size() << endl;
 
@@ -205,12 +208,14 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 		cout << "ClusteringAlgorithm found" << endl;
 		ClusterCollection *clustCol = new ClusterCollection();
 		ClusteringAlgorithm* clusteringAlgo = (ClusteringAlgorithm *) algorithmManager->GetAlgorithm("ClusteringAlgorithm");
-		clusteringAlgo->SetClusteringMode( fClustering2D );
+		clusteringAlgo->SetClusteringMode( fClustering3D );
 		clusteringAlgo->SetTaggingMode( fClusterTagMode );
 		clusteringAlgo->AddHitTagToCluster( fCore );
 		clusteringAlgo->SetClusterCollection( clustCol );
 		clusteringAlgo->Process();
+
 		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+
 			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
 			Core *core = new Core();
 			for( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
@@ -222,6 +227,13 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 		}
 		clustCol->clear();
 		delete clustCol;
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("ConeBeginningAlgorithm") ) {
+
+		cout << "ConeBeginningAlgorithm found" << endl;
+		ConeBeginningAlgorithm *coneBeginning = (ConeBeginningAlgorithm *) algorithmManager->GetAlgorithm("ConeBeginningAlgorithm");
+		coneBeginning->Process();
 	}
 
 	if( algorithmManager->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
@@ -248,6 +260,8 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 		HoughTransformAlgorithm *houghTransform = (HoughTransformAlgorithm*) algorithmManager->GetAlgorithm("HoughTransformAlgorithm");
 		houghTransform->Process();
 	}
+
+
 
 
 	for(unsigned int j=0 ; j<hitCollection->size() ; j++) {
@@ -320,6 +334,8 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 
 	clusteringManager->ClearAllContent();
 	hitManager->ClearAllContent();
+	coreManager->ClearAllContent();
+	trackManager->ClearAllContent();
 
 	delete caloHitCreator;
 }
@@ -337,6 +353,7 @@ void ShowerSplitterProcessor::end() {
 	AlgorithmManager::Kill();
 	HitManager::Kill();
 	ClusteringManager::Kill();
+	CoreManager::Kill();
 	SdhcalConfig::Kill();
 
 }
