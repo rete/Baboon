@@ -19,27 +19,21 @@ ENDIF()
 FOREACH( mod Algorithm Analysis Geometry Managers Objects Overlay Reconstruction Config CfgParser Utils Utilities Xml )
 	FILE (
 		GLOB_RECURSE
-		${mod}_FILES
+		BABOON_LIBRARY_FILES
+		${BABOON_LIBRARY_FILES}
 		include/${mod}/*
 		src/${mod}/*
 	)
-	ADD_LIBRARY( ${mod} SHARED ${${mod}_FILES} )
-	ADD_LIBRARY( ${mod}_STATIC STATIC ${${mod}_FILES} )
-	SET_TARGET_PROPERTIES( ${mod}_STATIC PROPERTIES OUTPUT_NAME ${mod} )
-	INSTALL(
-		TARGETS ${mod}_STATIC ${mod}
-		ARCHIVE DESTINATION lib 
-		LIBRARY DESTINATION lib 
-	)
-	SET( ALL_LIBS ${ALL_LIBS} ${mod} )
 ENDFOREACH()
 
-
-TARGET_LINK_LIBRARIES( Utils Objects )
-TARGET_LINK_LIBRARIES( Managers Analysis CfgParser Reconstruction )
-TARGET_LINK_LIBRARIES( Config CfgParser )
-TARGET_LINK_LIBRARIES( Algorithm Objects Reconstruction )
-#TARGET_LINK_LIBRARIES( Reconstruction Algorithm )
+ADD_LIBRARY( Baboon SHARED ${BABOON_LIBRARY_FILES} )
+ADD_LIBRARY( Baboon_STATIC STATIC ${BABOON_LIBRARY_FILES} )
+SET_TARGET_PROPERTIES( Baboon_STATIC PROPERTIES OUTPUT_NAME Baboon )
+INSTALL(
+	TARGETS Baboon_STATIC Baboon
+	ARCHIVE DESTINATION lib 
+	LIBRARY DESTINATION lib 
+)
 
 FILE (
 	GLOB_RECURSE
@@ -59,16 +53,7 @@ INSTALL(
 TARGET_LINK_LIBRARIES( 
 	ShowerSpliter_lib 
 	${ROOT_COMPONENT_LIBRARIES} 
-	CfgParser 
-	Config 
-	Analysis
-	Objects
-	Geometry
-	Algorithm
-	Managers
-	${TSPECTRUM_LIB}
-	Utils
-	Utilities 
+	Baboon 
 )
 
 FIND_LIBRARY( TSPECTRUM_LIB libSpectrum.so )
@@ -82,14 +67,7 @@ FILE( GLOB_RECURSE
 ADD_EXECUTABLE( OverlayEvent ${OVERLAY_EVENT_SRC_FILES} )
 TARGET_LINK_LIBRARIES( 
 	OverlayEvent
-	Algorithm
-	Managers
-	Objects
-	Overlay
-	Utils
-	Utilities
-	Config
-	CfgParser
+	Baboon
 )
 
 
@@ -106,7 +84,7 @@ SET(
 	main/DrawEvent.cc 
 )
 ADD_EXECUTABLE( DrawEvent ${DRAW_EVENT_SRC_FILES} )
-TARGET_LINK_LIBRARIES( DrawEvent ${ROOT_COMPONENT_LIBRARIES} CfgParser Config )
+TARGET_LINK_LIBRARIES( DrawEvent ${ROOT_COMPONENT_LIBRARIES} Baboon )
 
 
 # ------------------ Overlay Estimator --------------------
@@ -118,16 +96,8 @@ ADD_EXECUTABLE( OverlayEstimator ${OVERLAY_ESTIMATOR_SRC_FILES} )
 TARGET_LINK_LIBRARIES( 
 	OverlayEstimator 
 	${ROOT_COMPONENT_LIBRARIES} 
-	CfgParser 
-	Config 
-	Analysis
-	Objects
-	Geometry
-	Algorithm
-	Managers
+	Baboon
 	${TSPECTRUM_LIB}
-	Utils
-	Utilities
 )
 
 
@@ -141,9 +111,7 @@ ADD_EXECUTABLE( OverlayEstimatorAnalysis ${OVERLAY_ESTIMATOR_ANALYSIS_SRC_FILES}
 TARGET_LINK_LIBRARIES( 
 	OverlayEstimatorAnalysis 
 	${ROOT_COMPONENT_LIBRARIES} 
-	CfgParser 
-	Analysis
-	Utilities
+	Baboon
 )
 
 
@@ -156,16 +124,8 @@ ADD_EXECUTABLE( ShowerSpliter ${SHOWER_SPLITER_SRC_FILES} )
 TARGET_LINK_LIBRARIES( 
 	ShowerSpliter 
 	${ROOT_COMPONENT_LIBRARIES} 
-	CfgParser 
-	Config 
-	Analysis
-	Objects
-	Geometry
-	Algorithm
-	Managers
+	Baboon
 	${TSPECTRUM_LIB}
-	Utils
-	Utilities
 )
 
 
