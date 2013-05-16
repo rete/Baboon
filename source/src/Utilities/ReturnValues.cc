@@ -29,7 +29,6 @@ namespace baboon {
 		ret.OK = true;
 		ret.message = message;
 		return ret;
-
 	}
 
 	Return S_ERROR( const string &message ) {
@@ -38,10 +37,20 @@ namespace baboon {
 		ret.OK = false;
 		ret.message = message;
 		return ret;
-
 	}
 
 
+	Return& Return::operator = ( Return const &r ) {
+
+		this->message = r.message;
+		this->OK = r.OK;
+		return *this;
+	}
+
+	bool operator == ( Return const &r1 , Return const &r2 ) {
+
+		return ( r1.OK == r2.OK );
+	}
 
 
 }  // namespace 
