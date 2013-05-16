@@ -61,7 +61,13 @@ namespace baboon {
 
 		HitCollection::iterator it = std::find( hitCollection->begin() , hitCollection->end() , hit );
 
-		return S_OK();
+		if( it != hitCollection->end() ) {
+			hitCollection->erase( it );
+			return S_OK();
+		}
+		else {
+			return S_OK("Hit was not in the collection.");
+		}
 	}
 
 	bool Core::Contains( Hit *hit ) {
@@ -69,6 +75,35 @@ namespace baboon {
 		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
 	}
 
+
+	ThreeVector Core::CenterOfGravity() {
+
+		return GetCenterOfGravity( hitCollection );
+	}
+
+
+	int Core::GetFirstHitLayer() {
+
+		int firstLayer = 10000;
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+			if( hitCollection->at(i)->GetIJK().at(2) < firstLayer ) {
+				firstLayer = hitCollection->at(i)->GetIJK().at(2);
+			}
+		}
+
+		return firstLayer;
+	}
+
+
+	int Core::GetLastHitLayer() {
+
+		int lastLayer = 0;
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++ )
+			if( hitCollection->at(i)->GetIJK().at(2) > lastLayer )
+				lastLayer = hitCollection->at(i)->GetIJK().at(2);
+
+		return lastLayer;
+	}
 
 }  // namespace 
 
