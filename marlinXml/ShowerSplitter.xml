@@ -1,35 +1,39 @@
 
 <marlin>
- <execute>
-  <processor name="ShowerSplitterProcessor"/>
- </execute>
+	<execute>
+		<processor name="ShowerSplitterProcessor"/>
+	</execute>
 
- <global>
-  <parameter name="LCIOInputFiles">
-   /home/remi/ilcsoft/SDHCAL/data/single_calorimeterhit_pi-_40GeV_I0.slcio
-  </parameter>
-  <!-- limit the number of processed records (run+evt): -->  
-  <!--parameter name="MaxRecordNumber" value="400" /-->  
-  <parameter name="SkipNEvents" value="0" />  
-  <parameter name="SupressCheck" value="false" />  
-  <!--parameter name="GearXMLFile"> gear_ldc.xml </parameter-->  
-  <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE  </parameter> 
-  <!--parameter name="RandomSeed" value="1234567890" /-->
- </global>
- 
-  <processor name="ShowerSplitterProcessor" type="ShowerSplitterProcessor">
- <!--ShowerSliptterProcessor does whatever it does ...-->
-  <!-- BABOON_HOME env variable -->
-  <parameter name="BABOON_HOME" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon </parameter>
-  <!--Name of the SDHCAL hit collection-->
-  <parameter name="collectionName" type="string"> HCALBarrel </parameter>
-  <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
-  <!--parameter name="Verbosity" type="string">DEBUG </parameter-->
-  <!--Name of the ROOT file where tree is stored-->
-  <parameter name="rootOutputFile" type="string"> test.root </parameter>
-  <!--Default decoder-->
-  <parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
+	<global>
+		<parameter name="LCIOInputFiles">
+		/home/remi/ilcsoft/SDHCAL/data/single_calorimeterhit_pi-_20GeV_I0.slcio
+		</parameter>
+		<!-- limit the number of processed records (run+evt): -->  
+		<!--parameter name="MaxRecordNumber" value="400" /-->  
+		<parameter name="SkipNEvents" value="1900" />  
+		<parameter name="SupressCheck" value="false" />  
+		<!--parameter name="GearXMLFile"> gear_ldc.xml </parameter-->  
+		<parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE  </parameter> 
+		<!--parameter name="RandomSeed" value="1234567890" /-->
+	</global>
+	
+	<processor name="ShowerSplitterProcessor" type="ShowerSplitterProcessor">
+	
+		<!--ShowerSliptterProcessor does whatever it does ...-->
+		
+		<!-- BABOON_HOME env variable. Do not change it untill you run it on an other computer! -->
+		<parameter name="BABOON_HOME" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon </parameter>
+		<!--Name of the SDHCAL hit collection-->
+		<parameter name="collectionName" type="string"> HCALBarrel </parameter>
+		<!--Name of the ROOT file where tree is stored-->
+		<parameter name="rootOutputFile" type="string"> test.root </parameter>
+		<!--Name of the cfg file for Algorithm parameters -->
+		<parameter name="Algorithm_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/Algorithm.cfg </parameter>
+		<!--Name of the cfg file for SDHCAL parameters -->
+		<parameter name="SDHCAL_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/SDHCAL.cfg </parameter>
+		<!--Default decoder-->
+		<parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
 
-</processor>
+	</processor>
 
 </marlin>
