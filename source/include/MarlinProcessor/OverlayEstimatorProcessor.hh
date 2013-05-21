@@ -55,14 +55,14 @@ class OverlayEstimatorProcessor : public marlin::Processor {
 
 		/** Called for every run.
 		*/
-		virtual void processRunHeader( LCRunHeader* run ) ;
+		virtual void processRunHeader( EVENT::LCRunHeader* run ) ;
 
 		/** Called for every event - the working horse.
 		*/
-		virtual void processEvent( LCEvent * evt ) ;
+		virtual void processEvent( EVENT::LCEvent * evt ) ;
 
 
-		virtual void check( LCEvent * evt ) ;
+		virtual void check( EVENT::LCEvent * evt ) ;
 
 
 		/** Called after data processing for clean up.
