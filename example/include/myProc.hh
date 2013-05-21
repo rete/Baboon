@@ -33,6 +33,11 @@
 #include "Managers/AlgorithmManager.hh"
 #include "Managers/AnalysisManager.hh"
 #include "Managers/CoreManager.hh"
+#include "Managers/HitManager.hh"
+#include "Managers/CoreManager.hh"
+#include "Managers/ShowerManager.hh"
+#include "Managers/ClusteringManager.hh"
+#include "Managers/TrackManager.hh"
 
 #include "MarlinProcessor/CaloHitCreator.hh"
 
@@ -45,36 +50,84 @@ class myProc : public marlin::Processor {
 
 	public:
 
-		/*! Default Constructor */
+		/*!
+		 *
+		 * @brief Default Constructor
+		 *
+		 */
 		myProc();
 
-		/*! Default Destructor */
+		/*!
+		 *
+		 * @brief Default Destructor
+		 *
+		 */
 		virtual ~myProc();
 
-
+		/*!
+		 *
+		 * @brief Return a new processor. Called by Marlin to execute the processor
+		 *
+		 */
 		virtual Processor *newProcessor()
 			{ return new myProc(); }
 
-		/** Called at the begin of the job before anything is read.
-		* Use to initialize the processor, e.g. book histograms.
-		*/
+		/*!
+		 *
+		 * @brief Called by Marlin. Called at the begin of the job before anything is read.
+		 * Use to initialize the processor, e.g. book histograms.
+		 *
+		 */
 		virtual void init();
 
-		/** Called for every run.
-		*/
+		/*!
+		 *
+		 * @brief Called by Marlin. Called for every run.
+		 *
+		 */
 		virtual void processRunHeader( LCRunHeader* run );
 
-		/** Called for every event - the working horse.
-		*/
+		/*!
+		 *
+		 * @brief Called by Marlin. Called for every event - the working horse.
+		 *
+		 */
 		virtual void processEvent( LCEvent * evt );
 
-
+		/*!
+		 *
+		 * @brief Called by Marlin. Check the event
+		 *
+		 */
 		virtual void check( LCEvent * evt );
 
-
-		/** Called after data processing for clean up.
-		*/
+		/*!
+		 *
+		 * @brief Called by Marlin. Called after data processing for clean up.
+		 *
+		 */
 		virtual void end();
+
+		/*!
+		 *
+		 * @brief Laod the baboon objects. Called at beginning of event in processEvent()
+		 *
+		 */
+		void LoadEvent( LCEvent *evt );
+
+		/*!
+		 *
+		 * @brief Clear all the baboon content. Called at the end of event in processEvent()
+		 *
+		 */
+		void ClearAllContent();
+
+		/*!
+		 *
+		 * @brief Load the managers. Called in init() function.
+		 *
+		 */
+		void LoadManagers();
 
 	protected:
 
@@ -84,6 +137,16 @@ class myProc : public marlin::Processor {
 		std::string rootOutputFile;
 		std::string decoderString;
 		std::string collectionName;
+
+		baboon::CaloHitCreator *caloHitCreator;
+
+		baboon::HitManager        *hitManager;
+		baboon::ClusteringManager *clusteringManager;
+		baboon::CoreManager       *coreManager;
+		baboon::ShowerManager     *showerManager;
+		baboon::TrackManager      *trackManager;
+		baboon::AnalysisManager   *analysisManager;
+		baboon::AlgorithmManager  *algorithmManager;
 
 
 };  // class 
