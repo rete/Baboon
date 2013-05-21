@@ -62,6 +62,11 @@ namespace baboon {
 
 			ShowerCollection *showerCollection;
 
+		public:
+
+			inline ShowerCollection *GetShowerCollection()
+				{ return showerCollection; }
+
 	};  // class
 
 }  // namespace 
