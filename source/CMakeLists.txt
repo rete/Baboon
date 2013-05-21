@@ -16,13 +16,27 @@ IF( OPENMP_FOUND )
 ENDIF()
 
 # create library
-FOREACH( mod Algorithm Analysis Geometry Managers Objects Overlay Reconstruction Config CfgParser Utils Utilities Xml )
+FOREACH( module
+	Algorithm 
+	Analysis 
+	Geometry 
+	Managers 
+	Objects 
+	Overlay 
+	Reconstruction 
+	Config 
+	CfgParser 
+	Utils 
+	Utilities 
+	Xml 
+	GraphicalProcessor )
+	
 	FILE (
 		GLOB_RECURSE
 		BABOON_LIBRARY_FILES
 		${BABOON_LIBRARY_FILES}
-		include/${mod}/*
-		src/${mod}/*
+		include/${module}/*
+		src/${module}/*
 	)
 ENDFOREACH()
 
@@ -33,8 +47,19 @@ SET(
 	include/MarlinProcessor/CaloHitCreator.hh
 )
 
-ADD_LIBRARY( Baboon SHARED ${BABOON_LIBRARY_FILES} )
+ADD_SHARED_LIBRARY( Baboon ${BABOON_LIBRARY_FILES} )
 ADD_LIBRARY( Baboon_STATIC STATIC ${BABOON_LIBRARY_FILES} )
+
+TARGET_LINK_LIBRARIES( 
+	Baboon
+	${ROOT_COMPONENT_LIBRARIES} 
+)
+TARGET_LINK_LIBRARIES( 
+	Baboon_STATIC
+	${ROOT_COMPONENT_LIBRARIES} 
+)
+
+
 SET_TARGET_PROPERTIES( Baboon_STATIC PROPERTIES OUTPUT_NAME Baboon )
 INSTALL(
 	TARGETS Baboon_STATIC Baboon
@@ -47,8 +72,6 @@ FILE (
 	ShowerSplitterProcessor_FILES
 	include/MarlinProcessor/ShowerSplitterProcessor.hh
 	src/MarlinProcessor/ShowerSplitterProcessor.cc
-	include/MarlinProcessor/CaloHitCreator.hh
-	src/MarlinProcessor/CaloHitCreator.cc
 )
 ADD_LIBRARY( ShowerSpliter_lib SHARED ${ShowerSplitterProcessor_FILES} )
 SET_TARGET_PROPERTIES( ShowerSpliter_lib PROPERTIES OUTPUT_NAME ShowerSplitter )
@@ -62,6 +85,27 @@ TARGET_LINK_LIBRARIES(
 	${ROOT_COMPONENT_LIBRARIES} 
 	Baboon 
 )
+
+
+FILE (
+	GLOB_RECURSE
+	GShowerSplitterProcessor_FILES
+	include/MarlinProcessor/GShowerSplitterProcessor.hh
+	src/MarlinProcessor/GShowerSplitterProcessor.cc
+)
+ADD_LIBRARY( GShowerSpliter_lib SHARED ${GShowerSplitterProcessor_FILES} )
+SET_TARGET_PROPERTIES( GShowerSpliter_lib PROPERTIES OUTPUT_NAME GShowerSplitter )
+INSTALL(
+	TARGETS GShowerSpliter_lib
+	LIBRARY DESTINATION lib 
+)
+
+TARGET_LINK_LIBRARIES( 
+	GShowerSpliter_lib 
+	${ROOT_COMPONENT_LIBRARIES} 
+	Baboon 
+)
+
 
 FIND_LIBRARY( TSPECTRUM_LIB libSpectrum.so )
 
@@ -108,7 +152,6 @@ TARGET_LINK_LIBRARIES(
 )
 
 
-
 # ------------------ Overlay Estimator Analysis --------------------
 SET( 
 	OVERLAY_ESTIMATOR_ANALYSIS_SRC_FILES 
@@ -122,19 +165,6 @@ TARGET_LINK_LIBRARIES(
 )
 
 
-# ------------------ Shower Spliter --------------------
-SET( 
-	SHOWER_SPLITER_SRC_FILES 
-	main/ShowerSpliter.cc 
-)
-ADD_EXECUTABLE( ShowerSpliter ${SHOWER_SPLITER_SRC_FILES} )
-TARGET_LINK_LIBRARIES( 
-	ShowerSpliter 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon
-	${TSPECTRUM_LIB}
-)
-
 
 IF( BABOON_GUI )
 	ADD_SUBDIRECTORY( ./gui )
@@ -145,7 +175,7 @@ ENDIF()
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent ShowerSpliter OverlayEstimator OverlayEstimatorAnalysis
+	OverlayEvent LcioToRoot DrawEvent OverlayEstimator OverlayEstimatorAnalysis
 	DESTINATION 
 	bin
 )
