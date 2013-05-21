@@ -129,7 +129,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief
+			 * @brief Check the tag information to continue the algorithm or not
 			 *
 			 */
 			bool CheckTag( const Tag &fTag );
@@ -142,16 +142,15 @@ namespace baboon {
 			 * @brief Set the clustering mode : 2D , 3D
 			 *
 			 */
-			inline void SetClusteringMode( ClusteringMode mode )
-				{ fClusteringMode = mode; }
+			Return SetClusteringMode( ClusteringMode mode );
+
 
 			/*!
 			 *
 			 * @brief Set the tagging mode : avoid tag or cluster them
 			 *
 			 */
-			inline void SetTaggingMode( TaggingMode mode )
-				{ fTaggingMode = mode; }
+			Return SetTaggingMode( TaggingMode mode );
 
 			/*!
 			 *
