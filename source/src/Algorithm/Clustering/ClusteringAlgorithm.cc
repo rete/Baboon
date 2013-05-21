@@ -30,7 +30,7 @@ namespace baboon {
 		fClusteringMode = fClustering2D;
 		fTaggingMode = fClusterTagMode;
 		clusterCollection = 0;
-		clusterSizeLowerLimit = 0;
+		clusterSizeLowerLimit = 1;
 		neighborDistance = 1;
 
 	}
@@ -104,7 +104,6 @@ namespace baboon {
 			if( fClusteringMode == fClustering2D ) cluster->SetType( fCluster2D );
 			else if( fClusteringMode == fClustering3D ) cluster->SetType( fCluster3D );
 			clusterCollection->push_back( cluster );
-//			getchar();
 		}
 		treatedHits.clear();
 
@@ -116,13 +115,13 @@ namespace baboon {
 		hitTagToCluster.clear();
 		hitTagToAvoid.clear();
 		neighborDistance = 1;
-		clusterSizeLowerLimit = 0;
+		clusterSizeLowerLimit = 1;
 	}
 
 
 	Return ClusteringAlgorithm::CheckConsistency() {
 
-		Return ret;
+		Return ret = S_OK();
 		if( clusterCollection == 0 || clusterCollection == NULL )
 			return S_ERROR("While checking consistency : Cluster collection not set or set to 0 in ClusteringAlgorithm. ");
 		if( !clusterCollection->empty() ) {
@@ -199,6 +198,18 @@ namespace baboon {
 	Return ClusteringAlgorithm::SetNeighborDistance( unsigned int distance ) {
 
 		neighborDistance = distance;
+		return S_OK();
+	}
+
+	Return ClusteringAlgorithm::SetClusteringMode( ClusteringMode mode ) {
+
+		fClusteringMode = mode;
+		return S_OK();
+	}
+
+	Return ClusteringAlgorithm::SetTaggingMode( TaggingMode mode ) {
+
+		fTaggingMode = mode;
 		return S_OK();
 	}
 
