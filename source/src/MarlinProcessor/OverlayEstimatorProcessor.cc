@@ -19,6 +19,9 @@
 
 OverlayEstimatorProcessor aOverlayEstimatorProcessor;
 
+using namespace EVENT;
+using namespace std;
+using namespace baboon;
 
 OverlayEstimatorProcessor::OverlayEstimatorProcessor()
 	: marlin::Processor("OverlayEstimatorProcessor") {
