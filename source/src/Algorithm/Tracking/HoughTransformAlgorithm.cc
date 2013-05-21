@@ -51,6 +51,8 @@ namespace baboon {
 		data.GetValue("trackSegmentMinimumSize",&trackSegmentMinimumSize);
 		data.GetValue("maximumDistanceBetweenHitsInPlane",&maximumDistanceBetweenHitsInPlane);
 		data.GetValue("maximumDistanceBetweenHitsForLayers",&maximumDistanceBetweenHitsForLayers);
+		data.GetValue("maximumDistanceAllowedForHitsInTrack",&maximumDistanceAllowedForHitsInTrack);
+
 
 		this->DeleteHoughSpace();
 		this->AllocateHoughSpace();
@@ -237,19 +239,62 @@ namespace baboon {
 				}
 			}
 
-			if( tracks.size() < trackSegmentMinimumSize ) {
-				for( unsigned int k=0 ; k<tracks.size() ; k++ )
-					tracks.at(k)->cluster->SetClusterTag( fUndefined );
-				continue;
-			}
-			Track *track = new Track();
 
+			HitCollection tempHitCollection;
+
+			// Copy all the clusters hits in a hit collection.
 			for(unsigned int j=0 ; j<tracks.size() ; j++) {
 				HitCollection *hitColTemp = tracks.at(j)->cluster->GetHitCollection();
 				for(unsigned int k=0 ; k<hitColTemp->size() ; k++ ) {
-					track->AddHit( hitColTemp->at(k) );
-					hitColTemp->at(k)->SetHitTag( fTrack );
+					tempHitCollection.push_back( hitColTemp->at(k) );
 				}
+			}
+
+			// Check for hits in track which are to far from the other hits in the track and remove them.
+			for( unsigned int k=0 ; k<tempHitCollection.size() ; k++ ) {
+
+				Hit *hit1 = tempHitCollection.at(k);
+				IntVector ijk1 = hit1->GetIJK();
+				double minimumDistance = 10000;
+
+				for( unsigned int j=0 ; j<tempHitCollection.size() ; j++ ) {
+
+					if( k == j ) continue;
+					Hit *hit2 = tempHitCollection.at(j);
+					IntVector ijk2 = hit2->GetIJK();
+
+					double distance = sqrt( (ijk2.at(0)-ijk1.at(0)) * (ijk2.at(0)-ijk1.at(0))
+								  + (ijk2.at(1)-ijk1.at(1)) * (ijk2.at(1)-ijk1.at(1))
+								  + (ijk2.at(2)-ijk1.at(2)) * (ijk2.at(2)-ijk1.at(2)) );
+
+					if( distance < minimumDistance )
+						minimumDistance = distance;
+				}
+				if( minimumDistance > maximumDistanceAllowedForHitsInTrack ) {
+					tempHitCollection.erase( tempHitCollection.begin() + k );
+					k--;
+				}
+			}
+
+			// Untag all the clusters of the track. No need anymore.
+			for( unsigned int k=0 ; k<tracks.size() ; k++ )
+				tracks.at(k)->cluster->SetClusterTag( fUndefined );
+
+			/*
+			 * Check if the number of remaining hits in the hit track
+			 * collection is enough to build a track
+			 */
+			if( tempHitCollection.size() < trackSegmentMinimumSize ) {
+				tempHitCollection.clear();
+				continue;
+			}
+
+			// Build the track and tag the hits inside as "track hits"
+			Track *track = new Track();
+			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
+				track->AddHit( tempHitCollection.at(j) );
+				tempHitCollection.at(j)->SetHitTag( fTrack );
+
 			}
 
 			track->GetExtremities().first->SetHitTag( fTrackExtremity );
