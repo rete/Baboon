@@ -26,49 +26,101 @@
 #include <cmath> 
 #include <vector> 
 #include <algorithm>
+#include <numeric>
 
 #include "Geometry/Cone.hh"
 #include "Objects/Hit.hh"
 #include "Managers/HitManager.hh"
+#include "Managers/CoreManager.hh"
+#include "Managers/ShowerManager.hh"
+#include "Reconstruction/Objects/Shower.hh"
+#include "Utilities/ReturnValues.hh"
+#include "Utilities/Globals.hh"
 
 
 namespace baboon {
 
-/* 
- * Class ConeBeginningAlgorithm
- * Inherits from base class AbstractAlgorithm
- */ 
+	/*!
+	 * Class ConeBeginningAlgorithm
+	 * Inherits from base class AbstractAlgorithm
+	 */
 
-class ConeBeginningAlgorithm : public AbstractAlgorithm {
+	class ConeBeginningAlgorithm : public AbstractAlgorithm {
 
-	public:
+		public:
 
-		/*! Default Constructor */
-		ConeBeginningAlgorithm();
+			/*!
+			 *
+			 * @brief Default Constructor
+			 *
+			 */
+			ConeBeginningAlgorithm();
 
-		/*! Default Destructor */
-		virtual ~ConeBeginningAlgorithm();
-
-
-	protected:
-
-		/*! Hit collection for the algorithm */
-		HitCollection *hitCollection;
-
-		/*! Initialize the algorithm, i.e by initializing specific variables */
-		virtual void Init();
-
-		/*! Execute the algorithm */
-		virtual void Execute();
-
-		/*! Finalize the algorithm*/
-		virtual void End();
-
-		/*! Allow to check if everything is well set in the algorithm before starting it */
-		virtual Return CheckConsistency();
+			/*!
+			 *
+			 * @brief Default Destructor
+			 *
+			 */
+			virtual ~ConeBeginningAlgorithm();
 
 
-};  // class 
+		protected:
+
+			/*!
+			 *
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
+			 *
+			 */
+			virtual void Init();
+
+			/*!
+			 *
+			 * @brief Execute the algorithm
+			 *
+			 */
+			virtual void Execute();
+
+			/*!
+			 *
+			 * @brief Finalize the algorithm
+			 *
+			 */
+			virtual void End();
+
+			/*!
+			 *
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
+			 *
+			 */
+			virtual Return CheckConsistency();
+
+			/*!
+			 *
+			 * @brief Find the existing pads inside a given cone. Find also the touched pads.
+			 *
+			 */
+			void FindPadsInCone( Cone *cone , std::vector<IntVector> &existingPadsInCone, std::vector<IntVector> &touchedPadsInCone );
+
+
+			HitCollection *hitCollection;
+
+			// algorithm parameters
+			int xLoopHalfRange;
+			int yLoopHalfRange;
+			int zLoopHalfRange;
+			double coneMinimumOpeningAngle;
+			double coneMaximumOpeningAngle;
+			double angleStep;
+			int coneLength;
+			double coneDirectedVectorHalfRange;
+			double coneDirectedVectorStep;
+			double conePadsLowerLimitCut;
+			int coreSizeLowerLimit;
+			double coneBackwardDistance;
+			double coneStepDistance;
+
+
+	};  // class
 
 
 }  // namespace 
