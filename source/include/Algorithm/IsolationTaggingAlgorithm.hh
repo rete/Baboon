@@ -32,11 +32,9 @@
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
 
-#include <omp.h>
-
 namespace baboon {
 
-	/*
+	/*!
 	 * Class IsolationTaggingAlgorithm
 	 * Inherits from base class AbstractAlgorithm
 	 */
@@ -45,45 +43,74 @@ namespace baboon {
 
 		public:
 
-			/*! Default Constructor */
+			/*!
+			 *
+			 * @brief Default Constructor
+			 *
+			 */
 			IsolationTaggingAlgorithm();
 
-			/*! Default Destructor */
+			/*!
+			 *
+			 * @brief Default Destructor
+			 *
+			 */
 			virtual ~IsolationTaggingAlgorithm();
 
-			/*! Set the hit collection for the algorithm */
+			/*!
+			 *
+			 * @brief Set the hit collection for the algorithm
+			 *
+			 */
 			void SetHitCollection( HitCollection *hitCol )
 				{ hitCollection = hitCol; }
 
+			/*!
+			 *
+			 * @brief Return the isolation weights
+			 *
+			 */
 			inline std::vector<double> GetIsolationWeights()
 				{ return isolationWeights; }
 
 
 		protected:
 
-			/*! Hit collection for the algorithm */
-			HitCollection *hitCollection;
-
-			/*! Distance at which we don't want other hits */
-			int distance;
-
-			/*! Concentration of hits allowed in a volume of (2*distance+1)^3 */
-			double concentrationLimit;
-
-			/*! Hit weight for each hit in the context of isolation ( cf. Execute() ) */
-			std::vector<double> isolationWeights;
-
-			/*! Initialize the algorithm, i.e by initializing specific variables */
+			/*!
+			 *
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
+			 *
+			 */
 			virtual void Init();
 
-			/*! Execute the algorithm */
+			/*!
+			 *
+			 * @brief Execute the algorithm
+			 *
+			 */
 			virtual void Execute();
 
-			/*! Finalize the algorithm*/
+			/*!
+			 *
+			 * @brief Finalize the algorithm
+			 *
+			 */
 			virtual void End();
 
-			/*! Allow to check if everything is well set in the algorithm before starting it */
+			/*!
+			 *
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
+			 *
+			 */
 			virtual Return CheckConsistency();
+
+
+			HitCollection *hitCollection;
+
+			// Algorithm parameters
+			int distance;
+			double concentrationLimit;
+			std::vector<double> isolationWeights;
 
 
 	};  // class
