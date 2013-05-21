@@ -19,10 +19,10 @@
 
 #include "Algorithm/AbstractAlgorithm.hh"
 
-#include <iostream> 
-#include <string> 
-#include <cstdlib> 
-#include <cmath> 
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cmath>
 #include <vector>
 #include <algorithm>
 
@@ -154,7 +154,8 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief Set the cluster collection you want to have at the end
+			 * @brief Set the cluster collection you want to have at the end.
+			 * Must be an empty one, else delete the content before processing.
 			 *
 			 */
 			inline void SetClusterCollection( ClusterCollection *clusterCol )

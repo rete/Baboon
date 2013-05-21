@@ -158,7 +158,7 @@ namespace baboon {
 			 *
 			 * @brief
 			 *
-			 * */
+			 */
 //			virtual void Load( const TiXmlHandle *const pXmlHandle ) = 0;
 
 

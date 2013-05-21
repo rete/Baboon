@@ -41,7 +41,7 @@
 namespace baboon {
 
 	/*!
-	 * Class ConeBeginningAlgorithm
+	 * @brief Class ConeBeginningAlgorithm
 	 * Inherits from base class AbstractAlgorithm
 	 */
 

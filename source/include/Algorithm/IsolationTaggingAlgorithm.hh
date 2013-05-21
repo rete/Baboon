@@ -35,7 +35,7 @@
 namespace baboon {
 
 	/*!
-	 * Class IsolationTaggingAlgorithm
+	 * @brief Class IsolationTaggingAlgorithm
 	 * Inherits from base class AbstractAlgorithm
 	 */
 

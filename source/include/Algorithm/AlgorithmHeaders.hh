@@ -19,7 +19,7 @@
 
 /*!
  *
- *  @brief : All algorithm headers
+ *  @brief All algorithm headers
  *
  */
 

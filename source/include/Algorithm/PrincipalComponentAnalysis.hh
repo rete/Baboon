@@ -46,7 +46,7 @@
 namespace baboon {
 
 	/*
-	 * Class PrincipalComponentAnalysis
+	 * @brief Class PrincipalComponentAnalysis
 	 * Inherits from base class AbstractAlgorithm
 	 */
 
@@ -54,46 +54,79 @@ namespace baboon {
 
 		public:
 
-			/*! Default Constructor */
+			/*!
+			 *
+			 * @brief Default Constructor
+			 *
+			 */
 			PrincipalComponentAnalysis();
 
-			/*! Default Destructor */
+			/*!
+			 *
+			 * @brief Default Destructor
+			 *
+			 */
 			virtual ~PrincipalComponentAnalysis();
 
-			/**/
+			/*!
+			 *
+			 * @brief Set the hit collection
+			 *
+			 */
 			inline void SetHitCollection( HitCollection *hitCol )
 				{ hitCollection = hitCol; }
 
+			/*!
+			 *
+			 * @brief Return the eigen vectors of the PCA
+			 *
+			 */
 			inline TMatrixD GetEigenVectors()
 				{ return eigenVectors; }
 
+			/*!
+			 *
+			 * @brief Return the eigen values of the PCA
+			 *
+			 */
 			inline TVectorD GetEigenValues()
 				{ return eigenValues; }
 
 
 		protected:
 
-			/**/
-			HitCollection *hitCollection;
-
-			/**/
-			TVectorD eigenValues;
-
-			/**/
-			TMatrixD eigenVectors;
-
-			/*! Initialize the algorithm, i.e by initializing specific variables */
+			/*!
+			 *
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
+			 *
+			 */
 			virtual void Init();
 
-			/*! Execute the algorithm */
+			/*!
+			 *
+			 * @brief Execute the algorithm
+			 *
+			 */
 			virtual void Execute();
 
-			/*! Finalize the algorithm*/
+			/*!
+			 *
+			 * @brief Finalize the algorithm
+			 *
+			 */
 			virtual void End();
 
-			/*! Allow to check if everything is well set in the algorithm before starting it */
+			/*!
+			 *
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
+			 *
+			 */
 			virtual Return CheckConsistency();
 
+
+			HitCollection *hitCollection;
+			TVectorD eigenValues;
+			TMatrixD eigenVectors;
 
 
 	};  // class

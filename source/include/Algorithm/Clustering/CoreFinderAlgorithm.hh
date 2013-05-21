@@ -41,50 +41,74 @@ namespace baboon {
 
 	class CoreFinderAlgorithm : public AbstractAlgorithm {
 
-		protected :
 
-			/*! HitCollection needed for the algorithm */
-			HitCollection *hitCollection;
-
-			/*! Threshold accumulation. cf. Execute() */
-			std::vector<int> threshCountVec;
-
-			/*! Threshold to be reached to tag a hit as core hit. cf. Execute() */
-			int coreCountThreshold;
-
-			/*! Distance to cluster the core hit. cf. Execute() */
-			int distance;
-
-			double minimumThresholdConcentration;
 
 		public :
 
-			/*! Default Constructor */
+			/*!
+			 *
+			 * @brief Default Constructor
+			 *
+			 */
 			CoreFinderAlgorithm();
 
-			/*! Default Destructor */
+			/*!
+			 *
+			 * @brief Default Destructor
+			 *
+			 */
 			virtual ~CoreFinderAlgorithm();
 
-			/*! Initialize the algorithm, i.e by initializing specific variables */
+			/*!
+			 *
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
+			 *
+			 */
 			virtual void Init();
 
-			/*! Execute the algorithm */
+			/*!
+			 *
+			 * @brief Execute the algorithm
+			 *
+			 */
 			virtual void Execute() ;
 
-			/*! Finalize the algorithm*/
+			/*!
+			 *
+			 * @brief Finalize the algorithm
+			 *
+			 */
 			virtual void End();
 
-			/*! Allow to check if everything is well set in the algorithm before starting it */
+			/*!
+			 *
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
+			 *
+			 */
 			virtual Return CheckConsistency();
 
 			/*! Set the hit collection needed for the algorithm */
 //			inline void SetHitCollection( HitCollection *hitCol )
 //				{ hitCollection = hitCol; }
 
-			/*! Set the distance between two pads to clusterize core hits */
+			/*!
+			 *
+			 * @brief Set the distance between two pads to clusterize core hits
+			 *
+			 */
 			inline void SetDistance( int d )
 				{ distance = d; }
 
+
+		protected :
+
+			HitCollection *hitCollection;
+			std::vector<int> threshCountVec;
+
+			// Algorithm parameters
+			int coreCountThreshold;
+			int distance;
+			double minimumThresholdConcentration;
 
 	};
 

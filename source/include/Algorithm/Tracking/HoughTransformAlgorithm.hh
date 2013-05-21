@@ -44,7 +44,7 @@ namespace baboon {
 
 
 	/*!
-	 * Class HoughTransformAlgorithm.
+	 * @brief Class HoughTransformAlgorithm.
 	 * Inherit from 'AbstractAlgorithm' base class.
 	 */
 
@@ -52,7 +52,7 @@ namespace baboon {
 
 
 		/*!
-		 * Hough tag used in HoughTransformAlgorithm to tag candidate clusters
+		 * @brief Hough tag used in HoughTransformAlgorithm to tag candidate clusters
 		 */
 
 		enum HoughTag {
@@ -156,6 +156,7 @@ namespace baboon {
 			int trackSegmentMinimumSize;
 			int maximumDistanceBetweenHitsInPlane;
 			int maximumDistanceBetweenHitsForLayers;
+			double maximumDistanceAllowedForHitsInTrack;
 
 			int ** houghSpaceX;
 			int ** houghSpaceY;
