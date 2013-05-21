@@ -85,6 +85,8 @@ namespace baboon {
 
 			bool Contains( Hit *hit );
 
+			Return OrderHits();
+
 		protected:
 
 			HitCollection *hitCollection;
