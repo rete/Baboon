@@ -27,8 +27,7 @@
 #include "Algorithm/AbstractAlgorithm.hh"
 
 #include "Algorithm/Tracking/HoughTransformAlgorithm.hh"
-#include "Algorithm/Clustering/NearbyClustering2DAlgorithm.hh"
-#include "Algorithm/Clustering/NearbyClustering3DAlgorithm.hh"
+#include "Algorithm/Clustering/ClusteringAlgorithm.hh"
 #include "Algorithm/Clustering/DistanceAgglomerationAlgorithm.hh"
 #include "Algorithm/Clustering/CoreFinderAlgorithm.hh"
 #include "Algorithm/ConeBeginningAlgorithm.hh"
