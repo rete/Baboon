@@ -23,10 +23,16 @@ namespace baboon {
 	ShowerManager *ShowerManager::instance = 0;
 
 
-	ShowerManager::ShowerManager() {}
+	ShowerManager::ShowerManager() {
+
+		showerCollection = new ShowerCollection();
+	}
 
 
-	ShowerManager::~ShowerManager() {}
+	ShowerManager::~ShowerManager() {
+
+
+	}
 
 
 	ShowerManager *ShowerManager::GetInstance() {
@@ -77,6 +83,21 @@ namespace baboon {
 		}
 
 		return S_ERROR("While removing a shower. Shower was not registered by the Shower Manager!");
+	}
+
+
+	Return ShowerManager::ClearAllContent() {
+
+		if( showerCollection == 0 )
+			return S_ERROR("While clearing all content in shower manager : assertion showerCollection != 0 failed");
+
+		for( unsigned int i=0 ; i<showerCollection->size() ; i++ ) {
+			if( showerCollection->at(i) != 0 )
+				delete showerCollection->at(i);
+		}
+		showerCollection->clear();
+
+		return S_OK("Content cleared in shower manager");
 	}
 
 
