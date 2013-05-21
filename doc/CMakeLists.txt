@@ -53,7 +53,8 @@ IF( INSTALL_DOC )
 
         # keep source tree clean
         ADD_CUSTOM_TARGET( uninstall_doc
-            COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_INSTALL_PREFIX}/doc/html"
+            COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_INSTALL_PREFIX}/doc/html;"
+            "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_INSTALL_PREFIX}/doc/latex"
         )
         ADD_DEPENDENCIES( uninstall uninstall_doc )
     ELSE()
@@ -62,6 +63,7 @@ IF( INSTALL_DOC )
     ENDIF()
 
     INSTALL( DIRECTORY "${DOC_BIN_DIR}/html" DESTINATION ${DOC_INSTALL_PREFIX} )
+    INSTALL( DIRECTORY "${DOC_BIN_DIR}/latex" DESTINATION ${DOC_INSTALL_PREFIX} )
 
 ENDIF()
 
