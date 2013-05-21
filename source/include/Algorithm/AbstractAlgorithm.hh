@@ -63,7 +63,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Default Constructor with algorithm name
+			 * @brief Default Constructor with algorithm name
 			 *
 			 */
 			AbstractAlgorithm(const std::string& n)
@@ -71,7 +71,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Default Destructor
+			 * @brief Default Destructor
 			 *
 			 */
 			virtual ~AbstractAlgorithm() {;}
@@ -79,7 +79,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Method to be used by the user to start the algorithm
+			 * @brief Method to be used by the user to start the algorithm
 			 *
 			 */
 			void Process() {
@@ -100,7 +100,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Return the algorithm name
+			 * @brief Return the algorithm name
 			 *
 			 */
 			inline const std::string& GetName()
@@ -109,7 +109,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Set the data for the algorithm
+			 * @brief Set the data for the algorithm
 			 *
 			 */
 			inline void SetData(const cfgparser::Data& d)
@@ -117,7 +117,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Return the data set of the algorithm
+			 * @brief Return the data set of the algorithm
 			 *
 			 */
 			inline const cfgparser::Data& GetData()
@@ -125,7 +125,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Return true if the algorithm need to be parameterized
+			 * @brief Return true if the algorithm need to be parameterized
 			 *
 			 */
 			inline bool NeedSomeData()
@@ -134,7 +134,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Return true if the algorithm need to parameterized
+			 * @brief Return true if the algorithm need to parameterized
 			 *
 			 */
 			inline bool NeedParameters()
@@ -143,7 +143,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Add a new tag to be avoided while running
+			 * @brief Add a new tag to be avoided while running
 			 *
 			 */
 			inline void AddAvoidedTag( Tag fTag ) {
@@ -156,7 +156,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief :
+			 * @brief
 			 *
 			 * */
 //			virtual void Load( const TiXmlHandle *const pXmlHandle ) = 0;
@@ -164,7 +164,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Initialize the algorithm, i.e by initializing specific variables
+			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
 			virtual void Init() = 0;
@@ -172,7 +172,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Execute the algorithm
+			 * @brief Execute the algorithm
 			 *
 			 */
 			virtual void Execute() = 0;
@@ -180,7 +180,7 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Finalize the algorithm
+			 * @brief Finalize the algorithm
 			 *
 			 */
 			virtual void End() = 0;
@@ -188,21 +188,18 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief : Allow to check if everything is well set in the algorithm before starting it
+			 * @brief Allow to check if everything is well set in the algorithm before starting it
 			 *
 			 */
 			virtual Return CheckConsistency() = 0;
 
 
 			std::string name;
-
 			cfgparser::Data data;
-
 			bool needData;
-
 			bool needParams;
-
 			std::vector<Tag> avoidedTags;
+
 	};
 
 }  // end of namespace
