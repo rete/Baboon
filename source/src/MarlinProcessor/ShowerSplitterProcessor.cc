@@ -22,6 +22,7 @@ ShowerSplitterProcessor aShowerSplitterProcessor;
 
 using namespace std;
 using namespace baboon;
+using namespace EVENT;
 
 ShowerSplitterProcessor::ShowerSplitterProcessor()
 	: marlin::Processor("ShowerSplitterProcessor") {
@@ -179,6 +180,7 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 	ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 	TrackManager *trackManager = TrackManager::GetInstance();
 	CoreManager *coreManager = CoreManager::GetInstance();
+	ShowerManager *showerManager = ShowerManager::GetInstance();
 
 	HitCollection * hitCollection = hitManager->GetHitCollection();
 	ClusterCollection *clusterCollection = clusteringManager->GetCluster2D();
@@ -211,9 +213,9 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 		clusteringAlgo->SetClusteringMode( fClustering3D );
 		clusteringAlgo->SetTaggingMode( fClusterTagMode );
 		clusteringAlgo->AddHitTagToCluster( fCore );
+		clusteringAlgo->SetClusterSizeLowerLimit( 10 );
 		clusteringAlgo->SetClusterCollection( clustCol );
 		clusteringAlgo->Process();
-
 		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
 
 			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
@@ -332,6 +334,7 @@ void ShowerSplitterProcessor::processEvent( LCEvent * evt ) {
 
 	analysisManager->Fill("SplitterVariables");
 
+	showerManager->ClearAllContent();
 	clusteringManager->ClearAllContent();
 	hitManager->ClearAllContent();
 	coreManager->ClearAllContent();
