@@ -18,25 +18,27 @@ INCLUDE( ilcsoft_default_settings )
 
 # -------------- packages -------------
 FIND_PACKAGE( Baboon REQUIRED )
-FIND_PACKAGE( Marlin 1.0 REQUIRED )
-FIND_PACKAGE( LCIO REQUIRED )
-FIND_PACKAGE( ROOT 5.32 REQUIRED )
 
-FOREACH( pkg LCIO Marlin Baboon ROOT )
-    IF( ${pkg}_FOUND )
-        INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
-        LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
-        ADD_DEFINITIONS ( ${${pkg}_DEFINITIONS} )
-    ENDIF()
-ENDFOREACH()
+IF( Baboon_FOUND )
+    INCLUDE_DIRECTORIES( ${Baboon_INCLUDE_DIRS} )
+    LINK_LIBRARIES( ${Baboon_LIBRARIES} )
+    ADD_DEFINITIONS ( ${Baboon_DEFINITIONS} )
+ENDIF()
+
 
 INCLUDE_DIRECTORIES( include )
+
 
 # require proper c++
 ADD_DEFINITIONS( "-pedantic -Wunused-value -O2" )
 ADD_DEFINITIONS("-Wno-long-long")
 
-ADD_LIBRARY( myProc SHARED src/myProc.cc include/myProc.hh )
+ADD_LIBRARY( 
+	myProc 
+	SHARED 
+	src/myProc.cc 
+	include/myProc.hh 
+)
 
 INSTALL(
 	TARGETS myProc
