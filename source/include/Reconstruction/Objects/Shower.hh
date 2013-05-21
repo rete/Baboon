@@ -85,7 +85,7 @@ namespace baboon {
 			inline ThreeVector GetStartingPoint()
 				{ return startingPoint; }
 
-			inline ThreeVector GetStartingCone()
+			inline Cone *GetStartingCone()
 				{ return startingCone; }
 
 			inline int Size()
