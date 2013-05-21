@@ -49,6 +49,8 @@ namespace baboon {
 
 			bool ShowerContainsHit( Shower *shower , Hit *hit );
 
+			Return ClearAllContent();
+
 		protected:
 
 			/*! Unique instance of this class. Singleton pattern */
