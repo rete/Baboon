@@ -18,7 +18,7 @@ of any derivative work must include this copyright notice.
 REQUIREMENTS:
 =============
 
-   ILCSOFT version 01-14 or higher.
+   ILCSOFT version 01-14 or higher( tested ).
    CMake 2.6 or higher.
    
    Needed packages from ILCSoft :
@@ -39,15 +39,13 @@ INSTALL:
     mkdir build (if there's not)
     cd build
     cmake -C $ILCSOFT/ILCSoft.cmake ..
- 
-    make -j N  # for N processor on your machine
-    sudo make install
+    make install -j N  # for N processor on your machine
  
  
   Before using the software, do not forget to modify 
   the init_Baboon.sh script as your need and source it :
   
-    source init_SDHCAL.sh
+    source init_Baboon.sh
     
     
   Enjoy !  :)
