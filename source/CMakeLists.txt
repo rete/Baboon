@@ -67,6 +67,8 @@ INSTALL(
 	LIBRARY DESTINATION lib 
 )
 
+# --------------------- Shower Splitter lib -------------------------------
+
 FILE (
 	GLOB_RECURSE
 	ShowerSplitterProcessor_FILES
@@ -85,6 +87,8 @@ TARGET_LINK_LIBRARIES(
 	${ROOT_COMPONENT_LIBRARIES} 
 	Baboon 
 )
+
+
 
 
 FILE (
@@ -108,6 +112,30 @@ TARGET_LINK_LIBRARIES(
 
 
 FIND_LIBRARY( TSPECTRUM_LIB libSpectrum.so )
+
+
+
+# --------------------- Overlay Estimator lib processor -------------------------------
+
+FILE (
+	GLOB_RECURSE
+	OverlayEstimatorProcessor_FILES
+	include/MarlinProcessor/OverlayEstimatorProcessor.hh
+	src/MarlinProcessor/OverlayEstimatorProcessor.cc
+)
+ADD_LIBRARY( OverlayEstimator_lib SHARED ${OverlayEstimatorProcessor_FILES} )
+SET_TARGET_PROPERTIES( OverlayEstimator_lib PROPERTIES OUTPUT_NAME OverlayEstimator )
+INSTALL(
+	TARGETS OverlayEstimator_lib
+	LIBRARY DESTINATION lib 
+)
+
+TARGET_LINK_LIBRARIES( 
+	OverlayEstimator_lib 
+	${ROOT_COMPONENT_LIBRARIES} 
+	Baboon
+	${TSPECTRUM_LIB}
+)
 
 
 # ---------------- Overlay Event ------------------
@@ -139,17 +167,17 @@ TARGET_LINK_LIBRARIES( DrawEvent ${ROOT_COMPONENT_LIBRARIES} Baboon )
 
 
 # ------------------ Overlay Estimator --------------------
-SET( 
-	OVERLAY_ESTIMATOR_SRC_FILES 
-	main/OverlayEstimator.cc 
-)
-ADD_EXECUTABLE( OverlayEstimator ${OVERLAY_ESTIMATOR_SRC_FILES} )
-TARGET_LINK_LIBRARIES( 
-	OverlayEstimator 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon
-	${TSPECTRUM_LIB}
-)
+#SET( 
+#	OVERLAY_ESTIMATOR_SRC_FILES 
+#	main/OverlayEstimator.cc 
+#)
+#ADD_EXECUTABLE( OverlayEstimator ${OVERLAY_ESTIMATOR_SRC_FILES} )
+#TARGET_LINK_LIBRARIES( 
+#	OverlayEstimator 
+#	${ROOT_COMPONENT_LIBRARIES} 
+#	Baboon
+#	${TSPECTRUM_LIB}
+#)
 
 
 # ------------------ Overlay Estimator Analysis --------------------
@@ -175,7 +203,7 @@ ENDIF()
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent OverlayEstimator OverlayEstimatorAnalysis
+	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis DrawShower
 	DESTINATION 
 	bin
 )
