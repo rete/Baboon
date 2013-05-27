@@ -35,6 +35,9 @@
 #include "IMPL/LCEventImpl.h"
 #include "IMPL/LCFlagImpl.h"
 #include "IMPL/LCTOOLS.h"
+#include "UTIL/CellIDDecoder.h"
+#include "UTIL/CellIDEncoder.h"
+#include "lcio.h"
 
 // baboon includes
 #include "Utils/Converters.hh"
@@ -59,6 +62,8 @@
 using namespace std;
 using namespace cfgparser;
 using namespace baboon;
+using namespace EVENT;
+using namespace UTIL;
 
 // for debug messages (devel)
 #define __DEBUG__ 0
