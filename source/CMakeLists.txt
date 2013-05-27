@@ -203,7 +203,7 @@ ENDIF()
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis DrawShower
+	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis
 	DESTINATION 
 	bin
 )
