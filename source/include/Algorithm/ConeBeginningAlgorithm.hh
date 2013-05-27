@@ -29,14 +29,17 @@
 #include <numeric>
 
 #include "Geometry/Cone.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Managers/HitManager.hh"
 #include "Managers/CoreManager.hh"
 #include "Managers/ShowerManager.hh"
+#include "Managers/ClusteringManager.hh"
 #include "Reconstruction/Objects/Shower.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 
+#include "GraphicalProcessor/SDHCALPrototype.hh"
+#include "TGeoCone.h"
 
 namespace baboon {
 
@@ -102,7 +105,10 @@ namespace baboon {
 			void FindPadsInCone( Cone *cone , std::vector<IntVector> &existingPadsInCone, std::vector<IntVector> &touchedPadsInCone );
 
 
+			int NbOfCoreHitsInCone( Cone *cone , Core *core );
+
 			HitCollection *hitCollection;
+			std::vector<TGeoNode*> nodeList;
 
 			// algorithm parameters
 			int xLoopHalfRange;
@@ -118,6 +124,7 @@ namespace baboon {
 			int coreSizeLowerLimit;
 			double coneBackwardDistance;
 			double coneStepDistance;
+			int clusterSizeAtPeakPositionUpperLimit;
 
 
 	};  // class
