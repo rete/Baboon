@@ -27,7 +27,7 @@
 #include <algorithm>
 
 
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Managers/HitManager.hh"
 #include "Objects/Cluster.hh"
 #include "Utilities/Globals.hh"

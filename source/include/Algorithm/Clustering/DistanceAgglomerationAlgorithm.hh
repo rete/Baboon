@@ -29,7 +29,7 @@
 // sdhcal includes
 #include "Exception.hh"
 #include "Objects/Cluster.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 
 
 namespace baboon {
