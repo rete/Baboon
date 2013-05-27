@@ -30,7 +30,7 @@
 // sdhcal includes
 #include "Algorithm/AbstractAlgorithm.hh"
 #include "Objects/Cluster.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Managers/ClusteringManager.hh"
 #include "Managers/HitManager.hh"
 #include "Managers/TrackManager.hh"
