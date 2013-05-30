@@ -22,14 +22,9 @@
 #include <cmath>
 #include <algorithm>
 
-//// lcio includes
-//#include "EVENT/LCCollection.h"
-//#include "EVENT/CalorimeterHit.h"
-//#include "IMPL/CalorimeterHitImpl.h"
 
-
-// sdhcal includes
-#include "Objects/Hit.hh"
+// baboon includes
+#include "Objects/HitCollection.hh"
 #include "Geometry/Matrix3D.hh"
 #include "Config/SdhcalConfig.hh"
 #include "Utilities/Globals.hh"

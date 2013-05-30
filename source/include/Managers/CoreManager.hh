@@ -58,6 +58,8 @@ namespace baboon {
 
 			bool CoreContainsHit( Core *core , Hit *hit );
 
+			Return FindCoreContainingHit( Hit *hit , Core *coreToFind );
+
 		protected:
 
 			/*!

@@ -26,6 +26,8 @@
 #include "Reconstruction/Objects/Shower.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
+#include "Managers/TrackManager.hh"
+#include "Managers/CoreManager.hh"
 
 
 namespace baboon {
@@ -50,6 +52,11 @@ namespace baboon {
 			bool ShowerContainsHit( Shower *shower , Hit *hit );
 
 			Return ClearAllContent();
+
+			Return BuildShowerFromHitCollection( HitCollection *hitCollection );
+
+			// To be implemented...
+			Return MergeShowersAndDelete( Shower *showerToBeEnlarged , Shower *showerToBeDeleted );
 
 		protected:
 

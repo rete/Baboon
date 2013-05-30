@@ -26,8 +26,10 @@
 
 
 #include "Objects/Cluster.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Managers/HitManager.hh"
+#include "Utilities/ReturnValues.hh"
+#include "Utilities/Internal.hh"
 
 namespace baboon {
 
@@ -81,6 +83,8 @@ namespace baboon {
 
 
 		Return MergeAndDeleteClusters( Cluster *clusterToEnlarge , Cluster *clusterToDelete );
+
+		Cluster *GetClusterAt( ClusterType clusterType , unsigned int I , unsigned int J , unsigned int K );
 
 	};
 

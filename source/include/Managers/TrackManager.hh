@@ -51,6 +51,8 @@ namespace baboon {
 
 			Return ClearAllContent();
 
+			Return FindTrackContainingHit( Hit *hit , Track *trackToFind );
+
 
 		protected:
 
@@ -59,9 +61,14 @@ namespace baboon {
 			/*! Default Destructor */
 			virtual ~TrackManager();
 
-			static TrackManager *instance;
 
+			static TrackManager *instance;
 			TrackCollection *trackCollection;
+
+		public:
+
+			inline TrackCollection *GetTrackCollection()
+				{ return trackCollection; }
 
 
 

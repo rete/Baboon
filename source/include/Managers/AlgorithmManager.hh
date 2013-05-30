@@ -29,9 +29,11 @@
 #include "CfgParser/Data.hh"
 #include "CfgParser/CfgParser.hh"
 
-// sdhcal includes
+// baboon includes
 #include "Algorithm/AbstractAlgorithm.hh"
 #include "Exception.hh"
+#include "Utilities/Internal.hh"
+#include "Utilities/ReturnValues.hh"
 
 
 namespace baboon {
@@ -47,23 +49,30 @@ namespace baboon {
 
 		protected :
 
-			/*! Default Constructor */
+			/*!
+			 *
+			 * Default Constructor
+			 *
+			 */
 			AlgorithmManager();
 
-			/*! Default Destructor. Not virtual because no inheritance */
+			/*!
+			 *
+			 * Default Destructor. Not virtual because no inheritance
+			 *
+			 */
 			~AlgorithmManager();
 
-			/*! Unique instance. Part of singleton pattern */
 			static AlgorithmManager* instance;
-
-			/*! Map for algorithm storage */
 			AlgorithmMap algorithmMap;
-
-			/*! Configuration file name where the parameters of the algorithms have to be taken */
 			std::string cfgFileName;
 
-			/*! Load the algorithm parameters from the cfg file */
-			void LoadAlgorithms();
+			/*!
+			 *
+			 * Load the algorithm parameters from the cfg file
+			 *
+			 */
+			Return LoadAlgorithms();
 
 			/*!
 			 *
@@ -74,29 +83,56 @@ namespace baboon {
 
 		public :
 
-			/*! Only way to get an instance of this class. Part of the singleton patter */
+			/*!
+			 *
+			 * Only way to get an instance of this class. Part of the singleton patter
+			 *
+			 */
 			static AlgorithmManager* GetInstance();
 
-			/*! Only way to delete the object. Part of the singleton pattern */
+			/*!
+			 *
+			 * Only way to delete the object. Part of the singleton pattern
+			 *
+			 */
 			static void Kill();
 
-			/*! Register an algorithm. Throw an exception if the algorithm is already registered */
-			void RegisterAlgorithm( AbstractAlgorithm* )
-				throw ( AlgorithmException , Exception );
+			/*!
+			 *
+			 * Register an algorithm
+			 *
+			 */
+			Return RegisterAlgorithm( AbstractAlgorithm* );
 
-			/*! Return true if the lagorithm is registered. Useful to avoid exception while getting or registering an algorithm */
+			/*!
+			 *
+			 * Return true if the algorithm is registered.
+			 * Useful to avoid exception while getting or registering an algorithm
+			 *
+			 */
 			bool AlgorithmIsRegistered(const std::string&);
 
-			/*! Return an algorithm which have already been registered via RegisterAlgorithm() */
-			AbstractAlgorithm* GetAlgorithm(const std::string&)
-				throw ( AlgorithmException , Exception );
+			/*!
+			 *
+			 * Return an algorithm which have already been registered via RegisterAlgorithm()
+			 *
+			 */
+			AbstractAlgorithm* GetAlgorithm(const std::string&);
 
-			/*! Set the cfg file name where the algorithm parameters are stored */
+			/*!
+			 *
+			 * Set the cfg file name where the algorithm parameters are stored
+			 *
+			 */
 			inline void SetConfigFileName(const std::string& cfgfName)
 				{ cfgFileName = cfgfName; }
 
-			/*! Initialize the whole stuff. */
-			void Initialize();
+			/*!
+			 *
+			 * Initialize the beast.
+			 *
+			 */
+			Return Initialize();
 
 
 	};
