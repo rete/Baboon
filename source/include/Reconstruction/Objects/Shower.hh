@@ -27,12 +27,14 @@
 #include <vector>
 #include <algorithm>
 
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 #include "Geometry/ThreeVector.hh"
 #include "Geometry/Cone.hh"
 #include "Reconstruction/Objects/Track.hh"
+#include "Reconstruction/Objects/Core.hh"
+
 
 
 namespace baboon {
@@ -71,16 +73,35 @@ namespace baboon {
 
 			bool HasThrust();
 
+			Return AddCore( Core *core );
+
+			Return RemoveCore( Core *core );
+
+			bool Contains( Core *core );
+
+			Return AddTrack( Track *track );
+
+			Return RemoveTrack( Track *track );
+
+			bool Contains( Track *track );
+
+
+
 
 		protected:
 
 			HitToWeightsMap *hitToWeightsMap;
+			CoreCollection *coreCollection;
+			TrackCollection *trackCollection;
 			ThreeVector startingPoint;
 			Track *thrust;
 			Cone *startingCone;
 
 
 		public:
+
+			inline HitToWeightsMap *GetHitToWeightsMap()
+				{ return hitToWeightsMap; }
 
 			inline ThreeVector GetStartingPoint()
 				{ return startingPoint; }
@@ -93,6 +114,12 @@ namespace baboon {
 
 			inline Track *GetThrust()
 				{ return thrust; }
+
+			inline CoreCollection *GetCoreCollection()
+				{ return coreCollection; }
+
+			inline TrackCollection *GetTrackCollection()
+				{ return trackCollection; }
 
 
 	};  // class
