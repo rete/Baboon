@@ -21,17 +21,10 @@
 #include <cstdlib>
 #include <cmath>
 
-
-// lcio includes
-#include "IMPL/CalorimeterHitImpl.h"
-#include "IMPL/LCCollectionVec.h"
-#include "UTIL/CellIDDecoder.h"
-#include "UTIL/CellIDEncoder.h"
-
-// sdhcal includes
+// baboon includes
 #include "Geometry/ThreeVector.hh"
 #include "Config/SdhcalConfig.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 
 
 namespace baboon {
