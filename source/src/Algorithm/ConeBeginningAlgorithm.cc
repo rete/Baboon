@@ -34,9 +34,6 @@ namespace baboon {
 	void ConeBeginningAlgorithm::Init() {
 
 		hitCollection = HitManager::GetInstance()->GetHitCollection();
-		data.GetValue("xLoopHalfRange",&xLoopHalfRange);
-		data.GetValue("yLoopHalfRange",&yLoopHalfRange);
-		data.GetValue("zLoopHalfRange",&zLoopHalfRange);
 		data.GetValue("coneMinimumOpeningAngle",&coneMinimumOpeningAngle);
 		data.GetValue("coneMaximumOpeningAngle",&coneMaximumOpeningAngle);
 		data.GetValue("angleStep",&angleStep);
@@ -47,14 +44,23 @@ namespace baboon {
 		data.GetValue("coreSizeLowerLimit",&coreSizeLowerLimit);
 		data.GetValue("coneBackwardDistance",&coneBackwardDistance);
 		data.GetValue("coneStepDistance",&coneStepDistance);
+		data.GetValue("clusterSizeAtPeakPositionUpperLimit",&clusterSizeAtPeakPositionUpperLimit);
+
+		if( !nodeList.empty() ) {
+			for( unsigned int i=0 ; i<nodeList.size() ; i++ ) {
+				SDHCALPrototype::GetGeoManager()->GetTopVolume()->RemoveNode( nodeList.at(i) );
+			}
+			nodeList.clear();
+		}
+
 	}
 
 
 	Return ConeBeginningAlgorithm::CheckConsistency() {
 
 		if( hitCollection == 0 )
-			return S_ERROR("ConeBeginningAlgorithm bad init. Please check your inputs!");
-		return S_OK();
+			return BABOON_ERROR("ConeBeginning Algorithm bad init. Please check your inputs!");
+		return BABOON_SUCCESS();
 	}
 
 
@@ -62,10 +68,13 @@ namespace baboon {
 
 		HitManager* hitManager = HitManager::GetInstance();
 		CoreManager *coreManager = CoreManager::GetInstance();
+		ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 
 		CoreCollection *coreCollection = coreManager->GetCoreCollection();
 		if( coreCollection->empty() )
 			return;
+
+		ostringstream ss;
 
 		for( unsigned int c=0 ; c<coreCollection->size() ; c++ ) {
 
@@ -75,9 +84,82 @@ namespace baboon {
 				continue;
 
 			ThreeVector coreCog = core->CenterOfGravity();
+
 			int firstHitLayer = core->GetFirstHitLayer();
 
 			HitCollection *hitCol = core->GetHitCollection();
+			DoubleVector coreRMS = hitCol->GetRMS();
+
+
+			int maximumClusterSizeInCore = 0;
+//			ClusterCollection clusterTempList;
+			int maximumClusterSizeLayer = 0;
+			HitCollection hitTempCollection;
+
+			double maxRadius = 0;
+
+			for( unsigned int i=0 ; i<hitCol->size() ; i++ ) {
+
+				Hit *hit1 = hitCol->at(i);
+				if( std::find( hitTempCollection.begin() , hitTempCollection.end() , hit1 ) != hitTempCollection.end() )
+					continue;
+
+				HitCollection corePlanCluster;
+				hitTempCollection.push_back( hit1 );
+				corePlanCluster.push_back( hit1 );
+				int coreClusterSize = 0;
+
+				for(  unsigned int j=0 ; j<hitCol->size() ; j++ ) {
+
+					Hit *hit2 = hitCol->at(j);
+					if( hit1 == hit2 ) {
+						coreClusterSize++;
+						continue;
+					}
+					if( std::find( hitTempCollection.begin() , hitTempCollection.end() , hit2 ) != hitTempCollection.end() )
+						continue;
+
+					if( hit1->GetIJK().at(2) == hit2->GetIJK().at(2) ) {
+						corePlanCluster.push_back( hit2 );
+						coreClusterSize++;
+						hitTempCollection.push_back( hit2 );
+					}
+
+				}
+//				cout << "coreClusterSize : " << coreClusterSize << endl;
+
+				if( coreClusterSize > maximumClusterSizeInCore ) {
+
+					maximumClusterSizeInCore = coreClusterSize;
+					maximumClusterSizeLayer = hit1->GetIJK().at(2);
+
+					for( unsigned int k1=0 ; k1<corePlanCluster.size() ; k1++ ) {
+
+						Hit *hitK1 = corePlanCluster.at(k1);
+						IntVector ijk1 = hitK1->GetIJK();
+						double radius = 0;
+						for( unsigned int k2=0 ; k2<corePlanCluster.size() ; k2++ ) {
+
+							Hit *hitK2 = corePlanCluster.at(k2);
+							IntVector ijk2 = hitK2->GetIJK();
+							double distance = (ijk1.at(0)-ijk2.at(0))* (ijk1.at(0) - ijk2.at(0)) + (ijk1.at(1)-ijk2.at(1))* (ijk1.at(1) - ijk2.at(1));
+
+							if( sqrt(distance) > maxRadius )
+								maxRadius = sqrt(distance);
+						}
+					}
+				}
+			}
+//			cout << "maximumClusterSizeInCore : " << maximumClusterSizeInCore << endl;
+//			cout << "maxRadius : " << maxRadius << endl;
+//			cout << "maximumClusterSizeLayer : " << maximumClusterSizeLayer << endl;
+//
+//			cout << "firstHitLayer : " << firstHitLayer << endl;
+
+
+			double coneRadius = maxRadius;
+
+			int lastLayer = hitCol->GetLastLayer();
 
 			double iStart = 0;
 			double jStart = 0;
@@ -97,95 +179,91 @@ namespace baboon {
 			ThreeVector coneDirected( coreCog - coreStartingPoint );
 			if( coneDirected.z() < 0 ) coneDirected *= -1;
 
-			ThreeVector forwardMinimumConePeakPosition = coreStartingPoint - coneBackwardDistance*coneDirected.unit();
 
-			if( coneDirected == ThreeVector(0,0,0) ) continue;
-			coneDirected.setMag( coneLength );
 
-			vector<Cone*> coneCandidates;
-			vector<int> conePeakLayers;
+			ThreeVector coneCoreStartingPoint = coreStartingPoint;
 
-			for( double coneDistance=0 ; coneDistance<=coneBackwardDistance ; coneDistance+=coneStepDistance ) {
-				for( double angle=coneMinimumOpeningAngle ; angle<=coneMaximumOpeningAngle ; angle+=angleStep ) {
+			coneCoreStartingPoint.setZ( coneCoreStartingPoint.z() -1 );
 
-					ThreeVector currentConePeakPosition = forwardMinimumConePeakPosition + coneDistance*coneDirected.unit();
-					double radius = coneLength*tan( angle );
-					Cone *currentCone = new Cone( currentConePeakPosition , coneDirected , radius );
-					vector<IntVector> existingPadsInCone;
-					vector<IntVector> touchedPadsInCone;
-					FindPadsInCone( currentCone , existingPadsInCone , touchedPadsInCone );
-					if( existingPadsInCone.empty() )
-						continue;
-					double percent = double(touchedPadsInCone.size()) / double(existingPadsInCone.size());
+			double currentConeLength = abs(coneCoreStartingPoint.z() - maximumClusterSizeLayer);
+			coneDirected.setMag( currentConeLength );
+//			cout << "currentConeLength : " << currentConeLength << endl;
 
-					if( percent > conePadsLowerLimitCut ) {
+			Cone *bestCone = new Cone( coneCoreStartingPoint , coneDirected , coneRadius/2.0 );
 
-						int I = round( currentConePeakPosition.x() );
-						int J = round( currentConePeakPosition.y() );
-						int K = round( currentConePeakPosition.z() );
-						if( hitManager->PadIsTouched( I , J , K ) ) {
-							HitThreshold fThr = hitManager->GetHitAt( I , J , K )->GetThreshold();
-//							if( fThr == fThreshold2 || fThr == fThreshold3 ) {
-							if( fThr == fThreshold3 ) {
-								delete currentCone;
-								continue;
-							}
-						}
-						else {
-							conePeakLayers.push_back( int( currentCone->GetPeakPosition().z() ) );
-							coneCandidates.push_back( currentCone );
-						}
-					}
-					else {
-						delete currentCone;
-					}
+//			cout << "bestCone->GetPeakPosition()" << bestCone->GetPeakPosition() << endl;
+
+			/******************************/
+
+
+			ThreeVector forwardMinimumConePeakPosition = coneCoreStartingPoint - coneBackwardDistance*coneDirected.unit();
+//			cout << "forwardMinimumConePeakPosition : " << forwardMinimumConePeakPosition << endl;
+
+			ThreeVector previousPosition = bestCone->GetPeakPosition();
+
+//			cout << "cone peak position before looping : " << bestCone->GetPeakPosition() << endl;
+
+			for( double coneDistance=0 ; coneDistance<coneBackwardDistance ; coneDistance+=coneStepDistance ) {
+
+
+				ThreeVector currentConePeakPosition = previousPosition - coneStepDistance*coneDirected.unit();
+//				cout << "coneDirected.unit() : " << coneDirected.unit() << endl;
+//				cout << "currentConePeakPosition : " << currentConePeakPosition << endl;
+
+				bestCone->SetPeakPosition( currentConePeakPosition );
+
+				vector<IntVector> existingPadsInCone;
+				vector<IntVector> touchedPadsInCone;
+
+				this->FindPadsInCone( bestCone , existingPadsInCone , touchedPadsInCone );
+
+				double percent = double(touchedPadsInCone.size()) / double(existingPadsInCone.size());
+
+				if( percent < conePadsLowerLimitCut ) {
+
+					bestCone->SetPeakPosition( previousPosition );
+					break;
 				}
+				previousPosition = currentConePeakPosition;
 			}
 
-//			cout << "core size : " << core->Size() << endl;
-//			cout << "coneDirected : " << coneDirected << endl;
+//			cout << "cone peak position after looping : " << bestCone->GetPeakPosition() << endl;
 
-			if( coneCandidates.empty() ) continue;
-
-			Cone *bestCone = 0;
-			vector<Cone*> coneWithGoodPeakLayer;
-			double averageConePeaksLayer = accumulate( conePeakLayers.begin() , conePeakLayers.end() , 0.0 ) *1.0 / conePeakLayers.size();
-			int layerMin = 1000;
-			ThreeVector minPos;
-			double minDistanceCoreCone = 10000;
-
-			for( unsigned int coneID=0 ; coneID<coneCandidates.size() ; coneID++ ) {
-
-				Cone *cone = coneCandidates.at( coneID );
-				if( abs( cone->GetPeakPosition().mag() - coreStartingPoint.mag() ) < minDistanceCoreCone ) {
-					minDistanceCoreCone = abs( cone->GetPeakPosition().mag() - coreStartingPoint.mag() );
-					bestCone = cone;
-				}
-			}
-
-			double maximumOpeningAngle = 0;
-
-			for( unsigned int coneID=0 ; coneID<coneCandidates.size() ; coneID++ ) {
-
-				Cone *cone = coneCandidates.at(coneID);
-				if( cone->GetPeakPosition() == bestCone->GetPeakPosition() ) {
-					if( cone->GetTheta() > maximumOpeningAngle ) {
-						maximumOpeningAngle = cone->GetTheta();
-						bestCone = cone;
-					}
-				}
-
-			}
-//			cout << "best peak position        : " << bestCone->GetPeakPosition() << endl;
-//			cout << "best cone angle           : " << bestCone->GetTheta() << endl;
-//			cout << "best cone radius          : " << bestCone->GetRadius() << endl;
-//			cout << "best cone directed vector : " << coneDirected << endl;
+			core->SetStartingCone( bestCone );
 
 			ShowerManager *showerManager = ShowerManager::GetInstance();
 			Shower *shower = new Shower();
 			shower->SetStartingCone( bestCone );
 			shower->SetStartingPoint( bestCone->GetPeakPosition() );
+			shower->AddCore( core );
 			showerManager->AddShower( shower );
+
+			TGeoManager *geoManager = SDHCALPrototype::GetGeoManager();
+
+			if( geoManager !=0 ) {
+
+//				ThreeVector ex(1,0,0);
+//				ThreeVector ey(0,1,0);
+//				ThreeVector ez(0,0,1);
+//
+//				double psi = bestCone->GetDirectedVector().angle( ex );
+//				double phi = bestCone->GetDirectedVector().angle( ey );
+//				double theta = bestCone->GetDirectedVector().angle( ez );
+
+				ss << "cone_" << c+1;
+				TGeoMaterial *vacMat = new TGeoMaterial("Vacuum",0,0,0);
+				TGeoMedium *vacMed = new TGeoMedium("Vacuum",1,vacMat);
+				double coneRadius = bestCone->GetRadius();
+				TGeoVolume *cone = geoManager->MakeCone( ss.str().c_str() , vacMed , (currentConeLength*2.613)/2.0 ,0,0,coneRadius-coneRadius*(0.01/100.0),coneRadius);
+				TGeoCone *coneShape = ( TGeoCone* )cone->GetShape();
+				ThreeVector coneTrans = bestCone->GetPeakPosition() + currentConeLength/2.0 * bestCone->GetDirectedVector().unit();
+				TGeoTranslation *translation = new TGeoTranslation( coneTrans.x() , coneTrans.y() , 2.613*coneTrans.z() );
+				geoManager->GetTopVolume()->AddNode( cone , c+1 , translation );
+				ss << "_" << c+1;
+				TGeoNode *n = geoManager->GetTopVolume()->GetNode(ss.str().c_str());
+				nodeList.push_back(n);
+				ss.str("");
+			}
 
 		}
 
@@ -238,6 +316,22 @@ namespace baboon {
 				}
 			}
 		}
+	}
+
+	int ConeBeginningAlgorithm::NbOfCoreHitsInCone( Cone *cone , Core *core ) {
+
+		int nbOfCoreHitsInCone = 0;
+		HitCollection *coreHitCollection = core->GetHitCollection();
+
+		for( unsigned int i=0 ; i<coreHitCollection->size() ; i++ ) {
+
+			IntVector ijk = coreHitCollection->at(i)->GetIJK();
+			ThreeVector ijkVec( ijk.at(0) , ijk.at(1) , ijk.at(2) );
+			if( cone->Contains( ijkVec ) )
+				nbOfCoreHitsInCone++;
+		}
+
+		return nbOfCoreHitsInCone;
 	}
 
 
