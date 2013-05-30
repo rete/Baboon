@@ -26,9 +26,10 @@
 #include <vector>
 #include <algorithm>
 
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
+#include "Geometry/Cone.hh"
 #include "Utils/HitComputing.hh"
 
 namespace baboon {
@@ -79,6 +80,8 @@ namespace baboon {
 
 			bool Contains( Hit *hit );
 
+			Return SetStartingCone( Cone *cone );
+
 			ThreeVector CenterOfGravity();
 
 			int GetFirstHitLayer();
@@ -88,6 +91,7 @@ namespace baboon {
 		protected:
 
 			HitCollection *hitCollection;
+			Cone *startingCone;
 
 		public:
 
@@ -96,6 +100,9 @@ namespace baboon {
 
 			inline HitCollection *GetHitCollection()
 				{ return hitCollection; }
+
+			inline Cone *GetStartingCone()
+				{ return startingCone; }
 
 
 	};  // class
