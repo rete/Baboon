@@ -30,8 +30,10 @@
 
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
-#include "Objects/Hit.hh"
+#include "Utilities/Internal.hh"
+#include "Objects/HitCollection.hh"
 #include "Managers/HitManager.hh"
+
 
 namespace baboon {
 
