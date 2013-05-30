@@ -38,6 +38,8 @@
 #include "Reconstruction/Builders/TrackCollectionBuilder.hh"
 #include "Utilities/ReturnValues.hh"
 
+#include "Reconstruction/Linear3DFit.hh"
+
 namespace baboon {
 
 
