@@ -63,7 +63,7 @@ namespace baboon {
 			void Fit();
 
 			inline double GetChi2()
-				{ if(chi2 == 0) ComputeChi2(); return chi2; }
+				{ ComputeChi2(); return chi2; }
 
 			ThreeVector VectorFromRealLine( const ThreeVector& );
 
