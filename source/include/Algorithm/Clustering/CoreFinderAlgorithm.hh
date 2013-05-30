@@ -27,7 +27,6 @@
 #include "Exception.hh"
 #include "Managers/HitManager.hh"
 #include "Objects/HitCollection.hh"
-#include "Reconstruction/Builders/CoreCollectionBuilder.hh"
 
 
 namespace baboon {
