@@ -19,12 +19,12 @@ namespace baboon {
 		const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
 		if (NULL == pXmlElement)
-			return S_ERROR("NULL == pXmlElement");
+			return BABOON_NOT_INITIALIZED("NULL == pXmlElement");
 
 		if (!StringToType(pXmlElement->GetText(), t))
-			return S_ERROR("Can't convert string to asked type");
+			return BABOON_ERROR("Can't convert string to asked type");
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	template <>
@@ -33,7 +33,7 @@ namespace baboon {
 		const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
 		if (NULL == pXmlElement)
-			return S_ERROR("NULL == pXmlElement");
+			return BABOON_NOT_INITIALIZED("NULL == pXmlElement");
 
 		const std::string xmlElementString = pXmlElement->GetText();
 
@@ -46,10 +46,10 @@ namespace baboon {
 			t = false;
 		}
 		else {
-			return S_ERROR("Invalid boolean value");
+			return BABOON_ERROR("Invalid boolean value");
 		}
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace baboon {
 		const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
 		if (NULL == pXmlElement)
-			return S_ERROR("NULL == pXmlElement");
+			return BABOON_NOT_INITIALIZED("NULL == pXmlElement");
 
 		StringVector tokens;
 		TokenizeString(pXmlElement->GetText(), tokens);
@@ -70,12 +70,12 @@ namespace baboon {
 			T t;
 
 			if (!StringToType(*iter, t))
-				return S_ERROR("Can't convert string to asked type");
+				return BABOON_ERROR("Can't convert string to asked type");
 
 			vector.push_back(t);
 		}
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,12 +87,12 @@ namespace baboon {
 		TiXmlElement *pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
 		if (NULL == pXmlElement)
-			return S_ERROR("NULL == pXmlElement");
+			return BABOON_NOT_INITIALIZED("NULL == pXmlElement");
 
 		TiXmlElement *pXmlRowElement = TiXmlHandle(pXmlElement).FirstChild(rowName).Element();
 
 		if (NULL == pXmlRowElement)
-			return S_ERROR("NULL == pXmlRowElement");
+			return BABOON_NOT_INITIALIZED("NULL == pXmlRowElement");
 
 		for ( ; NULL != pXmlRowElement; pXmlRowElement = pXmlRowElement->NextSiblingElement(rowName))
 		{
@@ -106,7 +106,7 @@ namespace baboon {
 				T t;
 
 				if (!StringToType(*iter, t))
-					return S_ERROR("Can't convert string to asked type");
+					return BABOON_ERROR("Can't convert string to asked type");
 
 				rowVector.push_back(t);
 			}
@@ -114,7 +114,7 @@ namespace baboon {
 			vector.push_back(rowVector);
 		}
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	void XmlHelper::TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter) {
