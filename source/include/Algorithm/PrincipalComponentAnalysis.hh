@@ -39,7 +39,7 @@
 #include "TSpectrum2.h"
 
 #include "Geometry/ThreeVector.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Exception.hh"
 
 
