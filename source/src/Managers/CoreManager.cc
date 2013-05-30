@@ -51,37 +51,37 @@ namespace baboon {
 	Return CoreManager::AddCore( Core *core ) {
 
 		if( core == 0 )
-			return S_ERROR("While adding a core : assertion core != 0 failed");
+			return BABOON_INVALID_PARAMETER("While adding a core : assertion core != 0 failed");
 
 		CoreCollection::iterator coreIt = std::find( coreCollection->begin() ,coreCollection->end() , core );
 		if( coreIt != coreCollection->end() )
-			return S_ERROR("Core already exists in core collection");
+			return BABOON_ALREADY_PRESENT("Core already exists in core collection");
 		else coreCollection->push_back( core );
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return CoreManager::RemoveCore( Core *core ) {
 
 		if( core == 0 )
-			return S_ERROR("While removing a core : assertion core != 0 failed");
+			return BABOON_INVALID_PARAMETER("While removing a core : assertion core != 0 failed");
 
 		CoreCollection::iterator coreIt = std::find( coreCollection->begin() ,coreCollection->end() , core );
 		if( coreIt != coreCollection->end() ) {
 			delete core;
 			coreCollection->erase( coreIt );
 		}
-		else return S_ERROR("While removing a core : core was not registered in the core collection");
+		else return BABOON_NOT_FOUND("While removing a core : core was not registered in the core collection");
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return CoreManager::ClearAllContent() {
 
 		if( coreCollection == 0 )
-			return S_ERROR("While clearing all content in core manager : assertion coreCollection != 0 failed");
+			return BABOON_INVALID_PARAMETER("While clearing all content in core manager : assertion coreCollection != 0 failed");
 
 		for( unsigned int i=0 ; i<coreCollection->size() ; i++ ) {
 			if( coreCollection->at(i) != 0 )
@@ -89,13 +89,26 @@ namespace baboon {
 		}
 		coreCollection->clear();
 
-		return S_OK("Content cleared in core manager");
+		return BABOON_SUCCESS("Content cleared in core manager");
 	}
 
 
 	bool CoreManager::CoreContainsHit( Core *core , Hit *hit ) {
 
 		return core->Contains( hit );
+	}
+
+
+	Return CoreManager::FindCoreContainingHit( Hit *hit , Core *coreToFind ) {
+
+		for( unsigned int c=0 ; c<coreCollection->size() ; c++ ) {
+
+			if( coreCollection->at(c)->Contains( hit ) ) {
+				coreToFind = coreCollection->at(c);
+				return BABOON_SUCCESS("Core found");
+			}
+		}
+		return BABOON_NOT_FOUND();
 	}
 
 }  // namespace 
