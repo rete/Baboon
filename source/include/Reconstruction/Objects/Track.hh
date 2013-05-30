@@ -28,7 +28,7 @@
 
 
 #include "Utilities/ReturnValues.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Geometry/ThreeVector.hh"
 
 namespace baboon {
@@ -85,7 +85,9 @@ namespace baboon {
 
 			bool Contains( Hit *hit );
 
-			Return OrderHits();
+			Return SortHits();
+
+			std::vector<ThreeVector> GetIJKs() const;
 
 		protected:
 
