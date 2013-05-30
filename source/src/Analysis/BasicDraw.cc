@@ -98,6 +98,37 @@ namespace baboon {
 		return legend;
 	}
 
+	TH2D *NewTH2D( const string &histName
+				   ,const string &histTitle
+				   ,unsigned int nbBinX
+				   ,int xMin
+				   ,int xMax
+				   ,unsigned int nbBinY
+				   ,int yMin
+				   ,int yMax
+				   ,int color ) {
+
+		TH2D *h2 = new TH2D( histName.c_str() , histTitle.c_str() , nbBinX , xMin , xMax ,  nbBinY , yMin , yMax );
+		h2->SetMarkerStyle(20);
+		h2->SetMarkerSize(.4);
+		h2->SetMarkerColor( color );
+		return h2;
+	}
+
+	TH1D *NewTH1D( const string &histName
+				   ,const string &histTitle
+				   ,unsigned int nbBinX
+				   ,int xMin
+				   ,int xMax
+				   ,int color ) {
+
+		TH1D *h1 = new TH1D( histName.c_str() , histTitle.c_str() , nbBinX , xMin , xMax );
+//		h1->SetLineStyle(0);
+		h1->SetLineWidth(2);
+		h1->SetLineColor( color );
+		return h1;
+	}
+
 
 }  // namespace 
 
