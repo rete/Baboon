@@ -33,6 +33,7 @@
 #include "Utilities/ReturnValues.hh"
 #include "Reconstruction/Tag.hh"
 #include "Exception.hh"
+#include "Utilities/Internal.hh"
 
 namespace baboon {
 
@@ -85,16 +86,9 @@ namespace baboon {
 			void Process() {
 
 				this->Init();
-				Return ret = this->CheckConsistency();
-				if( ret.OK ) {
-					this->Execute();
-					this->End();
-				}
-				else {
-					std::cerr << ret.message << std::endl;
-					throw AlgorithmException( ret.message );
-				}
-
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->CheckConsistency() );
+				this->Execute();
+				this->End();
 			}
 
 
