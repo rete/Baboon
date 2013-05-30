@@ -51,16 +51,16 @@ namespace baboon {
 
 		if( trackCollection->empty() ) {
 			trackCollection->push_back( track );
-			return S_OK();
+			return BABOON_SUCCESS();
 		}
 		TrackCollection::iterator trackIt = std::find( trackCollection->begin() , trackCollection->end() , track );
 
 		if( trackIt == trackCollection->end() ) {
 			trackCollection->push_back( track );
-			return S_OK();
+			return BABOON_SUCCESS();
 		}
 
-		return S_ERROR("While adding track. Track already registered by the Track Manager!");
+		return BABOON_ALREADY_PRESENT("Track already registered by the Track Manager!");
 	}
 
 
@@ -68,24 +68,24 @@ namespace baboon {
 	Return TrackManager::RemoveTrack( Track *track ) {
 
 		if( trackCollection->empty() )
-			return S_ERROR("While removing a track. Track collection is empty!");
+			return BABOON_INVALID_PARAMETER("Track collection is empty!");
 
 		TrackCollection::iterator trackIt = std::find( trackCollection->begin() , trackCollection->end() , track );
 
 		if( trackIt != trackCollection->end() ) {
 			delete track;
 			trackCollection->erase( trackIt );
-			return S_OK("Track correctly removed");
+			return BABOON_SUCCESS("Track correctly removed");
 		}
 
-		return S_ERROR("While removing a track. Track was not registered by the Track Manager!");
+		return BABOON_NOT_FOUND("Track was not registered by the Track Manager!");
 	}
 
 
 	Return TrackManager::ClearAllContent() {
 
 		if( trackCollection == 0 )
-			return S_ERROR("While clearing all content in track manager : assertion trackCollection != 0 failed");
+			return BABOON_INVALID_PARAMETER("Assertion trackCollection != 0 failed");
 
 		for( unsigned int i=0 ; i<trackCollection->size() ; i++ ) {
 			if( trackCollection->at(i) != 0 )
@@ -93,13 +93,27 @@ namespace baboon {
 		}
 		trackCollection->clear();
 
-		return S_OK("Content cleared in track manager");
+		return BABOON_SUCCESS("Content cleared in track manager");
 	}
 
 
 	bool TrackManager::TrackContainsHit( Track *track , Hit *hit ) {
 
 		return track->Contains( hit );
+	}
+
+	Return TrackManager::FindTrackContainingHit( Hit *hit , Track *trackToFind ) {
+
+		for( unsigned int t=0 ; t<trackCollection->size() ; t++ ) {
+
+			if( trackCollection->at(t)->Contains( hit ) ) {
+				trackToFind = trackCollection->at(t);
+				return BABOON_SUCCESS("Track found");
+			}
+		}
+
+		return BABOON_NOT_FOUND();
+
 	}
 
 
