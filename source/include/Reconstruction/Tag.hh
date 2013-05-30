@@ -32,6 +32,7 @@ namespace baboon {
 		fTrackExtremity,
 		fCore,
 		fCoreEdge,
+		fNoise,
 		fUndefined
 	};
 

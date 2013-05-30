@@ -27,6 +27,7 @@ namespace baboon {
 		else if( tagString == "fTrackExtremity" )  return fTrackExtremity;
 		else if( tagString == "fCore" )            return fCore;
 		else if( tagString == "fCoreEdge" )        return fCoreEdge;
+		else if( tagString == "fNoise" )           return fNoise;
 		else                                       return fUndefined;
 	}
 
@@ -37,6 +38,7 @@ namespace baboon {
 		else if( tag == fTrackExtremity ) return std::string("fTrackExtremity");
 		else if( tag == fCore )           return std::string("fCore");
 		else if( tag == fCoreEdge )       return std::string("fCoreEdge");
+		else if( tag == fNoise )       return std::string("fNoise");
 		else                               return std::string("fUndefined");
 	}
 
