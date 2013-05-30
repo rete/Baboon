@@ -44,18 +44,11 @@ namespace baboon {
 	// The position of the projection of the point on the real line
 	ThreeVector Linear3DFit::VectorFromRealLine(const ThreeVector& vec) {
 
-//		cout << "vector passed in argument (fromRealLine) : " << vec << endl;
-
-//		cout << "params[0] : " << params[0] << endl;
-//		cout << "params[1] : " << params[1] << endl;
-//		cout << "params[2] : " << params[2] << endl;
-//		cout << "params[3] : " << params[3] << endl;
 		ThreeVector x0( params[0], params[2] , 0. );
 		ThreeVector x1( params[0] + params[1], params[2] + params[3] , 1. );
 		ThreeVector u = (x1-x0);
-//		cout << "u : " << u << endl;
 		u.setMag( (vec-x1).mag() * cos( u.angle( vec-x1 ) ) );
-//		cout << " x1 - u :  " << x1-u << endl;
+
 		return  (x1 + u);
 	}
 
@@ -68,16 +61,6 @@ namespace baboon {
 	void Linear3DFit::Fit() {
 
 		params[0] = params[1] = params[2] = params[3] = 0;
-//		double zSumX = 0.0;
-//		double xSigma2Sum = 0.0;
-//		double xSum = 0.0;
-//		double zzSumX = 0.0;
-//		double xzSum = 0.0;
-//		double zSumY = 0.0;
-//		double ySigma2Sum = 0.0;
-//		double ySum = 0.0;
-//		double zzSumY = 0.0;
-//		double yzSum = 0.0;
 
 		double xsum = 0.0;
 		double ysum = 0.0;
@@ -87,18 +70,6 @@ namespace baboon {
 		double yzsum = 0.0;
 
 		for ( unsigned int i=0 ; i<positions.size() ; i++ ) {
-
-//			zSumX += positions.at(i).z() / ( weights.at(i).x() * weights.at(i).x() );
-//			xSigma2Sum += 1.0 / ( weights.at(i).x() * weights.at(i).x() );
-//			xSum += positions.at(i).x() / ( weights.at(i).x() * weights.at(i).x() );
-//			zzSumX += positions.at(i).z()*positions.at(i).z() / ( weights.at(i).x()*weights.at(i).x() );
-//			xzSum += positions.at(i).x()*positions.at(i).z() / ( weights.at(i).x() * weights.at(i).x() );
-//
-//			zSumY += positions.at(i).z() / ( weights.at(i).y()*weights.at(i).y() );
-//			ySigma2Sum += 1.0 / ( weights.at(i).y()*weights.at(i).y() );
-//			ySum += positions.at(i).y() / ( weights.at(i).y()*weights.at(i).y() );
-//			zzSumY += positions.at(i).z()*positions.at(i).z() / ( weights.at(i).y()*weights.at(i).y() );
-//			yzSum += positions.at(i).y()*positions.at(i).z() / ( weights.at(i).y()*weights.at(i).y() );
 
 			//for equation 1
 			zsum = zsum + positions.at(i).z();
@@ -110,43 +81,7 @@ namespace baboon {
 			ysum = ysum + positions.at(i).y();
 			yzsum = yzsum + positions.at(i).y()*positions.at(i).z();
 
-
-//			cout << "zsum : " << zsum << endl;
-//			cout << "xsum : " << xsum << endl;
-//			cout << "zzsum : " << zzsum << endl;
-//			cout << "xzsum : " << xzsum << endl;
-//			cout << "ysum : " << ysum << endl;
-//			cout << "yzsum : " << yzsum << endl;
-
-//			cout << endl;
-//			cout << " " << << endl;
-//			cout << " " << << endl;
-//			cout << " " << << endl;
-//			cout << " " << << endl;
-
 		}
-//		cout << "size : " << positions.size() << endl;
-
-//		cout << "xSigma2Sum : " << xSigma2Sum << endl;
-//		cout << "zzSumX : " << zzSumX << endl;
-//		cout << "zSumX : " << zSumX << endl;
-//		cout << "zzSumX : " << zzSumX << endl;
-//		cout << "xSum : " << xSum << endl;
-//		cout << "xzSum : " << xzSum << endl;
-//		cout << << << endl;
-
-//		double a = zzSumX*xSum-xzSum*zSumX;
-//		double b1 = xSigma2Sum*zzSumX;
-//		double b2 = zSumX*zSumX;
-//		cout << "a : " << a << endl;
-//		cout << "b1 : " << b1 << endl;
-//		cout << "b2 : " << b2 << endl;
-//		params[0] = (double)(zzSumX*xSum-xzSum*zSumX) / (double) (xSigma2Sum*zzSumX-zSumX*zSumX);
-//		cout << "params[0] : " << params[0] << endl;
-//		params[1] = (xzSum*xSigma2Sum-xSum*zSumX)/(xSigma2Sum*zzSumX-zSumX*zSumX);
-//		params[2] = (zzSumY*ySum-yzSum*zSumY)/(ySigma2Sum*zzSumY-zSumY*zSumY);
-//		params[3] = (yzSum*ySigma2Sum-ySum*zSumY)/(ySigma2Sum*zzSumY-zSumY*zSumY);
-
 
 		float A1 = zsum;
 		float B1 = positions.size();
@@ -160,24 +95,10 @@ namespace baboon {
 		float AA = A1*A1;
 		float BD = B1*D1;
 
-//		cout << "B1 : " << B1 << endl;
-//		cout << "D1 : " << D1 << endl;
-//		cout << "A1 : " << A1 << endl;
-//		cout << "A1*A1 : " << A1*A1 << endl;
-//		cout << "AA : " << AA << endl;
-//		cout << "BD : " << BD << endl;
-//		cout << "B1*D1 : " << B1*D1 << endl;
-//		cout << "B1*D1 - A1*A1 : " << B1*D1 - A1*A1 << endl;
-
 		params[0] = (D1*C1-E1*A1)/(B1*D1-A1*A1);
 		params[1] = (E1*B1-C1*A1)/(B1*D1-A1*A1);
 		params[2] = (D1*C2-E2*A1)/(B1*D1-A1*A1);
 		params[3] = (E2*B1-C2*A1)/(B1*D1-A1*A1);
-
-//		cout << "params[0] : " << params[0] << endl;
-//		cout << "params[1] : " << params[1] << endl;
-//		cout << "params[2] : " << params[2] << endl;
-//		cout << "params[3] : " << params[3] << endl;
 
 	}
 
