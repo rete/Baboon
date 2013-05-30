@@ -54,8 +54,8 @@ namespace baboon {
 	Return IsolationTaggingAlgorithm::CheckConsistency() {
 
 		if( hitCollection == 0 )
-			return S_ERROR("IsolationTaggingAlgorithm bad init. Please check your inputs!");
-		return S_OK();
+			return BABOON_ERROR("Isolation Tagging Algorithm bad init. Please check your inputs!");
+		return BABOON_SUCCESS();
 	}
 
 	void IsolationTaggingAlgorithm::Execute() {
