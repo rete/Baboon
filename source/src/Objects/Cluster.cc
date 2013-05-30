@@ -75,9 +75,9 @@ namespace baboon {
 			ThreeVector pos(clusters->at(clustID)->GetPosition() );
 
 			if(abs(position.x()-pos.x())>1
-			&& abs(position.x()-pos.x())<10
+			&& abs(position.x()-pos.x())<5
 			&& abs(position.y()-pos.y())>1
-			&& abs(position.y()-pos.y())<10
+			&& abs(position.y()-pos.y())<5
 			&& position.z()==pos.z())
 				{ neighbour++; }
 
@@ -147,31 +147,43 @@ namespace baboon {
 	Return Cluster::SetType( const ClusterType &type ) {
 
 		fType = type;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
-	void Cluster::AddHit( Hit *hit ) {
+	Return Cluster::AddHit( Hit *hit ) {
 
-		if( !this->ContainsHit(hit) )
+		if( hit == 0 )
+			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
+
+		if( !this->Contains(hit) ) {
 			hitCollection->push_back(hit);
-		else return;
+			return BABOON_SUCCESS();
+		}
+		return BABOON_ALREADY_PRESENT("Hit was already present in the cluster") ;
 	}
 
 
-	void Cluster::RemoveHit( Hit *hit ) {
+	Return Cluster::RemoveHit( Hit *hit ) {
+
+		if( hit == 0 )
+			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
+
+		if ( hitCollection->empty() )
+			return BABOON_INVALID_PARAMETER("Cluster was empty");
 
 		HitCollection::iterator hitIterator;
-		if ( hitCollection->empty() ) return;
+
 		hitIterator = find( hitCollection->begin() , hitCollection->end() , hit );
 		if( hitIterator != hitCollection->end() ) {
 			hitCollection->erase( hitIterator );
-			return;
+			return BABOON_SUCCESS();
 		}
+		return BABOON_NOT_FOUND("Hit was not found in the cluster");
 	}
 
 
-	bool Cluster::ContainsHit( Hit *hit ) {
+	bool Cluster::Contains( Hit *hit ) {
 
 		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
 	}
