@@ -98,7 +98,7 @@ namespace baboon {
 
 	Return HoughTransformAlgorithm::CheckConsistency() {
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
@@ -140,7 +140,7 @@ namespace baboon {
 					houghCluster->rhoy.push_back( (int) abs( cluster->GetPosition().z() * cos(-M_PI/2.0 + t*M_PI/thetaMax)
 									+ cluster->GetPosition().y() * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
 					houghSpaceX[ t ][ houghCluster->rhox.at( t ) ]++;
-
+					
 				}
 				houghCluster->cluster = cluster;
 				houghClusterCollection->push_back( houghCluster );
@@ -172,7 +172,7 @@ namespace baboon {
 				if( inc < 2 ) continue;
 
 				for( int t2=0 ; t2<thetaMax ; t2++ )
-					houghSpaceY[ t2 ][ houghCluster->rhox.at(t2) ] ++;
+					houghSpaceY[ t2 ][ houghCluster->rhoy.at(t2) ] ++;
 
 			}
 		}
@@ -276,7 +276,7 @@ namespace baboon {
 				}
 			}
 
-			// Untag all the clusters of the track. No need anymore.
+			// Un-tag all the clusters of the track. No need anymore.
 			for( unsigned int k=0 ; k<tracks.size() ; k++ )
 				tracks.at(k)->cluster->SetClusterTag( fUndefined );
 
@@ -293,13 +293,34 @@ namespace baboon {
 			Track *track = new Track();
 			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
 				track->AddHit( tempHitCollection.at(j) );
-				tempHitCollection.at(j)->SetHitTag( fTrack );
 
+			}
+
+
+//			trackCollection->push_back( track );
+			track->SortHits();
+
+			if( abs(track->GetHitCollection()->at(0)->GetIJK().at(2) - track->GetHitCollection()->at( track->Size() -1 )->GetIJK().at(2) ) < 4 ) {
+
+				delete track;
+				continue;
+			}
+
+			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
+				tempHitCollection.at(j)->SetHitTag( fTrack );
 			}
 
 			track->GetExtremities().first->SetHitTag( fTrackExtremity );
 			track->GetExtremities().second->SetHitTag( fTrackExtremity );
-			trackCollection->push_back( track );
+
+//			vector<ThreeVector> positions = track->GetPositions();
+//			vector<ThreeVector> weigths( track->Size() , ThreeVector(1,1,1) );
+
+//			Linear3DFit fitter(positions,weigths);
+//			fitter.Fit();
+//			double chi2 = fitter.GetChi2();
+//			cout << "chi2 : " << chi2 << endl;
+
 			TrackManager::GetInstance()->AddTrack( track );
 		}
 
