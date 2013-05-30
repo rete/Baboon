@@ -89,6 +89,9 @@ namespace baboon {
 	};  // class
 
 
+	std::ostream& operator << ( std::ostream &flux , Cone *cone );
+
+
 }  // namespace 
 
 #endif  //  CONE_HH

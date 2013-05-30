@@ -80,5 +80,13 @@ namespace baboon {
 	}
 
 
+	std::ostream& operator << ( std::ostream &flux , Cone *cone ) {
+
+		flux << "peakPos " << cone->GetPeakPosition() << " , radius " << cone->GetRadius();
+		flux << " , dirVec " << cone->GetDirectedVector() << " , theta " << cone->GetTheta() << std::endl;
+		return flux;
+	}
+
+
 }  // namespace 
 
