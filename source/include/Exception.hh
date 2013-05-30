@@ -46,7 +46,7 @@ namespace baboon {
 		 * @brief : Constructor thrown
 		 */
 		Exception( const std::string& msg ) {
-			message = "sdhcal::Exception : " + msg;
+			message = "baboon::Exception : " + msg;
 		}
 
 
