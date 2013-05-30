@@ -55,16 +55,16 @@ namespace baboon {
 
 		if( showerCollection->empty() ) {
 			showerCollection->push_back( shower );
-			return S_OK();
+			return BABOON_SUCCESS();
 		}
 		ShowerCollection::iterator showerIt = std::find( showerCollection->begin() , showerCollection->end() , shower );
 
 		if( showerIt == showerCollection->end() ) {
 			showerCollection->push_back( shower );
-			return S_OK();
+			return BABOON_SUCCESS();
 		}
 
-		return S_ERROR("While adding shower. Shower already registered by the Shower Manager!");
+		return BABOON_ALREADY_PRESENT("While adding shower. Shower already registered by the Shower Manager!");
 	}
 
 
@@ -72,24 +72,24 @@ namespace baboon {
 	Return ShowerManager::RemoveShower( Shower *shower ) {
 
 		if( showerCollection->empty() )
-			return S_ERROR("While removing a shower. Shower collection is empty!");
+			return BABOON_INVALID_PARAMETER("While removing a shower. Shower collection is empty!");
 
 		ShowerCollection::iterator showerIt = std::find( showerCollection->begin() , showerCollection->end() , shower );
 
 		if( showerIt != showerCollection->end() ) {
 			delete shower;
 			showerCollection->erase( showerIt );
-			return S_OK("Shower correctly removed");
+			return BABOON_SUCCESS("Shower correctly removed");
 		}
 
-		return S_ERROR("While removing a shower. Shower was not registered by the Shower Manager!");
+		return BABOON_NOT_FOUND("While removing a shower. Shower was not registered by the Shower Manager!");
 	}
 
 
 	Return ShowerManager::ClearAllContent() {
 
 		if( showerCollection == 0 )
-			return S_ERROR("While clearing all content in shower manager : assertion showerCollection != 0 failed");
+			return BABOON_NOT_INITIALIZED("While clearing all content in shower manager : assertion showerCollection != 0 failed");
 
 		for( unsigned int i=0 ; i<showerCollection->size() ; i++ ) {
 			if( showerCollection->at(i) != 0 )
@@ -97,13 +97,54 @@ namespace baboon {
 		}
 		showerCollection->clear();
 
-		return S_OK("Content cleared in shower manager");
+		return BABOON_SUCCESS("Content cleared in shower manager");
 	}
 
 
 	bool ShowerManager::ShowerContainsHit( Shower *shower , Hit *hit ) {
 
 		return shower->Contains( hit );
+	}
+
+	Return ShowerManager::BuildShowerFromHitCollection( HitCollection *hitCollection ) {
+
+		if( hitCollection == 0 )
+			return BABOON_NOT_INITIALIZED("Assertion hitCollection != 0 failed");
+
+		if( hitCollection->empty() )
+			return BABOON_SUCCESS();
+
+		TrackManager *trackManager = TrackManager::GetInstance();
+		CoreManager *coreManager = CoreManager::GetInstance();
+
+		Shower *newShower = new Shower();
+
+		for( unsigned int h=0 ; h<hitCollection->size() ; h++ ) {
+
+			Hit *hit = hitCollection->at(h);
+
+			if( !newShower->Contains( hit ) )
+				newShower->AddHit( hit );
+
+			if( hit->GetHitTag() == fTrack ) {
+
+				Track *track = 0;
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , trackManager->FindTrackContainingHit( hit , track ) );
+				if( !newShower->Contains( track ) )
+					newShower->AddTrack( track );
+			}
+			else if( hit->GetHitTag() == fCore ) {
+
+				Core *core = 0;
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->FindCoreContainingHit( hit , core ) );
+				if( !newShower->Contains( core ) )
+					newShower->AddCore( core );
+			}
+
+		}
+
+		this->AddShower( newShower );
+
 	}
 
 
