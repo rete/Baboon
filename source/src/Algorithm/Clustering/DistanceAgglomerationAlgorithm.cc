@@ -43,12 +43,12 @@ namespace baboon {
 	Return DistanceAgglomerationAlgorithm::CheckConsistency() {
 
 		if (hitCollection == 0 || startingHit == 0)
-			return S_ERROR("DistanceAgglomerationAlgorithm bad init. Please check your inputs!");
+			return BABOON_ERROR("DistanceAgglomerationAlgorithm bad init. Please check your inputs!");
 		if( aggregate != 0 )
 			if( aggregate->GetClusterSize() != 0 )
-				return S_ERROR("DistanceAgglomerationAlgorithm bad check on cluster size (!= 0). Bad init of aggregate pointer!");
+				return BABOON_ERROR("DistanceAgglomerationAlgorithm bad check on cluster size (!= 0). Bad init of aggregate pointer!");
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
