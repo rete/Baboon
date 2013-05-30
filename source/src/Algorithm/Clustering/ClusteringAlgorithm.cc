@@ -121,18 +121,18 @@ namespace baboon {
 
 	Return ClusteringAlgorithm::CheckConsistency() {
 
-		Return ret = S_OK();
+		Return ret = BABOON_SUCCESS();
 		if( clusterCollection == 0 || clusterCollection == NULL )
-			return S_ERROR("While checking consistency : Cluster collection not set or set to 0 in ClusteringAlgorithm. ");
+			return BABOON_ERROR("While checking consistency : Cluster collection not set or set to 0 in ClusteringAlgorithm. ");
 		if( !clusterCollection->empty() ) {
 			for( unsigned int i=0 ; i<clusterCollection->size() ; i++ )
 				delete clusterCollection->at(i);
 			clusterCollection->clear();
-			ret = S_OK("Warning : ClusterCollection has been cleared while checking consistency");
+			ret = BABOON_SUCCESS("Warning : ClusterCollection has been cleared while checking consistency");
 		}
 		for( unsigned int i=0 ; i<hitTagToCluster.size() ; i++ ) {
 			if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , hitTagToCluster.at(i) ) != hitTagToAvoid.end() ) {
-				return S_ERROR("Tag to be avoided also set to be clustered ... Check your inputs!");
+				return BABOON_ERROR("Tag to be avoided also set to be clustered ... Check your inputs!");
 			}
 		}
 		return ret;
@@ -143,9 +143,9 @@ namespace baboon {
 
 		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , fTag ) == hitTagToCluster.end() ) {
 			hitTagToCluster.push_back( fTag );
-			return S_OK();
+			return BABOON_SUCCESS();
 		}
-		else return S_OK("Warning : hit tag was already added");
+		return BABOON_ALREADY_PRESENT("Warning : hit tag was already added");
 	}
 
 
@@ -153,9 +153,9 @@ namespace baboon {
 
 		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , fTag ) == hitTagToAvoid.end() ) {
 			hitTagToAvoid.push_back( fTag );
-			return S_OK();
+			return BABOON_SUCCESS();
 		}
-		else return S_OK("Warning : hit tag was already added");
+		else return BABOON_ALREADY_PRESENT("Warning : hit tag was already added");
 	}
 
 
@@ -192,25 +192,25 @@ namespace baboon {
 	Return ClusteringAlgorithm::SetClusterSizeLowerLimit( unsigned int limit ) {
 
 		clusterSizeLowerLimit = limit;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	Return ClusteringAlgorithm::SetNeighborDistance( unsigned int distance ) {
 
 		neighborDistance = distance;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	Return ClusteringAlgorithm::SetClusteringMode( ClusteringMode mode ) {
 
 		fClusteringMode = mode;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	Return ClusteringAlgorithm::SetTaggingMode( TaggingMode mode ) {
 
 		fTaggingMode = mode;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 }  // namespace 
