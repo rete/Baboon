@@ -25,7 +25,7 @@
 
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Config/SdhcalConfig.hh"
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
@@ -51,11 +51,7 @@ namespace baboon {
 
 		ThreeVector position;
 
-//		std::string codingPattern;
-
 		HitCollection *hitCollection;
-
-//		std::vector<Cluster*> *associatedClusters;
 
 		Tag fClusterTag;
 
@@ -98,21 +94,11 @@ namespace baboon {
 		inline ClusterType GetType() const
 			{ return fType; }
 
-//		void AssociateCluster( Cluster* );
+		bool Contains( Hit *hit );
 
-//		std::vector<Cluster*> *GetAssociatedClusters()
-//			{ return associatedClusters; }
+		Return AddHit( Hit *hit );
 
-//		bool IsAssociatedToCluster( Cluster* );
-
-		bool ContainsHit( Hit *hit );
-
-		void AddHit( Hit *hit );
-
-		void RemoveHit( Hit *hit );
-
-//		void MergeClusters( Cluster *cl );
-
+		Return RemoveHit( Hit *hit );
 
 	};
 
