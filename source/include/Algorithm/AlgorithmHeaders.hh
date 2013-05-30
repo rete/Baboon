@@ -33,6 +33,7 @@
 #include "Algorithm/ConeBeginningAlgorithm.hh"
 #include "Algorithm/IsolationTaggingAlgorithm.hh"
 #include "Algorithm/PrincipalComponentAnalysis.hh"
+#include "Algorithm/TrackToShowerAssociationAlgorithm.hh"
 
 
 
