@@ -42,27 +42,20 @@ namespace baboon {
 
 			for( unsigned int i=0 ; i<collection->getNumberOfElements() ; i++ ) {
 
+				if( collection->getTypeName() != "CalorimeterHit" )
+					BABOON_THROW_RESULT( BABOON_INVALID_PARAMETER("Collection name must be a CalorimeterHit collection") );
 				CalorimeterHit *caloHit = static_cast<CalorimeterHit*> ( collection->getElementAt(i) );
 				HitParameters hitParams;
+				if( caloHit->getEnergy() == 1.0 ) hitParams.threshold = fThreshold1;
+				else if( caloHit->getEnergy() == 2.0 ) hitParams.threshold = fThreshold2;
+				else if( caloHit->getEnergy() == 3.0 ) hitParams.threshold = fThreshold3;
+				else
+					return BABOON_INVALID_PARAMETER("Energy of SDHCAL hit is not in threshold unit (1,2,3)");
 				ThreeVector position;
 				position.setX( caloHit->getPosition()[0] );
 				position.setY( caloHit->getPosition()[1] );
 				position.setZ( caloHit->getPosition()[2] );
 				hitParams.position = position;
-				try {
-	//				cout << "hit energy : " << caloHit->getEnergy() << endl;
-					if( caloHit->getEnergy() == 1.0 ) hitParams.threshold = fThreshold1;
-					else if( caloHit->getEnergy() == 2.0 ) hitParams.threshold = fThreshold2;
-					else if( caloHit->getEnergy() == 3.0 ) hitParams.threshold = fThreshold3;
-					else throw ThresholdUndefinedException();
-				}
-				catch ( ThresholdUndefinedException &e ) {
-
-					stringstream ss;
-					ss << "Undefined threshold exception thrown. Energy is not unit of SDHCAL threshold (1,2,3)" << endl;
-					cerr << ss.str();
-					return S_ERROR( ss.str() );
-				}
 				int I = cellIdDecoder(caloHit)["I"];
 				int J = cellIdDecoder(caloHit)["J"];
 				int K = cellIdDecoder(caloHit)["K-1"];
@@ -74,25 +67,19 @@ namespace baboon {
 				hitParams.time = caloHit->getTime();
 				hitParams.ijk = ijk;
 
-				HitManager::GetInstance()->RegisterNewHit( hitParams );
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , HitManager::GetInstance()->RegisterNewHit( hitParams ) );
 			}
 		}
 		catch ( DataNotAvailableException &e ) {
 
-			stringstream ss;
-			ss << "LCIO exception thrown : " << e.what() << endl;
-			cerr << ss.str();
-			return S_ERROR( ss.str() );
+			return BABOON_ERROR( "LCIO exception thrown : " + string(e.what()) );
 		}
 		catch ( Exception &e ) {
 
-			stringstream ss;
-			ss << "Failed to create hit. " << e.what() << endl;
-			cerr << ss.str();
-			return S_ERROR( ss.str() );
+			return BABOON_ERROR( "Failed to create hit. " + string(e.what()) );
 		}
 
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
