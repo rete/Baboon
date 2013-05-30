@@ -14,7 +14,7 @@
  */
 
 
-#include "OverlayEstimatorProcessor.hh"
+#include "MarlinProcessor/OverlayEstimatorProcessor.hh"
 
 
 OverlayEstimatorProcessor aOverlayEstimatorProcessor;
@@ -24,76 +24,594 @@ using namespace std;
 using namespace baboon;
 
 OverlayEstimatorProcessor::OverlayEstimatorProcessor()
-	: marlin::Processor("OverlayEstimatorProcessor") {
+	: BaboonProcessor("OverlayEstimatorProcessor") {
 
 	  _description = "OverlayEstimatorProcessor to estimate the overlap of two showers SDHCAL";
 
-	  // register steering parameters: name, description, class-variable, default value
-
-//	  std::vector<std::string> hcalCollections;
-//	  hcalCollections.push_back(std::string("HCALBarrel"));
-//	  registerInputCollections( LCIO::CALORIMETERHIT,
-//				   "HCALCollections",
-//				   "HCAL Collection Names",
-//				   _hcalCollections,
-//				   hcalCollections);
-//
-//	  registerOutputCollection( LCIO::LCRELATION,
-//				    "RelationOutputCollection" ,
-//				    "CaloHit Relation Collection" ,
-//				    _outputRelCollection ,
-//				    std::string("RelationCalorimeterHit")) ;
-//
-//	  registerProcessorParameter( "Energy" ,
-//				      "Pion energy",
-//				      energy_,
-//				      (int) 0 );
-//
-//
-//	  std::vector<float> thresholdHcal;
-//	  thresholdHcal.push_back(0.114);
-//	  thresholdHcal.push_back(1.45);
-//	  thresholdHcal.push_back(3.80);
-//	  registerProcessorParameter("HCALThreshold" ,
-//	  			       "Threshold for HCAL Hits in GeV" ,
-//	  			       _thresholdHcal,
-//	  			       thresholdHcal);
-//
-//	  registerProcessorParameter( "RootFileName" ,
-//				      "Name of the ROOT file where tree is stored",
-//				      treeFileName_,
-//				      std::string("showers.root") );
-//
-//	  std::vector<int> hcalLayers;
-//	  hcalLayers.push_back(48);
-//
-//	  registerProcessorParameter("HCALLayers" ,
-//				     "Index of HCal Layers" ,
-//				     _hcalLayers,
-//				     hcalLayers);
+	  registerProcessorParameter("overlayEstimatorMethod" ,
+			  	  	  "overlay estimator mode (cylinder or pca)" ,
+			  	  	  overlayEstimatorMethod,
+			  	  	  string("pca"));
 
 }
 
-OverlayEstimatorProcessor::~ShowerSplitterProcessor() {
+OverlayEstimatorProcessor::~OverlayEstimatorProcessor() {
+
+}
+
+Return OverlayEstimatorProcessor::Init() {
+
+
+	// Add pca algorithm
+	algorithmManager->RegisterAlgorithm( new PrincipalComponentAnalysis() );
+
+	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
+	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
+
+	// Add isolation tagging algorithm
+	algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() );
+
+	// Add clustering (2D) algorithm
+	algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() );
+
+	// Add core finder algorithm
+	algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() );
+
+	// Add track to shower association algorithm to make an association between track and existing showers.
+//	algorithmManager->RegisterAlgorithm( new TrackToShowerAssociationAlgorithm() );
+
+	return BABOON_SUCCESS();
 
 }
 
 
-void OverlayEstimatorProcessor::processRunHeader( LCRunHeader* run) {
+Return OverlayEstimatorProcessor::ProcessRunHeader( EVENT::LCRunHeader* run ) {
 
-}
-
-void OverlayEstimatorProcessor::processEvent( LCEvent * evt ) {
-
+	return BABOON_SUCCESS();
 }
 
 
-void OverlayEstimatorProcessor::check() {
 
+Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
+
+	int overlaidHits;
+	IntVector nbOfPadsXYZ;
+	SdhcalConfig::GetInstance()->GetData("pads").GetValue("nbOfPadsXYZ",&nbOfPadsXYZ);
+
+	HitCollection *hitCollection = hitManager->GetHitCollection();
+//	cout << "total nb of hits : " << hitCollection->size() << endl;
+	cout << "evt : " << evtNb << endl;
+
+	HitCollection *hitColType1 = new HitCollection();
+	HitCollection *hitColType2 = new HitCollection();
+
+	Shower *MCShower1 = new Shower();
+	Shower *MCShower2 = new Shower();
+
+	for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+
+		if( hitCollection->at(i)->GetType() == 1 ) {
+			hitColType1->push_back( hitCollection->at(i) );
+			MCShower1->AddHit( hitCollection->at(i) );
+		}
+		else if( hitCollection->at(i)->GetType() == 2 ) {
+			hitColType2->push_back(hitCollection->at(i));
+			MCShower2->AddHit( hitCollection->at(i) );
+		}
+		else if( hitCollection->at(i)->GetType() == 3) {
+			hitColType1->push_back(hitCollection->at(i));
+			hitColType2->push_back(hitCollection->at(i));
+			MCShower1->AddHit( hitCollection->at(i) );
+			MCShower2->AddHit( hitCollection->at(i) );
+			overlaidHits++;
+		}
+		else {
+			cerr << "No shower type. Please check if the input slcio "
+				"file has been produced by OverlayEvent script..." << endl;
+			exit(1);
+		}
+	}
+
+	double contamination1 = 0;
+	double contamination2 = 0;
+
+	double purity1 = 0;
+	double purity2 = 0;
+
+	double compensation1 = 0;
+	double compensation2 = 0;
+
+	double hitsFrom1in1 = 0;
+	double hitsFrom1in2 = 0;
+	double hitsFrom2in1 = 0;
+	double hitsFrom2in2 = 0;
+
+	double energyShower1 = 0;
+	double energyShower2 = 0;
+	double energyMCShower1 = 0;
+	double energyMCShower2 = 0;
+
+	HitCollection *hitCollection1in1 = new HitCollection();
+	HitCollection *hitCollection2in1 = new HitCollection();
+	HitCollection *hitCollection1in2 = new HitCollection();
+	HitCollection *hitCollection2in2 = new HitCollection();
+
+	bool showersFound = true;
+
+
+
+	if( algorithmManager->AlgorithmIsRegistered("IsolationTaggingAlgorithm") ) {
+
+		cout << "IsolationTaggingAlgorithm found" << endl;
+		IsolationTaggingAlgorithm* isolationAlgo = (IsolationTaggingAlgorithm *) algorithmManager->GetAlgorithm("IsolationTaggingAlgorithm");
+		isolationAlgo->Process();
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("CoreFinderAlgorithm") ) {
+
+		cout << "CoreFinderAlgorithm found" << endl;
+		CoreFinderAlgorithm *coreFinder = (CoreFinderAlgorithm *) algorithmManager->GetAlgorithm("CoreFinderAlgorithm");
+		coreFinder->Process();
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
+
+		cout << "ClusteringAlgorithm found" << endl;
+		ClusterCollection *clustCol = new ClusterCollection();
+		ClusteringAlgorithm* clusteringAlgo = (ClusteringAlgorithm *) algorithmManager->GetAlgorithm("ClusteringAlgorithm");
+		clusteringAlgo->SetClusteringMode( fClustering3D );
+		clusteringAlgo->SetTaggingMode( fClusterTagMode );
+		clusteringAlgo->AddHitTagToCluster( fCore );
+		clusteringAlgo->SetClusterCollection( clustCol );
+		clusteringAlgo->Process();
+		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+
+			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
+			Core *core = new Core();
+			for( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
+				core->AddHit( hitCol->at(j) );
+			}
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->AddCore( core ) );
+
+		}
+		clustCol->clear();
+		delete clustCol;
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
+
+		cout << "ClusteringAlgorithm found" << endl;
+		ClusterCollection *clustCol = new ClusterCollection();
+		ClusteringAlgorithm* clusteringAlgo = (ClusteringAlgorithm *) algorithmManager->GetAlgorithm("ClusteringAlgorithm");
+		clusteringAlgo->SetClusteringMode( fClustering2D );
+		clusteringAlgo->SetTaggingMode( fClusterTagMode );
+		clusteringAlgo->SetClusterCollection( clustCol );
+		clusteringAlgo->Process();
+		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , clusteringManager->AddCluster( clustCol->at(i) ) );
+		}
+		clustCol->clear();
+		delete clustCol;
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("HoughTransformAlgorithm") ) {
+
+		cout << "HoughTransformAlgorithm found" << endl;
+		HoughTransformAlgorithm *houghTrans = (HoughTransformAlgorithm *) algorithmManager->GetAlgorithm("HoughTransformAlgorithm");
+		houghTrans->Process();
+	}
+
+
+	if( overlayEstimatorMethod == "pca" ) {
+
+		TVectorD pcaEigenValues(2);
+		TMatrixD pcaEigenVectors(2,2);
+
+		HitCollection *coreHits = new HitCollection();
+
+		if( algorithmManager->AlgorithmIsRegistered("PrincipalComponentAnalysis") ) {
+
+			PrincipalComponentAnalysis *pca = (PrincipalComponentAnalysis *) algorithmManager->GetAlgorithm("PrincipalComponentAnalysis");
+
+			for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+				Tag tag = hitCollection->at(i)->GetHitTag();
+				if( tag != fIsolated && tag != fTrack )
+					coreHits->push_back( hitCollection->at(i) );
+			}
+
+			pca->SetHitCollection( coreHits );
+			pca->Process();
+			pcaEigenValues = pca->GetEigenValues();
+			pcaEigenVectors = pca->GetEigenVectors();
+		}
+	else {
+		delete coreHits;
+		return BABOON_NOT_INITIALIZED("PCA algorithm not found! Mandatory for this processor...");
+	}
+
+
+		pcaEigenValues.Print();
+		pcaEigenVectors.Print();
+
+		bool revertedShower = (pcaEigenVectors(0,0)<0) ? true : false ;
+
+
+		ThreeVector cog = coreHits->GetBarycenter();
+		TMatrixD initialDataSet(2,hitCollection->size());
+		TMatrixD initialDataSetCore(2,coreHits->size());
+
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++  ) {
+			initialDataSet(0,i) = hitCollection->at(i)->GetPosition().x() - cog.x();
+			initialDataSet(1,i) = hitCollection->at(i)->GetPosition().y() - cog.y();
+		}
+
+		for( unsigned int i=0 ; i<coreHits->size() ; i++  ) {
+			initialDataSetCore(0,i) = coreHits->at(i)->GetPosition().x() - cog.x();
+			initialDataSetCore(1,i) = coreHits->at(i)->GetPosition().y() - cog.y();
+		}
+
+		TMatrixD newDataSet(pcaEigenVectors,TMatrixD::kTransposeMult,initialDataSet);
+		TMatrixD newDataSetCore(pcaEigenVectors,TMatrixD::kTransposeMult,initialDataSetCore);
+
+		double xNewMean = 0;
+		double yNewMean = 0;
+		double xNewMeanCore = 0;
+		double yNewMeanCore = 0;
+
+		for( int i=0 ; i<hitCollection->size() ; i++) {
+			xNewMean += newDataSet(0,i) / hitCollection->size();
+			yNewMean += newDataSet(1,i) / hitCollection->size();
+		}
+
+		for( int i=0 ; i<coreHits->size() ; i++) {
+			xNewMeanCore += newDataSetCore(0,i) / coreHits->size();
+			yNewMeanCore += newDataSetCore(1,i) / coreHits->size();
+		}
+
+		TH1D* newXHist = new TH1D("newXHist","newXHist",350,-700,700);
+
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+
+			newDataSet(0,i) -= xNewMean;
+			newDataSet(1,i) -= yNewMean;
+
+		}
+
+		for( int i=0 ; i<coreHits->size() ; i++) {
+
+			newDataSetCore(0,i) -= xNewMeanCore;
+			newDataSetCore(1,i) -= yNewMeanCore;
+			newXHist->Fill(newDataSetCore(0,i));
+		}
+
+		newXHist->Smooth(80);
+		TSpectrum *s1 = new TSpectrum( 2 );
+
+		double precision = 0.1;
+		int nbOfPeaks = 0;
+		int tentative = 0;
+		while( nbOfPeaks != 2 ) {
+			precision /= 2.0;
+			nbOfPeaks = s1->Search(newXHist,2,"nodraw",precision);
+			tentative++;
+			if( tentative == 10 ) break;
+		}
+//		cout << "number of tentative : " << tentative << endl;
+//		cout << "number of peaks : " << nbOfPeaks << endl;
+
+		if( nbOfPeaks <= 1 ) {
+//			cout << "Maximum number of tentative reached! Nothing found" << endl;
+			showersFound = false;
+			delete newXHist;
+			delete s1;
+		}
+		else {
+
+
+			double firstMean = min( s1->GetPositionX()[0] , s1->GetPositionX()[1]);
+			double secondMean = max( s1->GetPositionX()[0] , s1->GetPositionX()[1]);
+			double center = (secondMean - firstMean ) / 2.0 + firstMean ;
+
+			double firstPosition = 0;
+			double secondPosition = 0;
+			double firstRMS = 0;
+			double secondRMS = 0;
+			int nbOfPosFirst = 0;
+			int nbOfPosSecond = 0;
+
+			double infLimitFirst = firstMean - abs( center - firstMean );
+			double supLimitFirst = center;
+			double infLimitSecond = center;
+			double supLimitSecond = secondMean + abs( center - secondMean );
+
+			for( unsigned int i=0 ; i<coreHits->size() ; i++ ) {
+
+				if(  ( newDataSetCore(0,i) < supLimitFirst )
+				  && ( newDataSetCore(0,i) > infLimitFirst ) ) {
+
+					firstRMS += (newDataSetCore(0,i) - firstMean)*(newDataSetCore(0,i) - firstMean);
+					nbOfPosFirst ++;
+				}
+
+				else if(  ( newDataSetCore(0,i) > infLimitSecond )
+						&& ( newDataSetCore(0,i) < supLimitSecond ) ) {
+
+					secondRMS += (newDataSetCore(0,i) - secondMean)*(newDataSetCore(0,i) - secondMean);
+					nbOfPosSecond++;
+				}
+			}
+
+			firstRMS = sqrt(firstRMS/ nbOfPosFirst);
+			secondRMS = sqrt(secondRMS/ nbOfPosSecond);
+
+			double realCenter = ( firstMean/firstRMS + secondMean/secondRMS ) / ( 1/firstRMS + 1/secondRMS );
+
+			Shower *recoShower1 = new Shower();
+			Shower *recoShower2 = new Shower();
+
+			for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+
+				int type = hitCollection->at(i)->GetType();
+				if( newDataSet(0,i) < realCenter && (type == 1 || type == 3)) {
+					BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , recoShower1->AddHit( hitCollection->at(i) ) );
+					hitsFrom1in1++;
+				}
+				else if( newDataSet(0,i) < realCenter && (type == 2 || type == 3)) {
+					BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , recoShower1->AddHit( hitCollection->at(i) ) );
+					hitsFrom2in1++;
+				}
+				else if( newDataSet(0,i) > realCenter && (type == 2 || type == 3)) {
+					BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , recoShower2->AddHit( hitCollection->at(i) ) );
+					hitsFrom2in2++;
+				}
+				else if( newDataSet(0,i) > realCenter && (type == 1 || type == 3)) {
+					BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , recoShower2->AddHit( hitCollection->at(i) ) );
+					hitsFrom1in2++;
+				}
+			}
+
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , showerManager->AddShower( recoShower1 ) );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , showerManager->AddShower( recoShower2 ) );
+
+
+			WeightEnergyCalculator *calculator = new WeightEnergyCalculator();
+
+
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->SetShower( recoShower1 ) );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+			energyShower1 = calculator->GetEnergy();
+//			cout << "Energy of reconstructed shower 1 : " << energyShower1 << endl;
+
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->SetShower( MCShower1 ) );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+			energyMCShower1 = calculator->GetEnergy();
+//			cout << "Energy of reconstructed shower 1 (MC): " << energyMCShower1 << endl;
+
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->SetShower( recoShower2 ) );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+			energyShower2 = calculator->GetEnergy();
+//			cout << "Energy of reconstructed shower 2 : " << energyShower2 << endl;
+
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->SetShower( MCShower2 ) );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+			energyMCShower2 = calculator->GetEnergy();
+//			cout << "Energy of reconstructed shower 2 (MC): " << energyMCShower2 << endl;
+
+			if( algorithmManager->AlgorithmIsRegistered("TrackToShowerAssociationAlgorithm") ) {
+
+				cout << "TrackToShowerAssociationAlgorithm found" << endl;
+				TrackToShowerAssociationAlgorithm *trackShowerAsso = (TrackToShowerAssociationAlgorithm *) algorithmManager->GetAlgorithm("TrackToShowerAssociationAlgorithm");
+				trackShowerAsso->Process();
+			}
+
+			if( !revertedShower ) {
+				cout << "Reverted showers !" << endl;
+				double energyTemp = energyShower1;
+				energyShower1 = energyShower2;
+				energyShower2 = energyTemp;
+			}
+
+			if( hitsFrom1in2 > hitsFrom2in2 ) {
+
+				contamination1 = hitsFrom2in2 / (hitsFrom1in2 + hitsFrom2in2);
+				contamination2 = hitsFrom1in1 / (hitsFrom2in1 + hitsFrom1in1);
+
+				purity1 = ( hitsFrom1in2 ) / ( hitsFrom2in2 + hitsFrom1in2 );
+				purity2 = ( hitsFrom2in1 ) / ( hitsFrom1in1 + hitsFrom2in1 );
+
+				compensation1 = ( hitsFrom2in1 ) / hitColType2->size();
+				compensation2 = ( hitsFrom1in2 ) / hitColType1->size();
+
+
+			}
+			else {
+
+				contamination1 = hitsFrom2in1 / (hitsFrom2in1 + hitsFrom1in1);
+				contamination2 = hitsFrom1in2 / (hitsFrom2in1 + hitsFrom2in2);
+
+				purity1 = ( hitsFrom1in1 ) / ( hitsFrom2in1 + hitsFrom1in1 );
+				purity2 = ( hitsFrom2in2 ) / ( hitsFrom1in2 + hitsFrom2in2 );
+
+				compensation2 = ( hitsFrom2in1 ) / hitColType2->size();
+				compensation1 = ( hitsFrom1in2 ) / hitColType1->size();
+
+
+
+			}
+
+
+
+
+
+			for( unsigned int j=0 ; j<hitCollection->size() ; j++) {
+
+				IntVector ijk = hitCollection->at(j)->GetIJK();
+
+				if( recoShower1->Contains( hitCollection->at(j) ) ) {
+					if( graphicalEnvironment )
+						calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGreen);
+
+				}
+
+				else if( recoShower2->Contains( hitCollection->at(j) ) ) {
+					if( graphicalEnvironment )
+						calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kBlue);
+
+				}
+			}
+
+			delete newXHist;
+			delete s1;
+		}
+	}
+
+	else if( overlayEstimatorMethod == "cylinder" ) {
+
+		double hitsFrom1Side1OutsideCylinder = 0;
+		double hitsFrom2Side1OutsideCylinder = 0;
+		double hitsFrom2Side2OutsideCylinder = 0;
+		double hitsFrom1Side2OutsideCylinder = 0;
+
+		ThreeVector cog1 = hitColType1->GetBarycenter();
+		DoubleVector rmsVec1 = hitColType1->GetRMS();
+		double rms1 = (rmsVec1.at(0) + rmsVec1.at(1)) / 2.0;
+		ThreeVector center1(cog1.x(),cog1.y(),nbOfPadsXYZ.at(2)/2);
+		ThreeVector direc1(0,0,1);
+		Cylinder *cylinder1 = new Cylinder(center1,direc1,nbOfPadsXYZ.at(2),rms1/2.0);
+
+
+		ThreeVector cog2 = hitColType2->GetBarycenter();
+		DoubleVector rmsVec2 = hitColType2->GetRMS();
+		double rms2 = (rmsVec2.at(0) + rmsVec2.at(1)) / 2.0;
+		ThreeVector center2(cog2.x(),cog2.y(),nbOfPadsXYZ.at(2)/2);
+		ThreeVector direc2(0,0,1);
+		Cylinder *cylinder2 = new Cylinder(center2,direc2,nbOfPadsXYZ.at(2),rms2/2.0);
+
+		double planeXPosition = ( cog1.x()/rms1 + cog2.x()/rms2 ) / ( 1/rms1 + 1/rms2 );
+
+		for( unsigned int i=0 ; i<hitColType1->size() ; i++ ) {
+
+			IntVec ijk = hitColType1->at(i)->GetIJK();
+			ThreeVector ijkPos( ijk.at(0) , ijk.at(1) , ijk.at(2) );
+
+
+			if( cylinder1->Contains(ijkPos) ) {
+				hitsFrom1in1++;
+			}
+			if( cylinder2->Contains(ijkPos) ) {
+				hitsFrom1in2++;
+			}
+			if( !cylinder1->Contains(ijkPos) && !cylinder2->Contains(ijkPos) ) {
+				if( ijk.at(0) > planeXPosition ) hitsFrom1Side1OutsideCylinder ++;
+				else hitsFrom2Side1OutsideCylinder ++;
+
+			}
+		}
+
+		for( unsigned int i=0 ; i<hitColType2->size() ; i++ ) {
+
+			IntVec ijk = hitColType2->at(i)->GetIJK();
+			ThreeVector ijkPos( ijk.at(0) , ijk.at(1) , ijk.at(2) );
+
+			if( cylinder2->Contains(ijkPos) ) {
+				hitsFrom2in2++;
+			}
+			if( cylinder1->Contains(ijkPos) ) {
+				hitsFrom2in1++;
+			}
+			if( !cylinder2->Contains(ijkPos) && !cylinder1->Contains(ijkPos) ) {
+				if( ijk.at(0) < planeXPosition ) hitsFrom2Side2OutsideCylinder ++;
+				else hitsFrom1Side2OutsideCylinder ++;
+			}
+		}
+
+		contamination1 = ( hitsFrom2in1 + hitsFrom2Side1OutsideCylinder ) / ( hitsFrom1in1 + hitsFrom2in1 + hitsFrom1Side1OutsideCylinder + hitsFrom2Side1OutsideCylinder);
+		contamination2 = ( hitsFrom1in2 + hitsFrom1Side2OutsideCylinder ) / ( hitsFrom1in2 + hitsFrom2in2 + hitsFrom2Side2OutsideCylinder + hitsFrom1Side2OutsideCylinder);
+
+		purity1 = ( hitsFrom1in1 + hitsFrom1Side1OutsideCylinder ) / ( hitColType1->size() );
+		purity2 = ( hitsFrom2in2 + hitsFrom2Side2OutsideCylinder ) / ( hitColType2->size() );
+
+		compensation1 = ( hitsFrom2in1 + hitsFrom2Side1OutsideCylinder ) / hitColType1->size();
+		compensation2 = ( hitsFrom1in2 + hitsFrom1Side2OutsideCylinder ) / hitColType2->size();
+
+		delete cylinder1;
+		delete cylinder2;
+
+	}
+
+
+
+
+//	for( unsigned int j=0 ; j<hitCollection->size() ; j++) {
+//
+//		IntVector ijk = hitCollection->at(j)->GetIJK();
+//
+//		if( hitCollection->at(j)->GetHitTag() == fTrack ) {
+//			if( graphicalEnvironment )
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kRed);
+//		}
+//		else if (hitCollection->at(j)->GetHitTag() == fTrackExtremity) {
+//			if( graphicalEnvironment )
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGreen);
+//		}
+//		else if( hitCollection->at(j)->GetHitTag() == fCore ) {
+//			if( graphicalEnvironment )
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kMagenta);
+//		}
+//		else if( hitCollection->at(j)->GetHitTag() == fIsolated ) {
+//			if( graphicalEnvironment )
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kBlue);
+//		}
+//		else {
+//			if( graphicalEnvironment )
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGray+3);
+//		}
+//	}
+
+
+
+	analysisManager->Set("EstimatorVariables","purity1",purity1);
+	analysisManager->Set("EstimatorVariables","purity2",purity2);
+	analysisManager->Set("EstimatorVariables","contamination1",contamination1);
+	analysisManager->Set("EstimatorVariables","contamination2",contamination2);
+	analysisManager->Set("EstimatorVariables","compensation1",compensation1);
+	analysisManager->Set("EstimatorVariables","compensation2",compensation2);
+	analysisManager->Set("EstimatorVariables","hitsFrom1in1",hitsFrom1in1);
+	analysisManager->Set("EstimatorVariables","hitsFrom2in2",hitsFrom2in2);
+	analysisManager->Set("EstimatorVariables","hitsFrom2in1",hitsFrom2in1);
+	analysisManager->Set("EstimatorVariables","hitsFrom1in2",hitsFrom1in2);
+	analysisManager->Set("EstimatorVariables","recoEnergy1",energyShower1);
+	analysisManager->Set("EstimatorVariables","recoEnergy2",energyShower2);
+	analysisManager->Set("EstimatorVariables","recoEnergy1MC",energyMCShower1);
+	analysisManager->Set("EstimatorVariables","recoEnergy2MC",energyMCShower2);
+	analysisManager->Set("EstimatorVariables","deltaRecoEnergy1",energyMCShower1-energyShower1);
+	analysisManager->Set("EstimatorVariables","deltaRecoEnergy2",energyMCShower2-energyShower2);
+	analysisManager->Set("EstimatorVariables","showersFound",showersFound);
+
+	analysisManager->Fill("EstimatorVariables");
+
+	delete hitColType1;
+	delete hitColType2;
+
+	delete hitCollection1in1;
+	delete hitCollection2in1;
+	delete hitCollection1in2;
+	delete hitCollection2in2;
+
+	delete MCShower1;
+	delete MCShower2;
+
+	return BABOON_SUCCESS();
 }
 
-void OverlayEstimatorProcessor::end() {
 
+Return OverlayEstimatorProcessor::Check( EVENT::LCEvent *evt ) {
+
+	return BABOON_SUCCESS();
 }
 
+Return OverlayEstimatorProcessor::End() {
+
+	return BABOON_SUCCESS();
+}
 
