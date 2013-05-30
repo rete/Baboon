@@ -15,4 +15,7 @@ export PATH=$PATH:$BABOON_BIN_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BABOON_LIB_DIR
 
 export BABOON_DLL=$BABOON_LIB_DIR"/libShowerSplitter.so"
+export BABOON_DLL=$BABOON_DLL:$BABOON_LIB_DIR"/libOverlayEstimator.so"
+export BABOON_DLL=$BABOON_DLL:$BABOON_LIB_DIR"/libTestBeamCutsProcessor.so"
+
 export MARLIN_DLL=$BABOON_DLL
