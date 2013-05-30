@@ -213,17 +213,19 @@ namespace cfgparser {
 
 		string key = k;
 		NormalizeName(&key);
+		string type = t;
+		NormalizeName(&type);
 		DataList::iterator it;
 		bool typeFound = false;
 
 		if(dataList.size() != 0) {
 			for(it=dataList.begin() ; it!=dataList.end() ; it++) {
-				if(it->GetType() == t) {
+				if(it->GetType() == type) {
 					typeFound = true;
 					it->GetValue(key,v);
 				}
 			}
-			if (!typeFound) throw CfgParserException("Data type '" + t + "' doesn't exists!");
+			if (!typeFound) throw CfgParserException("Data type '" + type + "' doesn't exists!");
 		}
 		else if (!alreadyRead) throw CfgParserException("File not read and data list is empty!");
 		else throw CfgParserException("Data list empty! Try to read the file again");
