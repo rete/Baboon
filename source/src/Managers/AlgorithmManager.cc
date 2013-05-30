@@ -64,41 +64,37 @@ namespace baboon {
 		return false;
 	}
 
-	void AlgorithmManager::RegisterAlgorithm( AbstractAlgorithm* algo)
-		throw ( AlgorithmException , Exception ) {
+	Return AlgorithmManager::RegisterAlgorithm( AbstractAlgorithm* algo) {
 
 		string algoName = algo->GetName();
 
 		if( !this->AlgorithmIsRegistered( algoName ) ) {
 			algorithmMap[algoName] = algo;
+			return BABOON_SUCCESS();
 		}
 		else {
 			delete algo;
-			throw AlgorithmException("Algorithm "+algoName+" is already registered!");
+			return BABOON_ALREADY_PRESENT("Algorithm already registered.");
 		}
 	}
 
-	AbstractAlgorithm* AlgorithmManager::GetAlgorithm( const std::string& algoName )
-		throw ( AlgorithmException , Exception ) {
+	AbstractAlgorithm* AlgorithmManager::GetAlgorithm( const std::string& algoName ) {
 
 		AlgorithmMap::iterator it;
 		AbstractAlgorithm *algo;
-		bool found = false;
+		Return ret = BABOON_NOT_FOUND();
 
 		for( it=algorithmMap.begin() ; it!=algorithmMap.end() ; it++ ) {
 			if( (*it).first == algoName ) {
-				found = true;
+				ret = BABOON_SUCCESS();
 				algo = (*it).second;
 			}
 		}
-		if( !found ) {
-			throw AlgorithmException(
-					"Algorithm "+algoName+" doesn't exists or is not registered in AlgorithmManager" );
-		}
-		else return algo;
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ret );
+		return algo;
 	}
 
-	void AlgorithmManager::LoadAlgorithms() {
+	Return AlgorithmManager::LoadAlgorithms() {
 
 		AlgorithmMap::iterator it;
 
@@ -117,14 +113,15 @@ namespace baboon {
 			} catch ( std::exception &e ) {
 
 				if( it->second->NeedSomeData() ) {
-					throw AlgorithmException( "Algorithm " + algoName + " need some data to be processed. "
-							"Please add a section in " + cfgFileName);
+					BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , BABOON_ERROR("Algorithm " + algoName + " need some data to be processed. "
+							"Please add a section in " + cfgFileName) );
 				}
 				else continue;
 			}
 		}
 
 		delete parser;
+		return BABOON_SUCCESS();
 	}
 
 
@@ -145,10 +142,11 @@ namespace baboon {
 	}
 
 
-	void AlgorithmManager::Initialize() {
+	Return AlgorithmManager::Initialize() {
 
-		instance->LoadAlgorithms();
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , instance->LoadAlgorithms() );
 		instance->PrintAlgorithmHeader();
+		return BABOON_SUCCESS();
 	}
 
 
