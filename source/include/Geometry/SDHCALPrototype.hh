@@ -28,7 +28,7 @@
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 #include "Config/SdhcalConfig.hh"
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Geometry/Matrix3D.hh"
 
 #include "TGeoManager.h"
@@ -37,6 +37,7 @@
 #include "TGeoMaterial.h"
 #include "TGeoMedium.h"
 #include "TGeoMatrix.h"
+#include "TROOT.h"
 
 namespace baboon {
 
@@ -59,8 +60,6 @@ namespace baboon {
 
 			void ClearCalorimeter();
 
-			void BuildCalorimeter();
-
 
 		protected:
 
@@ -76,16 +75,19 @@ namespace baboon {
 			IntVector StringToIJK( const std::string &ijkString );
 
 			bool geometryAlreadyBuilt;
-			TGeoManager *geoManager;
+			double zScaleFactor;
+			static TGeoManager *geoManager;
 			SdhcalConfig *config;
-			std::map<TGeoVolume*,Hit*> volumeToHitMap;
-
-			Matrix3D<TGeoVolume*> hitMapVolumePtr;
+			Matrix3D<TGeoNode*> hitMapVolumePtr;
+			std::vector<TGeoNode*> currentNodeList;
 
 		public:
 
-			TGeoVolume *GetCalorimeterVolume()
-				{ return geoManager->GetTopVolume(); }
+
+			inline static TGeoManager *GetGeoManager()
+				{ return geoManager; }
+
+			TGeoNode *GetNodeAt( unsigned int I , unsigned int J , unsigned int K );
 
 
 	};  // class
