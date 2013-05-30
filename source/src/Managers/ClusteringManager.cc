@@ -55,34 +55,34 @@ namespace baboon {
 	Return ClusteringManager::AddCluster( Cluster *cluster ) {
 
 		if( cluster == 0 )
-			return S_ERROR("While adding a cluster : assertion cluster != 0 failed");
+			return BABOON_INVALID_PARAMETER("While adding a cluster : assertion cluster != 0 failed");
 
 		if( cluster->GetType() == fCluster2D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
 			if( clusterIt != clusters2D->end() )
-				return S_ERROR("Cluster already exists in cluster collection");
+				return BABOON_ALREADY_PRESENT("Cluster already exists in cluster collection");
 			else {
 				clusters2D->push_back( cluster );
-				return S_OK();
+				return BABOON_SUCCESS();
 			}
 		}
 		else if( cluster->GetType() == fCluster3D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
 			if( clusterIt != clusters3D->end() )
-				return S_ERROR("Cluster already exists in cluster collection");
+				return BABOON_ALREADY_PRESENT("Cluster already exists in cluster collection");
 			else {
 				clusters3D->push_back( cluster );
-				return S_OK();
+				return BABOON_SUCCESS();
 			}
 		}
-		return S_ERROR("Cluster type undefined...");
+		return BABOON_ERROR("Cluster type undefined...");
 	}
 
 
 	Return ClusteringManager::RemoveCluster( Cluster *cluster ) {
 
 		if( cluster == 0 )
-			return S_ERROR("While removing a cluster : assertion cluster != 0 failed");
+			return BABOON_INVALID_PARAMETER("While removing a cluster : assertion cluster != 0 failed");
 
 		if( cluster->GetType() == fCluster2D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
@@ -90,7 +90,7 @@ namespace baboon {
 				delete cluster;
 				clusters2D->erase(clusterIt);
 			}
-			else return S_ERROR("While removing cluster : cluster was not registered in the cluster collection 2D");
+			else return BABOON_NOT_FOUND("While removing cluster : cluster was not registered in the cluster collection 2D");
 		}
 		else if( cluster->GetType() == fCluster3D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
@@ -98,18 +98,18 @@ namespace baboon {
 				delete cluster;
 				clusters3D->erase(clusterIt);
 			}
-			else return S_ERROR("While removing cluster : cluster was not registered in the cluster collection 3D");
+			else return BABOON_NOT_FOUND("While removing cluster : cluster was not registered in the cluster collection 3D");
 		}
-		return S_ERROR("Cluster type undefined...");
+		return BABOON_ERROR("Cluster type undefined...");
 	}
 
 
 	Return ClusteringManager::ClearAllContent() {
 
 		if( clusters2D == 0 )
-			return S_ERROR("While clearing all content in clustering manager : assertion clusters2D != 0 failed");
+			return BABOON_INVALID_PARAMETER("While clearing all content in clustering manager : assertion clusters2D != 0 failed");
 		if( clusters3D == 0 )
-			return S_ERROR("While clearing all content in clustering manager : assertion clusters3D != 0 failed");
+			return BABOON_INVALID_PARAMETER("While clearing all content in clustering manager : assertion clusters3D != 0 failed");
 
 		for( unsigned int i=0 ; i<clusters2D->size() ; i++ ) {
 			if( clusters2D->at(i) != 0 )
@@ -122,23 +122,23 @@ namespace baboon {
 		clusters2D->clear();
 		clusters3D->clear();
 
-		return S_OK("Content cleared in clustering manager");
+		return BABOON_SUCCESS("Content cleared in clustering manager");
 	}
 
 
 	bool ClusteringManager::ClusterContainsHit( Cluster *cluster , Hit *hit ) {
 
-		return cluster->ContainsHit( hit );
+		return cluster->Contains( hit );
 	}
 
 
 	Return ClusteringManager::MergeAndDeleteClusters( Cluster *clusterToEnlarge , Cluster *clusterToDelete ) {
 
 		if( clusterToEnlarge == 0 || clusterToDelete == 0 )
-			return S_ERROR("While merging clusters : assertion cluster != 0 failed");
+			return BABOON_INVALID_PARAMETER("Assertion cluster != 0 failed");
 
 		if( clusterToEnlarge == clusterToDelete )
-			return S_ERROR("While merging clusters : cluster are the same. Can't merge the same clusters!");
+			return BABOON_INVALID_PARAMETER("Cluster are the same. Can't merge the same clusters!");
 
 		HitCollection *hitCollection = clusterToDelete->GetHitCollection();
 
@@ -148,9 +148,39 @@ namespace baboon {
 			clusterToDelete->RemoveHit( hitCollection->at(i) );
 		}
 
-		Return ret = this->RemoveCluster( clusterToDelete );
-		if( !ret.OK ) delete clusterToDelete;
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->RemoveCluster( clusterToDelete ) );
 
-		return S_OK();
+		delete clusterToDelete;
+
+		return BABOON_SUCCESS();
 	}
+
+
+	Cluster *ClusteringManager::GetClusterAt( ClusterType clusterType , unsigned int I , unsigned int J , unsigned int K ) {
+
+		if( !HitManager::GetInstance()->PadIsTouched(I,J,K) )
+			return 0;
+
+		Hit *hitAtIJK = HitManager::GetInstance()->GetHitAt(I,J,K);
+
+		if( clusterType == fCluster2D ) {
+			for( unsigned int i=0 ; i<clusters2D->size() ; i++ )
+				if( clusters2D->at(i)->Contains( hitAtIJK ) )
+					return clusters2D->at(i);
+		}
+		else {
+			for( unsigned int i=0 ; i<clusters3D->size() ; i++ )
+				if( clusters3D->at(i)->Contains( hitAtIJK ) )
+					return clusters3D->at(i);
+		}
+
+		return 0;
+	}
+
+
 }
+
+
+
+
+
