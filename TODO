@@ -8,12 +8,10 @@ TO DO LIST :
 
 
 
-25/04/13:
+21/05/13:
 
-	- des commits en masse !!
 	- l'interface Algorithm - Xml parser
-	- amélioration de la HoughTransform
-	- chercher des idées pour ConeAlgorithm
+	- algorithm d'agglomeration pour les hits connaissant les débuts de gerbes H
 	
 	
 
