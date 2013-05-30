@@ -29,6 +29,7 @@
 #include "TString.h"
 #include "TGraph.h"
 #include "TLegend.h"
+#include "TH2D.h"
 
 namespace baboon {
 
@@ -67,6 +68,28 @@ namespace baboon {
 	 *
 	 */
 	TLegend *NewTLegend( double x1 , double y1 , double x2 , double y2 );
+
+	/*!
+	 *
+	 * @brief TH2D Factory
+	 *
+	 */
+	TH2D *NewTH2D( const std::string &histName
+				   ,const std::string &histTitle
+				   ,unsigned int nbBinX
+				   ,int xMin
+				   ,int xMax
+				   ,unsigned int nbBinY
+				   ,int yMin
+				   ,int yMax
+				   ,int color );
+
+	TH1D *NewTH1D( const std::string &histName
+				   ,const std::string &histTitle
+				   ,unsigned int nbBinX
+				   ,int xMin
+				   ,int xMax
+				   ,int color );
 
 
 
