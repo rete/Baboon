@@ -45,6 +45,8 @@ SET(
 	${BABOON_LIBRARY_FILES} 
 	src/MarlinProcessor/CaloHitCreator.cc
 	include/MarlinProcessor/CaloHitCreator.hh
+	src/MarlinProcessor/BaboonProcessor.cc
+	include/MarlinProcessor/BaboonProcessor.hh
 )
 
 ADD_SHARED_LIBRARY( Baboon ${BABOON_LIBRARY_FILES} )
@@ -89,28 +91,6 @@ TARGET_LINK_LIBRARIES(
 )
 
 
-
-
-FILE (
-	GLOB_RECURSE
-	GShowerSplitterProcessor_FILES
-	include/MarlinProcessor/GShowerSplitterProcessor.hh
-	src/MarlinProcessor/GShowerSplitterProcessor.cc
-)
-ADD_LIBRARY( GShowerSpliter_lib SHARED ${GShowerSplitterProcessor_FILES} )
-SET_TARGET_PROPERTIES( GShowerSpliter_lib PROPERTIES OUTPUT_NAME GShowerSplitter )
-INSTALL(
-	TARGETS GShowerSpliter_lib
-	LIBRARY DESTINATION lib 
-)
-
-TARGET_LINK_LIBRARIES( 
-	GShowerSpliter_lib 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon 
-)
-
-
 FIND_LIBRARY( TSPECTRUM_LIB libSpectrum.so )
 
 
@@ -135,6 +115,29 @@ TARGET_LINK_LIBRARIES(
 	${ROOT_COMPONENT_LIBRARIES} 
 	Baboon
 	${TSPECTRUM_LIB}
+)
+
+
+
+# --------------------- TestBeamCutsProcessor lib -------------------------------
+
+FILE (
+	GLOB_RECURSE
+	TestBeamCutsProcessor_FILES
+	include/MarlinProcessor/TestBeamCutsProcessor.hh
+	src/MarlinProcessor/TestBeamCutsProcessor.cc
+)
+ADD_LIBRARY( TestBeamCutsProcessor_lib SHARED ${TestBeamCutsProcessor_FILES} )
+SET_TARGET_PROPERTIES( TestBeamCutsProcessor_lib PROPERTIES OUTPUT_NAME TestBeamCutsProcessor )
+INSTALL(
+	TARGETS TestBeamCutsProcessor_lib
+	LIBRARY DESTINATION lib 
+)
+
+TARGET_LINK_LIBRARIES( 
+	TestBeamCutsProcessor_lib 
+	${ROOT_COMPONENT_LIBRARIES} 
+	Baboon 
 )
 
 
@@ -193,6 +196,18 @@ TARGET_LINK_LIBRARIES(
 )
 
 
+# ------------------ Overlay Reco Energy --------------------
+SET( 
+	OVERLAY_RECO_ENERGY_SRC_FILES 
+	main/OverlayRecoEnergy.cc 
+)
+ADD_EXECUTABLE( OverlayRecoEnergy ${OVERLAY_RECO_ENERGY_SRC_FILES} )
+TARGET_LINK_LIBRARIES( 
+	OverlayRecoEnergy 
+	${ROOT_COMPONENT_LIBRARIES} 
+	Baboon
+)
+
 
 IF( BABOON_GUI )
 	ADD_SUBDIRECTORY( ./gui )
@@ -203,7 +218,7 @@ ENDIF()
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis
+	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis OverlayRecoEnergy
 	DESTINATION 
 	bin
 )
