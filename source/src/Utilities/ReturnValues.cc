@@ -22,20 +22,66 @@ using namespace std;
 namespace baboon {
 
 
-
-	Return S_OK( const string &message ) {
+	Return BABOON_SUCCESS( const string &message ) {
 
 		Return ret;
-		ret.OK = true;
 		ret.message = message;
 		return ret;
 	}
 
-	Return S_ERROR( const string &message ) {
+	Return BABOON_ERROR( const string &message ) {
 
-		Return ret;
-		ret.OK = false;
-		ret.message = message;
+		Return ret = BABOON_SUCCESS( message );
+		ret.fStatus = fStatusError;
+		return ret;
+	}
+
+	Return BABOON_WARNING( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusWarning;
+		return ret;
+	}
+
+	Return BABOON_INVALID_PARAMETER( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusInvalidParameter;
+		return ret;
+	}
+
+	Return BABOON_OUT_OF_RANGE( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusOutOfRange;
+		return ret;
+	}
+
+	Return BABOON_ALREADY_INITIALIZED( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusAlreadyInitialized;
+		return ret;
+	}
+
+	Return BABOON_ALREADY_PRESENT( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusAlreadyPresent;
+		return ret;
+	}
+
+	Return BABOON_NOT_FOUND( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusNotFound;
+		return ret;
+	}
+
+	Return BABOON_NOT_INITIALIZED( const string &message ) {
+
+		Return ret = BABOON_SUCCESS(message);
+		ret.fStatus = fStatusNotInitialized;
 		return ret;
 	}
 
@@ -43,13 +89,28 @@ namespace baboon {
 	Return& Return::operator = ( Return const &r ) {
 
 		this->message = r.message;
-		this->OK = r.OK;
+		this->fStatus = r.fStatus;
 		return *this;
+	}
+
+
+	string Return::ToString() {
+
+		      if( fStatus == fStatusSuccess )            return "fStatusSuccess";
+		else if( fStatus == fStatusError )              return "fStatusError";
+		else if( fStatus == fStatusWarning )            return "fStatusWarning";
+		else if( fStatus == fStatusInvalidParameter )   return "fStatusInvalidParameter";
+		else if( fStatus == fStatusOutOfRange )         return "fStatusOutOfRange";
+		else if( fStatus == fStatusAlreadyInitialized ) return "fStatusAlreadyInitialized";
+		else if( fStatus == fStatusAlreadyPresent )     return "fStatusAlreadyPresent";
+		else if( fStatus == fStatusNotFound )           return "fStatusNotFound";
+		else if( fStatus == fStatusNotInitialized )     return "fStatusNotInitialized";
+		else return "";
 	}
 
 	bool operator == ( Return const &r1 , Return const &r2 ) {
 
-		return ( r1.OK == r2.OK );
+		return ( r1.fStatus == r2.fStatus );
 	}
 
 

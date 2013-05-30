@@ -24,36 +24,101 @@
 namespace baboon {
 
 
+	enum ReturnStatus {
+
+		fStatusSuccess,
+		fStatusWarning,
+		fStatusInvalidParameter,
+		fStatusOutOfRange,
+		fStatusAlreadyInitialized,
+		fStatusAlreadyPresent,
+		fStatusNotFound,
+		fStatusNotInitialized,
+		fStatusError
+	};
+
 	/*!
 	 *
 	 * @brief Return class.
-	 * Returned object type.
+	 * Returned object type with a status
 	 *
 	 */
 	class Return {
 	public:
-			Return() : OK(true) , message("") {;}
-			bool OK;
+			Return() : message("") , fStatus(fStatusSuccess) {;}
+			ReturnStatus fStatus;
 			std::string message;
 			Return& operator =(const Return& ret);
+			std::string ToString();
 	};
 
 	bool operator == ( Return const &r1 , Return const &r2 );
 
-	/*!
-	 *
-	 * @brief Return a 'Return' object filled with an error status and a given message.
-	 *
-	 */
-	Return S_ERROR( const std::string &message = "" );
-
 
 	/*!
 	 *
-	 * @brief Return a 'Return' object filled with a OK status and a given message.
+	 * @brief Return a SUCCESS status and a given message.
 	 *
 	 */
-	Return S_OK( const std::string &message = "" );
+	Return BABOON_SUCCESS( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return an ERROR status and a given message.
+	 *
+	 */
+	Return BABOON_ERROR( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return a WARNING status and a given message.
+	 *
+	 */
+	Return BABOON_WARNING( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return an INVALID PARAMETER status and a given message.
+	 *
+	 */
+	Return BABOON_INVALID_PARAMETER( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return an OUT OF RANGE status and a given message.
+	 *
+	 */
+	Return BABOON_OUT_OF_RANGE( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return a ERROR status and a given message.
+	 *
+	 */
+	Return BABOON_ALREADY_INITIALIZED( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return a ALREADY PRESENT status and a given message.
+	 *
+	 */
+	Return BABOON_ALREADY_PRESENT( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return a NOT FOUND status and a given message.
+	 *
+	 */
+	Return BABOON_NOT_FOUND( const std::string &message = "" );
+
+	/*!
+	 *
+	 * @brief Return a NOT INITIALIZED status and a given message.
+	 *
+	 */
+	Return BABOON_NOT_INITIALIZED( const std::string &message = "" );
+
+
 
 }  // namespace 
 
