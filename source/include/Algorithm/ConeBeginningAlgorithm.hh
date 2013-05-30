@@ -38,7 +38,7 @@
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 
-#include "GraphicalProcessor/SDHCALPrototype.hh"
+#include "Geometry/SDHCALPrototype.hh"
 #include "TGeoCone.h"
 
 namespace baboon {
