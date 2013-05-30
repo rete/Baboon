@@ -81,37 +81,72 @@ namespace baboon {
 			vecCol.push_back( hitCollection->at(i)->GetPosition() );
 		}
 		return vecCol;
+	}
 
+	std::vector<ThreeVector> Track::GetIJKs() const {
+
+		std::vector<ThreeVector> ijks;
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+			ThreeVector ijk( hitCollection->at(i)->GetIJK().at(0) , hitCollection->at(i)->GetIJK().at(1) , hitCollection->at(i)->GetIJK().at(2) );
+			ijks.push_back( ijk );
+		}
+		return ijks;
 	}
 
 	Return Track::AddHit( Hit *hit ) {
 
+		if( hit == 0 )
+			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
+
 		if( find( hitCollection->begin() , hitCollection->end() , hit ) == hitCollection->end() )
 			hitCollection->push_back(hit);
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	Return Track::RemoveHit( Hit *hit ) {
 
+		if( hit == 0 )
+			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
+
 		HitCollection::iterator pos = find( hitCollection->begin() , hitCollection->end() , hit );
 		if( pos == hitCollection->end() )
-			return S_ERROR("Hit was not in track");
+			return BABOON_NOT_FOUND("Hit was not in track");
 		else {
 			hitCollection->erase(pos);
-			return S_OK("Hit removed from a track");
+			return BABOON_SUCCESS("Hit removed from a track");
 		}
 	}
 
 
 	bool Track::Contains( Hit *hit ) {
+
 		return ( std::find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
 	}
 
 
-	Return Track::OrderHits() {
+	Return Track::SortHits() {
 
+		if( hitCollection->size() <= 1 )
+			return BABOON_SUCCESS("Sort one element or an empty list is easy...");
 
+		int i = 0;
+		int j = 0;
+		Hit *hit = 0;
 
+		for( j=1 ; j<hitCollection->size() ; j++ ) {
+
+			i = j-1;
+			while( hitCollection->at(j)->GetIJK().at(2) < hitCollection->at(i)->GetIJK().at(2) ) {
+				hit = hitCollection->at(i);
+				hitCollection->at(i) = hitCollection->at(j);
+				hitCollection->at(j) = hit;
+				i=i-1;
+				j=j-1;
+				if( i<0 ) break;
+			}
+		}
+
+		return BABOON_SUCCESS();
 	}
 
 
