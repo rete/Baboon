@@ -55,6 +55,8 @@ namespace baboon {
 
 		public:
 
+			InputTTreeWrapper();
+
 			/*!
 			 *
 			 * @ brief : Constructor
@@ -70,6 +72,8 @@ namespace baboon {
 			 */
 			~InputTTreeWrapper();
 
+
+			void SetTree( TTree *t );
 
 			/*!
 			 *
