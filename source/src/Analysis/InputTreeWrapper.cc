@@ -25,6 +25,13 @@ using namespace std;
 namespace baboon {
 
 
+	InputTTreeWrapper::InputTTreeWrapper() {
+
+		tree = 0;
+		nbOfEntries = 0;
+		branchMap = 0;
+		currentEntry = -1;
+	}
 
 	InputTTreeWrapper::InputTTreeWrapper( TTree *pTree )
 		: tree(pTree) {
@@ -35,6 +42,18 @@ namespace baboon {
 
 	}
 
+	void InputTTreeWrapper::SetTree( TTree *t ) {
+
+		tree = t;
+		if( branchMap != 0 ) {
+			branchMap->clear();
+			delete branchMap;
+			branchMap = new TBranchMap;
+		}
+		nbOfEntries = tree->GetEntriesFast();
+		Init();
+		currentEntry = -1;
+	}
 
 	InputTTreeWrapper::~InputTTreeWrapper() {
 
