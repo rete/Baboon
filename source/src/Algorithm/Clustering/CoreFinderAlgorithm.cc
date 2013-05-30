@@ -43,8 +43,8 @@ namespace baboon {
 	Return CoreFinderAlgorithm::CheckConsistency() {
 
 		if(hitCollection == 0)
-			return S_ERROR("CoreFinderAlgorithm bad init. Please check your inputs!");
-		return S_OK();
+			return BABOON_ERROR("CoreFinderAlgorithm bad init. Please check your inputs!");
+		return BABOON_SUCCESS();
 
 	}
 
