@@ -30,6 +30,7 @@
 #include "Reconstruction/Tag.hh"
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
+#include "Utilities/Internal.hh"
 
 namespace baboon {
 
@@ -42,10 +43,6 @@ namespace baboon {
 		fThreshold2,
 		fThreshold3
 	};
-
-	class Hit;
-
-	typedef std::vector<Hit*> HitCollection;
 
 
 	/*!
