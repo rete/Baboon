@@ -17,9 +17,6 @@
 #ifndef OVERLAYESTIMATORPROCESSOR_HH
 #define OVERLAYESTIMATORPROCESSOR_HH
 
-#include "marlin/Processor.h"
-#include "EVENT/CalorimeterHit.h"
-#include "lcio.h"
 
 #include <iostream> 
 #include <string> 
@@ -27,14 +24,19 @@
 #include <cmath> 
 #include <vector> 
 
-namespace baboon {
+
+#include "Geometry/Cylinder.hh"
+#include "MarlinProcessor/BaboonProcessor.hh"
+#include "Reconstruction/WeightEnergyCalculator.hh"
+#include "Reconstruction/SimpleEnergyCalculator.hh"
+
 
 /* 
  * Class OverlayEstimatorProcessor
- * Inherits from base class marlin::Processor
+ * Inherits from base class baboon::BaboonProcessor
  */ 
 
-class OverlayEstimatorProcessor : public marlin::Processor {
+class OverlayEstimatorProcessor : public baboon::BaboonProcessor {
 
 	public:
 
@@ -48,32 +50,47 @@ class OverlayEstimatorProcessor : public marlin::Processor {
 		virtual Processor *newProcessor()
 			{ return new OverlayEstimatorProcessor(); }
 
-		/** Called at the begin of the job before anything is read.
-		* Use to initialize the processor, e.g. book histograms.
-		*/
-		virtual void init() ;
+		/*!
+		 *
+		 * @brief Must be defined by the user. Init the BABOON processor
+		 *
+		 */
+		virtual baboon::Return Init();
 
-		/** Called for every run.
-		*/
-		virtual void processRunHeader( EVENT::LCRunHeader* run ) ;
+		/*!
+		 *
+		 * @brief Must be defined by the user. Process the run header.
+		 *
+		 */
+		virtual baboon::Return ProcessRunHeader( EVENT::LCRunHeader* run  );
 
-		/** Called for every event - the working horse.
-		*/
-		virtual void processEvent( EVENT::LCEvent * evt ) ;
+		/*!
+		 *
+		 * @brief Must be defined by the user. Process an event in the BABOON framework
+		 *
+		 */
+		virtual baboon::Return ProcessEvent( const unsigned int &evtNb );
 
+		/*!
+		 *
+		 * @brief Must be defined by the user. Check the event.
+		 *
+		 */
+		virtual baboon::Return Check( EVENT::LCEvent * evt );
 
-		virtual void check( EVENT::LCEvent * evt ) ;
-
-
-		/** Called after data processing for clean up.
-		*/
-		virtual void end() ;
+		/*!
+		 *
+		 * @brief Must be defined by the user. Called after processing all the events.
+		 *
+		 */
+		virtual baboon::Return End();
 
 	protected:
+
+		std::string overlayEstimatorMethod;
 
 
 };  // class 
 
-}  // namespace 
 
 #endif  //  OVERLAYESTIMATORPROCESSOR_HH
