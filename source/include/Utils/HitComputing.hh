@@ -22,8 +22,7 @@
 #include <cstdlib> 
 #include <cmath> 
 #include <vector> 
-
-#include "Objects/Hit.hh"
+#include "Objects/HitCollection.hh"
 #include "Geometry/ThreeVector.hh"
 #include "Utilities/Globals.hh"
 
