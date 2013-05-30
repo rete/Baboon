@@ -61,14 +61,14 @@ namespace baboon {
 
 		Hit *hit = new Hit(params);
 		hitCollection->push_back(hit);
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return HitManager::DeleteHit( Hit *hit ) {
 
 		if( hit == 0 )
-			return S_ERROR("while deleting a hit : assertion hit  != 0 failed");
+			return BABOON_INVALID_PARAMETER("while deleting a hit : assertion hit  != 0 failed");
 
 		HitCollection::iterator hitIt = std::find( hitCollection->begin() , hitCollection->end() , hit );
 
@@ -76,9 +76,9 @@ namespace baboon {
 			if( *hitIt != 0 )
 				delete hit;
 			hitCollection->erase( hitIt );
-			return S_OK("Hit found and correctly deleted");
+			return BABOON_SUCCESS("Hit found and correctly deleted");
 		}
-		return S_ERROR("Hit was not registered by the hit manager. Couldn't delete it!");
+		return BABOON_NOT_FOUND("Hit was not registered by the hit manager. Couldn't delete it!");
 	}
 
 
@@ -106,7 +106,7 @@ namespace baboon {
 			hitCollection = new HitCollection();
 		}
 //		cerr << "ok" << endl;
-		return S_OK("Content cleared!");
+		return BABOON_SUCCESS("Content cleared!");
 
 	}
 
@@ -146,7 +146,7 @@ namespace baboon {
 
 		if( I <= nbOfPadsXYZ.at(0) && I > 0
 		 && J <= nbOfPadsXYZ.at(1) && K > 0
-		 && K <= nbOfPadsXYZ.at(2) && K > 0 )
+		 && K < nbOfPadsXYZ.at(2) && K >= 0 )
 			return true;
 
 		return false;
