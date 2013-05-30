@@ -17,10 +17,6 @@
 #ifndef SHOWERSPLITTERPROCESSOR_HH
 #define SHOWERSPLITTERPROCESSOR_HH
 
-#include "marlin/Processor.h"
-#include "EVENT/CalorimeterHit.h"
-#include "lcio.h"
-
 #include <iostream> 
 #include <string> 
 #include <cstdlib> 
@@ -28,22 +24,15 @@
 #include <vector> 
 
 
-#include "Config/SdhcalConfig.hh"
-#include "Algorithm/AlgorithmHeaders.hh"
-#include "Managers/AlgorithmManager.hh"
-#include "Managers/AnalysisManager.hh"
-#include "Managers/CoreManager.hh"
-#include "Managers/ShowerManager.hh"
-#include "Utils/Numeric.hh"
-
-#include "MarlinProcessor/CaloHitCreator.hh"
+#include "MarlinProcessor/BaboonProcessor.hh"
+#include "Reconstruction/SimpleEnergyCalculator.hh"
 
 /* 
  * Class ShowerSplitterProcessor
- * Inherits from base class marlin::Processor
+ * Inherits from base class BaboonProcessor
  */ 
 
-class ShowerSplitterProcessor : public marlin::Processor {
+class ShowerSplitterProcessor : public baboon::BaboonProcessor {
 
 	public:
 
@@ -57,35 +46,40 @@ class ShowerSplitterProcessor : public marlin::Processor {
 		virtual Processor *newProcessor()
 			{ return new ShowerSplitterProcessor(); }
 
-		/** Called at the begin of the job before anything is read.
-		* Use to initialize the processor, e.g. book histograms.
-		*/
-		virtual void init();
+		/*!
+		 *
+		 * @brief Must be defined by the user. Init the BABOON processor
+		 *
+		 */
+		virtual baboon::Return Init();
 
-		/** Called for every run.
-		*/
-		virtual void processRunHeader( EVENT::LCRunHeader* run );
+		/*!
+		 *
+		 * @brief Must be defined by the user. Process the run header.
+		 *
+		 */
+		virtual baboon::Return ProcessRunHeader( EVENT::LCRunHeader* run  );
 
-		/** Called for every event - the working horse.
-		*/
-		virtual void processEvent( EVENT::LCEvent * evt );
+		/*!
+		 *
+		 * @brief Must be defined by the user. Process an event in the BABOON framework
+		 *
+		 */
+		virtual baboon::Return ProcessEvent( const unsigned int &evtNb );
 
+		/*!
+		 *
+		 * @brief Must be defined by the user. Check the event.
+		 *
+		 */
+		virtual baboon::Return Check( EVENT::LCEvent * evt );
 
-		virtual void check( EVENT::LCEvent * evt );
-
-
-		/** Called after data processing for clean up.
-		*/
-		virtual void end();
-
-	protected:
-
-		std::string baboonHome;
-		std::string configFileName;
-		std::string algorithmFileName;
-		std::string rootOutputFile;
-		std::string decoderString;
-		std::string collectionName;
+		/*!
+		 *
+		 * @brief Must be defined by the user. Called after processing all the events.
+		 *
+		 */
+		virtual baboon::Return End();
 
 
 };  // class 
