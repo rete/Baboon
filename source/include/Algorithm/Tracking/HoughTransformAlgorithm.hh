@@ -35,7 +35,6 @@
 #include "Managers/HitManager.hh"
 #include "Managers/TrackManager.hh"
 #include "Reconstruction/Tag.hh"
-#include "Reconstruction/Builders/TrackCollectionBuilder.hh"
 #include "Utilities/ReturnValues.hh"
 
 #include "Reconstruction/Linear3DFit.hh"
