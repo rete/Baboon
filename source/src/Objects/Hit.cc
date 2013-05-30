@@ -36,28 +36,28 @@ namespace baboon {
 	Return Hit::SetPosition( const ThreeVector& pos ) {
 
 		position = pos;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return Hit::SetThreshold( const HitThreshold &fThr ) {
 
 		fThreshold = fThr;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return Hit::SetHitTag( const Tag &fTag ) {
 
 		hitTag = fTag;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return Hit::SetWeight( const int &w ) {
 
 		weight = w;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
@@ -67,26 +67,26 @@ namespace baboon {
 		ijk.push_back(I);
 		ijk.push_back(J);
 		ijk.push_back(K);
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
 	Return Hit::SetIJK( const IntVector &vec ) {
 
 		ijk = vec;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	Return Hit::SetType( int t ) {
 
 		type = t;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 	Return Hit::SetTime( double t ) {
 
 		time = t;
-		return S_OK();
+		return BABOON_SUCCESS();
 	}
 
 
