@@ -41,8 +41,8 @@ namespace baboon {
 	Return PrincipalComponentAnalysis::CheckConsistency() {
 
 		if( hitCollection == 0 )
-			return S_ERROR("PrincipalComponentAnalysis bad init. Please check your inputs!");
-		return S_OK();
+			return BABOON_ERROR("Principal Component Analysis bad init. Please check your inputs!");
+		return BABOON_SUCCESS();
 	}
 
 
