@@ -31,9 +31,10 @@
 #include "Algorithm/Clustering/DistanceAgglomerationAlgorithm.hh"
 #include "Algorithm/Clustering/CoreFinderAlgorithm.hh"
 #include "Algorithm/ConeBeginningAlgorithm.hh"
-#include "Algorithm/IsolationTaggingAlgorithm.hh"
+#include "Algorithm/Tagging/IsolationTaggingAlgorithm.hh"
 #include "Algorithm/PrincipalComponentAnalysis.hh"
-#include "Algorithm/TrackToShowerAssociationAlgorithm.hh"
+#include "Algorithm/Association/TrackToShowerAssociationAlgorithm.hh"
+#include "Algorithm/Association/CoreToCoreAssociationAlgorithm.hh"
 
 
 
