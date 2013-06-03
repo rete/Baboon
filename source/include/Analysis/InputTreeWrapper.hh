@@ -26,12 +26,15 @@
 #include <utility>
 #include <map>
 #include <stdexcept>
+#include <typeinfo>
 
 // root includes
 #include <TObjArray.h>
 #include <TTree.h>
 #include <TBranch.h>
 #include <TLeaf.h>
+
+#include "Utilities/ReturnValues.hh"
 
 
 namespace baboon {
@@ -113,7 +116,7 @@ namespace baboon {
 			 *
 			 */
 			template <typename T>
-			void GetValue( const std::string &branchName , T &val );
+			Return GetValue( const std::string &branchName , T &val );
 
 			/*!
 			 *
