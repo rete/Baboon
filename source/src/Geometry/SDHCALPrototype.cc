@@ -122,7 +122,7 @@ namespace baboon {
 	}
 
 
-	void SDHCALPrototype::LoadHitCollection( HitCollection *hitCol ) {
+	Return SDHCALPrototype::LoadHitCollection( HitCollection *hitCol ) {
 
 		TGeoMaterial *vacMat = new TGeoMaterial("Vacuum",0,0,0);
 		TGeoMedium *vacMed = new TGeoMedium("Vacuum",1,vacMat);
@@ -144,9 +144,10 @@ namespace baboon {
 			hitMapVolumePtr.SetValue( ijk.at(0) , ijk.at(1) , ijk.at(2) , currentNode );
 			currentNodeList.push_back(currentNode);
 		}
+		return BABOON_SUCCESS();
 	}
 
-	void SDHCALPrototype::ClearCalorimeter() {
+	Return SDHCALPrototype::ClearCalorimeter() {
 
 		TGeoVolume *top = geoManager->GetTopVolume();
 
@@ -155,6 +156,7 @@ namespace baboon {
 		}
 		currentNodeList.clear();
 		hitMapVolumePtr.Clear();
+		return BABOON_SUCCESS();
 	}
 
 	TGeoNode *SDHCALPrototype::GetNodeAt( unsigned int I , unsigned int J , unsigned int K ) {
