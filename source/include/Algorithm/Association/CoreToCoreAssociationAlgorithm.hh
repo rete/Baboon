@@ -17,7 +17,7 @@
 #ifndef CORETOCOREASSOCIATIONALGORITHM_HH
 #define CORETOCOREASSOCIATIONALGORITHM_HH
 
-#include "AbstractAlgorithm.hh"
+#include "Algorithm/AbstractAlgorithm.hh"
 
 #include <iostream> 
 #include <string> 
@@ -27,9 +27,9 @@
 
 #include "Managers/CoreManager.hh"
 #include "Managers/ShowerManager.hh"
-#include "Reconstruction/Objects/Core.hh"
-#include "Reconstruction/Objects/Track.hh"
-#include "Reconstruction/Objects/Shower.hh"
+#include "Objects/Core.hh"
+#include "Objects/Track.hh"
+#include "Objects/Shower.hh"
 
 
 namespace baboon {
@@ -63,7 +63,7 @@ namespace baboon {
 			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
-			virtual void Init();
+			virtual Return Init();
 
 
 			/*!
@@ -71,7 +71,7 @@ namespace baboon {
 			 * @brief Execute the algorithm
 			 *
 			 */
-			virtual void Execute();
+			virtual Return Execute();
 
 
 			/*!
@@ -79,7 +79,7 @@ namespace baboon {
 			 * @brief Finalize the algorithm
 			 *
 			 */
-			virtual void End();
+			virtual Return End();
 
 
 			/*!

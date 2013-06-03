@@ -14,7 +14,7 @@
  */
 
 
-#include "Algorithm/TrackToShowerAssociationAlgorithm.hh"
+#include "Algorithm/Association/TrackToShowerAssociationAlgorithm.hh"
 
 using namespace std;
 
@@ -31,13 +31,13 @@ namespace baboon {
 	}
 
 
-	void TrackToShowerAssociationAlgorithm::Init() {
+	Return TrackToShowerAssociationAlgorithm::Init() {
 
 		data.GetValue("Chi2LimitForTrack",&Chi2LimitForTrack);
 		data.GetValue("cylinderRadius",&cylinderRadius);
 		data.GetValue("cylinderLength",&cylinderLength);
 
-
+		return BABOON_SUCCESS();
 	}
 
 
@@ -53,7 +53,7 @@ namespace baboon {
 	}
 
 
-	void TrackToShowerAssociationAlgorithm::Execute() {
+	Return TrackToShowerAssociationAlgorithm::Execute() {
 
 
 		TrackCollection *trackCollection = TrackManager::GetInstance()->GetTrackCollection();
@@ -146,11 +146,13 @@ namespace baboon {
 
 			delete fitter;
 		}
+		return BABOON_SUCCESS();
 	}
 
 
-	void TrackToShowerAssociationAlgorithm::End() {
+	Return TrackToShowerAssociationAlgorithm::End() {
 
+		return BABOON_SUCCESS();
 	}
 
 	Return TrackToShowerAssociationAlgorithm::PredominantShowerInCylinder( Cylinder *cyl , Shower *predominantShower ) {

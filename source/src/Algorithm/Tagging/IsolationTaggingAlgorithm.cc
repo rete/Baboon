@@ -16,7 +16,7 @@
 
 
 
-#include "Algorithm/IsolationTaggingAlgorithm.hh"
+#include "Algorithm/Tagging/IsolationTaggingAlgorithm.hh"
 
 
 
@@ -42,13 +42,13 @@ namespace baboon {
 	}
 
 
-	void IsolationTaggingAlgorithm::Init() {
+	Return IsolationTaggingAlgorithm::Init() {
 
 		data.GetValue("distance",&distance);
 		data.GetValue("concentrationLimit",&concentrationLimit);
 		hitCollection = HitManager::GetInstance()->GetHitCollection();
 		isolationWeights.clear();
-
+		return BABOON_SUCCESS();
 	}
 
 	Return IsolationTaggingAlgorithm::CheckConsistency() {
@@ -58,7 +58,7 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
-	void IsolationTaggingAlgorithm::Execute() {
+	Return IsolationTaggingAlgorithm::Execute() {
 
 		HitManager *hitManager = HitManager::GetInstance();
 
@@ -92,11 +92,13 @@ namespace baboon {
 				hit->SetHitTag( fIsolated );
 			}
 		}
+		return BABOON_SUCCESS();
 	}
 
-	void IsolationTaggingAlgorithm::End() {
+	Return IsolationTaggingAlgorithm::End() {
 
 		hitCollection = 0;
+		return BABOON_SUCCESS();
 	}
 
 

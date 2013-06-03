@@ -28,8 +28,8 @@
 
 #include "Managers/ShowerManager.hh"
 #include "Managers/TrackManager.hh"
-#include "Reconstruction/Objects/Track.hh"
-#include "Reconstruction/Objects/Shower.hh"
+#include "Objects/Track.hh"
+#include "Objects/Shower.hh"
 #include "Reconstruction/Linear3DFit.hh"
 #include "Geometry/Cylinder.hh"
 #include "Utilities/Internal.hh"
@@ -69,7 +69,7 @@ namespace baboon {
 			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
-			virtual void Init();
+			virtual Return Init();
 
 
 			/*!
@@ -77,7 +77,7 @@ namespace baboon {
 			 * @brief Execute the algorithm
 			 *
 			 */
-			virtual void Execute();
+			virtual Return Execute();
 
 
 			/*!
@@ -85,7 +85,7 @@ namespace baboon {
 			 * @brief Finalize the algorithm
 			 *
 			 */
-			virtual void End();
+			virtual Return End();
 
 
 			/*!

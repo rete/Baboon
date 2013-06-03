@@ -14,7 +14,7 @@
  */
 
 
-#include "Algorithm/CoreToCoreAssociationAlgorithm.hh"
+#include "Algorithm/Association/CoreToCoreAssociationAlgorithm.hh"
 
 
 namespace baboon {
@@ -31,8 +31,9 @@ namespace baboon {
 	}
 
 
-	void CoreToCoreAssociationAlgorithm::Init() {
+	Return CoreToCoreAssociationAlgorithm::Init() {
 
+		return BABOON_SUCCESS();
 	}
 
 
@@ -41,12 +42,12 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
-	void CoreToCoreAssociationAlgorithm::Execute() {
+	Return CoreToCoreAssociationAlgorithm::Execute() {
 
 		ShowerCollection *showerCollection = ShowerManager::GetInstance()->GetShowerCollection();
 
 		if( showerCollection->size() <=1 )
-			return;
+			return BABOON_SUCCESS();
 
 
 		for( unsigned int sh1=0 ; sh1<showerCollection->size() ; sh1++) {
@@ -82,16 +83,16 @@ namespace baboon {
 		}
 
 
-
+		return BABOON_SUCCESS();
 	}
 
 
-	void CoreToCoreAssociationAlgorithm::End() {
+	Return CoreToCoreAssociationAlgorithm::End() {
 
+		return BABOON_SUCCESS();
 	}
 
 	bool CoreToCoreAssociationAlgorithm::CanAssociateCores( Core *core1 , Core *core2 ) {
-
 
 		return false;
 	}
