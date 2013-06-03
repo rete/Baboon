@@ -25,12 +25,16 @@
 #include "Geometry/ThreeVector.hh"
 #include "Config/SdhcalConfig.hh"
 #include "Objects/HitCollection.hh"
+#include "Utilities/ReturnValues.hh"
+#include "Utilities/Internal.hh"
 
 
 namespace baboon {
 
 	/*!
-	 * Class Overlayer.
+	 *
+	 * Class Overlayer
+	 *
 	 */
 
 	class Overlayer {
@@ -42,6 +46,7 @@ namespace baboon {
 			HitCollection* collection1;
 			HitCollection* collection2;
 			HitCollection* overlaidCollection;
+			HitCollection* lostHitCollection;
 			ThreeVector *collectionTranslation1;
 			ThreeVector *collectionTranslation2;
 			std::vector<double> padsSize;
@@ -50,15 +55,32 @@ namespace baboon {
 			bool collectionsTranslated;
 
 
-			void TranslateCollections();
+			Return TranslateCollections();
+
+			int ThresholdToInt( HitThreshold fThr );
 
 		public :
-			/*! Default Constructor with two collections */
+
+			/*!
+			 *
+			 * Default Constructor with two collections
+			 *
+			 */
 			Overlayer( HitCollection *col1 , HitCollection *col2) ;
-			/*! Default Destructor */
+
+			/*!
+			 *
+			 * Default Destructor
+			 *
+			 */
 			virtual ~Overlayer() ;
-			/*! Overlay the two collection */
-			void OverlayCollections();
+
+			/*!
+			 *
+			 * Overlay the two collection
+			 *
+			 */
+			Return OverlayCollections();
 
 			inline HitCollection* GetOverlaidCollection()
 				{ return overlaidCollection; }
@@ -71,8 +93,8 @@ namespace baboon {
 			inline int GetNumberOfLostHits()
 				{ return lostHits; }
 
-			int ThresholdToInt( HitThreshold fThr );
-
+			inline HitCollection *GetLostHitCollection()
+				{ return lostHitCollection; }
 
 
 	};
