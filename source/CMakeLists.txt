@@ -25,8 +25,7 @@ FOREACH( module
 	Overlay 
 	Reconstruction 
 	Config 
-	CfgParser 
-	Utils 
+	CfgParser  
 	Utilities 
 	Xml 
 	GraphicalProcessor )
@@ -86,6 +85,28 @@ INSTALL(
 
 TARGET_LINK_LIBRARIES( 
 	ShowerSpliter_lib 
+	${ROOT_COMPONENT_LIBRARIES} 
+	Baboon 
+)
+
+
+# --------------------- Shower PDF lib -------------------------------
+
+FILE (
+	GLOB_RECURSE
+	ShowerPDFProcessor_FILES
+	include/MarlinProcessor/ShowerPDFProcessor.hh
+	src/MarlinProcessor/ShowerPDFProcessor.cc
+)
+ADD_LIBRARY( ShowerPDFProcessor_lib SHARED ${ShowerPDFProcessor_FILES} )
+SET_TARGET_PROPERTIES( ShowerPDFProcessor_lib PROPERTIES OUTPUT_NAME ShowerPDFProcessor )
+INSTALL(
+	TARGETS ShowerPDFProcessor_lib
+	LIBRARY DESTINATION lib 
+)
+
+TARGET_LINK_LIBRARIES( 
+	ShowerPDFProcessor_lib 
 	${ROOT_COMPONENT_LIBRARIES} 
 	Baboon 
 )
