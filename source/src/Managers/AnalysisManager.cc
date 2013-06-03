@@ -54,12 +54,13 @@ namespace baboon {
 	}
 
 
-	void AnalysisManager::Init() {
+	Return AnalysisManager::Init() {
 
 		if( !outputFileName.empty() ) {
 			rootOutputFile = TFile::Open( outputFileName.c_str() ,"RECREATE" );
 			cout << "ROOT output file '" << outputFileName << "' correctly opened" << endl;
 		}
+		return BABOON_SUCCESS();
 	}
 
 	void AnalysisManager::PrintAnalysisFooter() {
@@ -85,7 +86,7 @@ namespace baboon {
 	}
 
 
-	void AnalysisManager::End() {
+	Return AnalysisManager::End() {
 
 		if( rootOutputFile ) {
 			instance->PrintAnalysisFooter();
@@ -96,6 +97,7 @@ namespace baboon {
 			rootOutputFile->Close();
 			delete rootOutputFile;
 		}
+		return BABOON_SUCCESS();
 	}
 
 
