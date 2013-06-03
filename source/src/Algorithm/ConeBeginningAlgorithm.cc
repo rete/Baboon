@@ -31,7 +31,7 @@ namespace baboon {
 
 
 
-	void ConeBeginningAlgorithm::Init() {
+	Return ConeBeginningAlgorithm::Init() {
 
 		hitCollection = HitManager::GetInstance()->GetHitCollection();
 		data.GetValue("coneMinimumOpeningAngle",&coneMinimumOpeningAngle);
@@ -52,7 +52,7 @@ namespace baboon {
 			}
 			nodeList.clear();
 		}
-
+		return BABOON_SUCCESS();
 	}
 
 
@@ -64,7 +64,7 @@ namespace baboon {
 	}
 
 
-	void ConeBeginningAlgorithm::Execute() {
+	Return ConeBeginningAlgorithm::Execute() {
 
 		HitManager* hitManager = HitManager::GetInstance();
 		CoreManager *coreManager = CoreManager::GetInstance();
@@ -72,7 +72,7 @@ namespace baboon {
 
 		CoreCollection *coreCollection = coreManager->GetCoreCollection();
 		if( coreCollection->empty() )
-			return;
+			return BABOON_SUCCESS();
 
 		ostringstream ss;
 
@@ -92,7 +92,6 @@ namespace baboon {
 
 
 			int maximumClusterSizeInCore = 0;
-//			ClusterCollection clusterTempList;
 			int maximumClusterSizeLayer = 0;
 			HitCollection hitTempCollection;
 
@@ -266,16 +265,17 @@ namespace baboon {
 			}
 
 		}
-
+		return BABOON_SUCCESS();
 	}
 
 
-	void ConeBeginningAlgorithm::End() {
+	Return ConeBeginningAlgorithm::End() {
 
+		return BABOON_SUCCESS();
 	}
 
 
-	void ConeBeginningAlgorithm::FindPadsInCone( Cone *cone , vector<IntVector> &existingPadsInCone, vector<IntVector> &touchedPadsInCone ) {
+	Return ConeBeginningAlgorithm::FindPadsInCone( Cone *cone , vector<IntVector> &existingPadsInCone, vector<IntVector> &touchedPadsInCone ) {
 
 		HitManager* hitManager = HitManager::GetInstance();
 		double r = cone->GetRadius();
@@ -316,6 +316,7 @@ namespace baboon {
 				}
 			}
 		}
+		return BABOON_SUCCESS();
 	}
 
 	int ConeBeginningAlgorithm::NbOfCoreHitsInCone( Cone *cone , Core *core ) {

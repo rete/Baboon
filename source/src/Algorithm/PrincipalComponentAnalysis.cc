@@ -32,9 +32,11 @@ namespace baboon {
 	}
 
 
-	void PrincipalComponentAnalysis::Init() {
+	Return PrincipalComponentAnalysis::Init() {
+
 		eigenValues.Clear();
 		eigenVectors.Clear();
+		return BABOON_SUCCESS();
 	}
 
 
@@ -46,7 +48,7 @@ namespace baboon {
 	}
 
 
-	void PrincipalComponentAnalysis::Execute() {
+	Return PrincipalComponentAnalysis::Execute() {
 
 		double *x = new double[ hitCollection->size() ];
 		double *y = new double[ hitCollection->size() ];
@@ -94,11 +96,13 @@ namespace baboon {
 		delete x;
 		delete y;
 
+		return BABOON_SUCCESS();
 	}
 
 
-	void PrincipalComponentAnalysis::End() {
+	Return PrincipalComponentAnalysis::End() {
 
+		return BABOON_SUCCESS();
 	}
 
 }  // namespace 
