@@ -36,7 +36,6 @@
 #include "Managers/TrackManager.hh"
 #include "Reconstruction/Tag.hh"
 #include "Utilities/ReturnValues.hh"
-
 #include "Reconstruction/Linear3DFit.hh"
 
 namespace baboon {
@@ -105,7 +104,7 @@ namespace baboon {
 			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
-			virtual void Init();
+			virtual Return Init();
 
 
 			/*!
@@ -113,7 +112,7 @@ namespace baboon {
 			 * @brief Execute the algorithm
 			 *
 			 */
-			virtual void Execute();
+			virtual Return Execute();
 
 
 			/*!
@@ -121,7 +120,7 @@ namespace baboon {
 			 * @brief Finalize the algorithm
 			 *
 			 */
-			virtual void End();
+			virtual Return End();
 
 
 			/*!
