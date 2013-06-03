@@ -104,7 +104,7 @@ namespace baboon {
 
 
 	template <typename T>
-	void InputTTreeWrapper::GetValue( const string &branchName , T &val ) {
+	Return InputTTreeWrapper::GetValue( const string &branchName , T &val ) {
 
 		bool found = false;
 		for( TBranchMap::iterator it=branchMap->begin() ; it!=branchMap->end() ;it++ ) {
@@ -115,21 +115,25 @@ namespace baboon {
 				found = true;
 			}
 		}
-		if( !found )
-			throw runtime_error("Asked branch name doesn't exists!");
+		if( !found ) {
+			string message = "Asked branch name '"+ branchName +"' of type '"+ string(typeid(T).name()) +"' doesn't exists!\n";
+			return BABOON_NOT_FOUND( message );
+		}
+
+		return BABOON_SUCCESS();
 	}
 
 
 
 	// template initialization
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , int &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , double &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , float &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , bool &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<int> &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<double> &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<float> &val );
-	template void InputTTreeWrapper::GetValue( const std::string &branchName , vector<bool> &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , int &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , double &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , float &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , bool &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , vector<int> &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , vector<double> &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , vector<float> &val );
+	template Return InputTTreeWrapper::GetValue( const std::string &branchName , vector<bool> &val );
 
 
 }  // namespace 
