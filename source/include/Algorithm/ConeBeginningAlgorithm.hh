@@ -34,7 +34,7 @@
 #include "Managers/CoreManager.hh"
 #include "Managers/ShowerManager.hh"
 #include "Managers/ClusteringManager.hh"
-#include "Reconstruction/Objects/Shower.hh"
+#include "Objects/Shower.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 
@@ -74,21 +74,21 @@ namespace baboon {
 			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
-			virtual void Init();
+			virtual Return Init();
 
 			/*!
 			 *
 			 * @brief Execute the algorithm
 			 *
 			 */
-			virtual void Execute();
+			virtual Return Execute();
 
 			/*!
 			 *
 			 * @brief Finalize the algorithm
 			 *
 			 */
-			virtual void End();
+			virtual Return End();
 
 			/*!
 			 *
@@ -102,7 +102,7 @@ namespace baboon {
 			 * @brief Find the existing pads inside a given cone. Find also the touched pads.
 			 *
 			 */
-			void FindPadsInCone( Cone *cone , std::vector<IntVector> &existingPadsInCone, std::vector<IntVector> &touchedPadsInCone );
+			Return FindPadsInCone( Cone *cone , std::vector<IntVector> &existingPadsInCone, std::vector<IntVector> &touchedPadsInCone );
 
 
 			int NbOfCoreHitsInCone( Cone *cone , Core *core );
