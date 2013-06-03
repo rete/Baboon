@@ -27,8 +27,8 @@
 
 #include "Geometry/Cylinder.hh"
 #include "MarlinProcessor/BaboonProcessor.hh"
-#include "Reconstruction/WeightEnergyCalculator.hh"
-#include "Reconstruction/SimpleEnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/WeightEnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/SimpleEnergyCalculator.hh"
 
 
 /* 
@@ -69,7 +69,7 @@ class OverlayEstimatorProcessor : public baboon::BaboonProcessor {
 		 * @brief Must be defined by the user. Process an event in the BABOON framework
 		 *
 		 */
-		virtual baboon::Return ProcessEvent( const unsigned int &evtNb );
+		virtual baboon::Return ProcessEvent( EVENT::LCEvent * );
 
 		/*!
 		 *
