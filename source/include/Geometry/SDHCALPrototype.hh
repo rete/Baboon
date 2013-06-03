@@ -56,9 +56,9 @@ namespace baboon {
 
 			Return BuildGeometry();
 
-			void LoadHitCollection( HitCollection *hitCol );
+			Return LoadHitCollection( HitCollection *hitCol );
 
-			void ClearCalorimeter();
+			Return ClearCalorimeter();
 
 
 		protected:
