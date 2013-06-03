@@ -43,22 +43,19 @@ Return OverlayEstimatorProcessor::Init() {
 
 
 	// Add pca algorithm
-	algorithmManager->RegisterAlgorithm( new PrincipalComponentAnalysis() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new PrincipalComponentAnalysis() ) );
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
-	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() ) );
 
 	// Add isolation tagging algorithm
-	algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() ) );
 
 	// Add clustering (2D) algorithm
-	algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() ) );
 
 	// Add core finder algorithm
-	algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() );
-
-	// Add track to shower association algorithm to make an association between track and existing showers.
-//	algorithmManager->RegisterAlgorithm( new TrackToShowerAssociationAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() ) );
 
 	return BABOON_SUCCESS();
 
@@ -72,14 +69,14 @@ Return OverlayEstimatorProcessor::ProcessRunHeader( EVENT::LCRunHeader* run ) {
 
 
 
-Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
+Return OverlayEstimatorProcessor::ProcessEvent( EVENT::LCEvent * evt ) {
 
 	int overlaidHits;
 	IntVector nbOfPadsXYZ;
 	SdhcalConfig::GetInstance()->GetData("pads").GetValue("nbOfPadsXYZ",&nbOfPadsXYZ);
 
 	HitCollection *hitCollection = hitManager->GetHitCollection();
-//	cout << "total nb of hits : " << hitCollection->size() << endl;
+	unsigned int evtNb = evt->getEventNumber();
 	cout << "evt : " << evtNb << endl;
 
 	HitCollection *hitColType1 = new HitCollection();
@@ -130,14 +127,7 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 	double energyShower2 = 0;
 	double energyMCShower1 = 0;
 	double energyMCShower2 = 0;
-
-	HitCollection *hitCollection1in1 = new HitCollection();
-	HitCollection *hitCollection2in1 = new HitCollection();
-	HitCollection *hitCollection1in2 = new HitCollection();
-	HitCollection *hitCollection2in2 = new HitCollection();
-
 	bool showersFound = true;
-
 
 
 	if( algorithmManager->AlgorithmIsRegistered("IsolationTaggingAlgorithm") ) {
@@ -274,7 +264,6 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 
 			newDataSet(0,i) -= xNewMean;
 			newDataSet(1,i) -= yNewMean;
-
 		}
 
 		for( int i=0 ; i<coreHits->size() ; i++) {
@@ -296,11 +285,11 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 			tentative++;
 			if( tentative == 10 ) break;
 		}
-//		cout << "number of tentative : " << tentative << endl;
-//		cout << "number of peaks : " << nbOfPeaks << endl;
+		cout << "number of tentative : " << tentative << endl;
+		cout << "number of peaks : " << nbOfPeaks << endl;
 
 		if( nbOfPeaks <= 1 ) {
-//			cout << "Maximum number of tentative reached! Nothing found" << endl;
+			cout << "Maximum number of tentative reached! Nothing found" << endl;
 			showersFound = false;
 			delete newXHist;
 			delete s1;
@@ -376,7 +365,6 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 
 			WeightEnergyCalculator *calculator = new WeightEnergyCalculator();
 
-
 			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->SetShower( recoShower1 ) );
 			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
 			energyShower1 = calculator->GetEnergy();
@@ -405,11 +393,15 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 			}
 
 			if( !revertedShower ) {
-				cout << "Reverted showers !" << endl;
 				double energyTemp = energyShower1;
 				energyShower1 = energyShower2;
 				energyShower2 = energyTemp;
 			}
+
+			cout << "energyMCShower1 : " << energyMCShower1 << endl;
+			cout << "energyMCShower2 : " << energyMCShower2 << endl;
+			cout << "Energy deviation 1 : " << energyMCShower1 - energyShower1 << endl;
+			cout << "Energy deviation 2 : " << energyMCShower2 - energyShower2 << endl;
 
 			if( hitsFrom1in2 > hitsFrom2in2 ) {
 
@@ -421,8 +413,6 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 
 				compensation1 = ( hitsFrom2in1 ) / hitColType2->size();
 				compensation2 = ( hitsFrom1in2 ) / hitColType1->size();
-
-
 			}
 			else {
 
@@ -434,13 +424,7 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 
 				compensation2 = ( hitsFrom2in1 ) / hitColType2->size();
 				compensation1 = ( hitsFrom1in2 ) / hitColType1->size();
-
-
-
 			}
-
-
-
 
 
 			for( unsigned int j=0 ; j<hitCollection->size() ; j++) {
@@ -540,36 +524,6 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 	}
 
 
-
-
-//	for( unsigned int j=0 ; j<hitCollection->size() ; j++) {
-//
-//		IntVector ijk = hitCollection->at(j)->GetIJK();
-//
-//		if( hitCollection->at(j)->GetHitTag() == fTrack ) {
-//			if( graphicalEnvironment )
-//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kRed);
-//		}
-//		else if (hitCollection->at(j)->GetHitTag() == fTrackExtremity) {
-//			if( graphicalEnvironment )
-//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGreen);
-//		}
-//		else if( hitCollection->at(j)->GetHitTag() == fCore ) {
-//			if( graphicalEnvironment )
-//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kMagenta);
-//		}
-//		else if( hitCollection->at(j)->GetHitTag() == fIsolated ) {
-//			if( graphicalEnvironment )
-//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kBlue);
-//		}
-//		else {
-//			if( graphicalEnvironment )
-//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGray+3);
-//		}
-//	}
-
-
-
 	analysisManager->Set("EstimatorVariables","purity1",purity1);
 	analysisManager->Set("EstimatorVariables","purity2",purity2);
 	analysisManager->Set("EstimatorVariables","contamination1",contamination1);
@@ -592,11 +546,6 @@ Return OverlayEstimatorProcessor::ProcessEvent( const unsigned int &evtNb ) {
 
 	delete hitColType1;
 	delete hitColType2;
-
-	delete hitCollection1in1;
-	delete hitCollection2in1;
-	delete hitCollection1in2;
-	delete hitCollection2in2;
 
 	delete MCShower1;
 	delete MCShower2;
