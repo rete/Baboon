@@ -37,19 +37,19 @@ ShowerSplitterProcessor::~ShowerSplitterProcessor() {}
 Return ShowerSplitterProcessor::Init() {
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
-	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() ) );
 
 	// Add isolation tagging algorithm
-	algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() ) );
 
 	// Add clustering (2D) algorithm
-	algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() ) );
 
 	// Add core finder algorithm
-	algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() ) );
 
 	// Add cone beginning algorithm
-	algorithmManager->RegisterAlgorithm( new ConeBeginningAlgorithm() );
+//	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new ConeBeginningAlgorithm() ) );
 
 	return BABOON_SUCCESS();
 }
@@ -59,7 +59,7 @@ Return ShowerSplitterProcessor::ProcessRunHeader( LCRunHeader* run ) {
 	return BABOON_SUCCESS();
 }
 
-Return ShowerSplitterProcessor::ProcessEvent( const unsigned int &evtNb ) {
+Return ShowerSplitterProcessor::ProcessEvent( EVENT::LCEvent * evt ) {
 
 
 	HitCollection *hitCollection = hitManager->GetHitCollection();
@@ -67,7 +67,7 @@ Return ShowerSplitterProcessor::ProcessEvent( const unsigned int &evtNb ) {
 	if( hitCollection->empty() )
 		return BABOON_NOT_INITIALIZED("No hit in the current event. Framework not initialized!");
 
-
+	unsigned int evtNb = evt->getEventNumber();
 	// just to keep tree compatibility with the old version. Will be removed in the future
 	cout << "event " << evtNb <<  endl;
 	analysisManager->Set("SplitterVariables","event",int(evtNb));
@@ -218,46 +218,67 @@ Return ShowerSplitterProcessor::ProcessEvent( const unsigned int &evtNb ) {
 
 	cout << "computed energy : " << energy << endl;
 
+	analysisManager->Set("SplitterVariables", "energy" , energy );
 
 	for(unsigned int j=0 ; j<hitCollection->size() ; j++) {
 
 		IntVector ijk = hitCollection->at(j)->GetIJK();
 
-		if( hitCollection->at(j)->GetHitTag() == fTrack ) {
-//			ITrack.push_back( ijk.at(0) );
-//			JTrack.push_back( ijk.at(1) );
-//			KTrack.push_back( ijk.at(2) );
-			if( graphicalEnvironment )
-				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kRed);
-		}
-		else if (hitCollection->at(j)->GetHitTag() == fTrackExtremity) {
-//			ITrackExtr.push_back( ijk.at(0) );
-//			JTrackExtr.push_back( ijk.at(1) );
-//			KTrackExtr.push_back( ijk.at(2) );
+
+		if( hitCollection->at(j)->GetThreshold() == fThreshold1 ) {
 			if( graphicalEnvironment )
 				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGreen);
 		}
-		else if( hitCollection->at(j)->GetHitTag() == fCore ) {
-//			ICore.push_back( ijk.at(0) );
-//			JCore.push_back( ijk.at(1) );
-//			KCore.push_back( ijk.at(2) );
-			if( graphicalEnvironment )
-				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kMagenta);
-		}
-		else if( hitCollection->at(j)->GetHitTag() == fIsolated ) {
-//			IIsolated.push_back( ijk.at(0) );
-//			JIsolated.push_back( ijk.at(1) );
-//			KIsolated.push_back( ijk.at(2) );
+
+		if( hitCollection->at(j)->GetThreshold() == fThreshold2 ) {
 			if( graphicalEnvironment )
 				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kBlue);
 		}
-		else {
-//			I.push_back( ijk.at(0) );
-//			J.push_back( ijk.at(1) );
-//			K.push_back( ijk.at(2) );
+
+		if( hitCollection->at(j)->GetThreshold() == fThreshold3 ) {
 			if( graphicalEnvironment )
-				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGray+3);
+				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kRed);
 		}
+
+//		if( hitCollection->at(j)->GetHitTag() == fTrack ) {
+////			ITrack.push_back( ijk.at(0) );
+////			JTrack.push_back( ijk.at(1) );
+////			KTrack.push_back( ijk.at(2) );
+//			if( graphicalEnvironment )
+////				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetVisibility(0);
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kRed);
+//		}
+//		else if (hitCollection->at(j)->GetHitTag() == fTrackExtremity) {
+////			ITrackExtr.push_back( ijk.at(0) );
+////			JTrackExtr.push_back( ijk.at(1) );
+////			KTrackExtr.push_back( ijk.at(2) );
+//			if( graphicalEnvironment )
+////				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetVisibility(0);
+//			calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGreen);
+//		}
+//		else if( hitCollection->at(j)->GetHitTag() == fCore ) {
+////			ICore.push_back( ijk.at(0) );
+////			JCore.push_back( ijk.at(1) );
+////			KCore.push_back( ijk.at(2) );
+//			if( graphicalEnvironment )
+////				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGray+3);
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kMagenta);
+//		}
+//		else if( hitCollection->at(j)->GetHitTag() == fIsolated ) {
+////			IIsolated.push_back( ijk.at(0) );
+////			JIsolated.push_back( ijk.at(1) );
+////			KIsolated.push_back( ijk.at(2) );
+//			if( graphicalEnvironment )
+////				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetVisibility(0);
+//			calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kBlue);
+//		}
+//		else {
+////			I.push_back( ijk.at(0) );
+////			J.push_back( ijk.at(1) );
+////			K.push_back( ijk.at(2) );
+//			if( graphicalEnvironment )
+//				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kGray+3);
+//		}
 	}
 
 //	analysisManager->Set("SplitterVariables","Hitx",&I);
