@@ -40,12 +40,13 @@ namespace baboon {
 	}
 
 
-	void ClusteringAlgorithm::Init() {
+	Return ClusteringAlgorithm::Init() {
 
+		return BABOON_SUCCESS();
 	 }
 
 
-	void ClusteringAlgorithm::Execute() {
+	Return ClusteringAlgorithm::Execute() {
 
 		HitManager *hitManager = HitManager::GetInstance();
 		HitCollection *hitCollection = hitManager->GetHitCollection();
@@ -106,16 +107,17 @@ namespace baboon {
 			clusterCollection->push_back( cluster );
 		}
 		treatedHits.clear();
-
+		return BABOON_SUCCESS();
 	}
 
 
-	void ClusteringAlgorithm::End() {
+	Return ClusteringAlgorithm::End() {
 
 		hitTagToCluster.clear();
 		hitTagToAvoid.clear();
 		neighborDistance = 1;
 		clusterSizeLowerLimit = 1;
+		return BABOON_SUCCESS();
 	}
 
 

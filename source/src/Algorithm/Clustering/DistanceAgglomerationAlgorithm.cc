@@ -32,11 +32,11 @@ namespace baboon {
 	}
 
 
-	void DistanceAgglomerationAlgorithm::Init() {
+	Return DistanceAgglomerationAlgorithm::Init() {
 
 		if( aggregate != 0 ) delete aggregate;
 		aggregate = new Cluster();
-
+		return BABOON_SUCCESS();
 	}
 
 
@@ -52,19 +52,20 @@ namespace baboon {
 	}
 
 
-	void DistanceAgglomerationAlgorithm::Execute() {
+	Return DistanceAgglomerationAlgorithm::Execute() {
 
 //		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
 //
 //
 //
 //		}
-
+		return BABOON_SUCCESS();
 	}
 
 
-	void DistanceAgglomerationAlgorithm::End() {
+	Return DistanceAgglomerationAlgorithm::End() {
 
+		return BABOON_SUCCESS();
 	}
 
 

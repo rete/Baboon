@@ -31,13 +31,13 @@ namespace baboon {
 	CoreFinderAlgorithm::~CoreFinderAlgorithm() {}
 
 
-	void CoreFinderAlgorithm::Init() {
+	Return CoreFinderAlgorithm::Init() {
 
 		hitCollection = HitManager::GetInstance()->GetHitCollection();
 		threshCountVec.clear();
 		data.GetValue("coreCountThreshold",&coreCountThreshold);
 		data.GetValue("minimumThresholdConcentration",&minimumThresholdConcentration);
-
+		return BABOON_SUCCESS();
 	}
 
 	Return CoreFinderAlgorithm::CheckConsistency() {
@@ -48,7 +48,7 @@ namespace baboon {
 
 	}
 
-	void CoreFinderAlgorithm::Execute() {
+	Return CoreFinderAlgorithm::Execute() {
 
 		HitManager *hitManager = HitManager::GetInstance();
 		int nbOfCoreHits = 0;
@@ -82,11 +82,12 @@ namespace baboon {
 				nbOfCoreHits++;
 			}
 		}
-
+		return BABOON_SUCCESS();
 	}
 
-	void CoreFinderAlgorithm::End() {
+	Return CoreFinderAlgorithm::End() {
 
+		return BABOON_SUCCESS();
 	}
 
 }
