@@ -25,7 +25,8 @@
 
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
-
+#include "Utilities/ReturnValues.hh"
+#include "Utilities/Internal.hh"
 
 
 namespace baboon {
@@ -51,7 +52,7 @@ namespace baboon {
 
 			double params[4];
 
-			void ComputeChi2();
+			Return ComputeChi2();
 
 
 		public :
@@ -60,10 +61,12 @@ namespace baboon {
 			/*! Default Destructor */
 			virtual ~Linear3DFit();
 
-			void Fit();
+			Return Fit();
 
-			inline double GetChi2()
-				{ ComputeChi2(); return chi2; }
+			inline double GetChi2() {
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ComputeChi2() );
+				return chi2;
+			}
 
 			ThreeVector VectorFromRealLine( const ThreeVector& );
 
