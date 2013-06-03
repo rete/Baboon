@@ -68,13 +68,13 @@ namespace baboon {
 			Cluster *aggregate;
 
 			/*! Initialize the algorithm, i.e by initializing specific variables */
-			virtual void Init();
+			virtual Return Init();
 
 			/*! Execute the algorithm */
-			virtual void Execute();
+			virtual Return Execute();
 
 			/*! Finalize the algorithm*/
-			virtual void End();
+			virtual Return End();
 
 			/*! Allow to check if everything is well set in the algorithm before starting it */
 			virtual Return CheckConsistency();
