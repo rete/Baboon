@@ -17,7 +17,7 @@
 #ifndef WEIGHTENERGYCALCULATOR_HH
 #define WEIGHTENERGYCALCULATOR_HH
 
-#include "EnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/EnergyCalculator.hh"
 
 #include <iostream> 
 #include <string> 
@@ -27,7 +27,7 @@
 #include <map>
 
 
-#include "Reconstruction/Objects/Shower.hh"
+#include "Objects/Shower.hh"
 
 namespace baboon {
 

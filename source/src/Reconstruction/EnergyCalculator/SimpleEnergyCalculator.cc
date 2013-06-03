@@ -14,7 +14,7 @@
  */
 
 
-#include "Reconstruction/SimpleEnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/SimpleEnergyCalculator.hh"
 
 using namespace std;
 

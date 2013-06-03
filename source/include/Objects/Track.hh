@@ -17,8 +17,6 @@
 #ifndef TRACK_HH
 #define TRACK_HH
 
-#include "Reconstruction/Objects/RecoObject.hh"
-
 #include <iostream> 
 #include <string> 
 #include <cstdlib> 
@@ -41,10 +39,9 @@ namespace baboon {
 
 	/*
 	 * Class Track
-	 * Inherits from base class RecoObject
 	 */
 
-	class Track : public RecoObject {
+	class Track {
 
 		public:
 

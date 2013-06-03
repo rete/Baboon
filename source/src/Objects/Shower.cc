@@ -14,12 +14,11 @@
  */
 
 
-#include "Reconstruction/Objects/Shower.hh"
+#include "Objects/Shower.hh"
 
 namespace baboon {
 
-	Shower::Shower()
-		: RecoObject() {
+	Shower::Shower() {
 		hitToWeightsMap = new HitToWeightsMap;
 		startingCone = 0;
 		thrust = 0;

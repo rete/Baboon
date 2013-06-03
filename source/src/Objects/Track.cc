@@ -15,7 +15,7 @@
 
 
 
-#include "Reconstruction/Objects/Track.hh"
+#include "Objects/Track.hh"
 
 
 using namespace std;
@@ -23,8 +23,8 @@ using namespace std;
 
 namespace baboon {
 
-	Track::Track()
-		: RecoObject() {
+	Track::Track() {
+
 		hitCollection = new HitCollection;
 	}
 

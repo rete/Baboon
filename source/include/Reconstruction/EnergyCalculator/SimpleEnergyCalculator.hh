@@ -25,7 +25,7 @@
 
 
 #include "Objects/HitCollection.hh"
-#include "Reconstruction/EnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/EnergyCalculator.hh"
 
 #include "Exception.hh"
 

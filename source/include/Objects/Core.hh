@@ -17,8 +17,6 @@
 #ifndef CORE_HH
 #define CORE_HH
 
-#include "Reconstruction/Objects/RecoObject.hh"
-
 #include <iostream> 
 #include <string> 
 #include <cstdlib> 
@@ -30,7 +28,6 @@
 #include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Geometry/Cone.hh"
-#include "Utils/HitComputing.hh"
 
 namespace baboon {
 
@@ -43,10 +40,9 @@ namespace baboon {
 	/*!
 	 *
 	 * @brief Class Core
-	 * Inherits from base class RecoObject
 	 *
 	 */
-	class Core : public RecoObject {
+	class Core {
 
 		public:
 

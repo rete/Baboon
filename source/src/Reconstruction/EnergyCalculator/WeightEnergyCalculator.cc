@@ -14,7 +14,7 @@
  */
 
 
-#include "Reconstruction/WeightEnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/WeightEnergyCalculator.hh"
 
 using namespace std;
 

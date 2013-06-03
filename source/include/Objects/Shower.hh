@@ -17,8 +17,6 @@
 #ifndef SHOWER_HH
 #define SHOWER_HH
 
-#include "Reconstruction/Objects/RecoObject.hh"
-
 #include <iostream> 
 #include <string> 
 #include <cstdlib> 
@@ -32,8 +30,8 @@
 #include "Utilities/Globals.hh"
 #include "Geometry/ThreeVector.hh"
 #include "Geometry/Cone.hh"
-#include "Reconstruction/Objects/Track.hh"
-#include "Reconstruction/Objects/Core.hh"
+#include "Objects/Track.hh"
+#include "Objects/Core.hh"
 
 
 
@@ -43,10 +41,9 @@ namespace baboon {
 
 	/*
 	 * Class Shower
-	 * Inherits from base class RecoObject
 	 */
 
-	class Shower : public RecoObject {
+	class Shower {
 
 		public:
 

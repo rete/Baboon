@@ -14,15 +14,14 @@
  */
 
 
-#include "Reconstruction/Objects/Core.hh"
+#include "Objects/Core.hh"
 
 using namespace std;
 
 namespace baboon {
 
 
-	Core::Core()
-		: RecoObject() {
+	Core::Core() {
 
 		hitCollection = new HitCollection();
 	}
