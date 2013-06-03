@@ -28,6 +28,22 @@ OverlayEstimatorProcessor::OverlayEstimatorProcessor()
 
 	  _description = "OverlayEstimatorProcessor to estimate the overlap of two showers SDHCAL";
 
+	  std::vector<std::string> hcalCollections;
+	  std::vector<std::string> _hcalCollections;
+	  hcalCollections.push_back(std::string("HCALBarrel"));
+	  registerInputCollections( LCIO::CALORIMETERHIT,
+	                           "CollectionName" ,
+	                           "HCAL Collection Names"  ,
+	                           _hcalCollections  ,
+	                           hcalCollections);
+
+	  string _outputRelCollection;
+	  registerOutputCollection( LCIO::LCRELATION,
+	                            "RelationOutputCollection" ,
+	                            "CaloHit Relation Collection" ,
+	                            _outputRelCollection ,
+	                            std::string("RelationCalorimeterHit")) ;
+
 	  registerProcessorParameter("overlayEstimatorMethod" ,
 			  	  	  "overlay estimator mode (cylinder or pca)" ,
 			  	  	  overlayEstimatorMethod,
