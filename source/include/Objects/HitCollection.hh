@@ -46,8 +46,6 @@ namespace baboon {
 
 			DoubleVector GetRMS();
 
-//			DoubleVector GetRMS( const ThreeVector &axis );
-
 			int GetFirstLayer();
 
 			int GetLastLayer();
