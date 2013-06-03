@@ -25,7 +25,9 @@
 #include <vector> 
 
 #include "MarlinProcessor/BaboonProcessor.hh"
-#include "Reconstruction/SimpleEnergyCalculator.hh"
+#include "Reconstruction/EnergyCalculator/SimpleEnergyCalculator.hh"
+#include "IOIMPL/LCFactory.h"
+#include "IO/LCWriter.h"
 
 /* 
  * Class TestBeamCutsProcessor
@@ -73,7 +75,7 @@ class TestBeamCutsProcessor : public baboon::BaboonProcessor {
 		 * @brief Must be defined by the user. Process an event in the BABOON framework
 		 *
 		 */
-		virtual baboon::Return ProcessEvent( const unsigned int &evtNb );
+		virtual baboon::Return ProcessEvent( EVENT::LCEvent * );
 
 		/*!
 		 *
@@ -88,6 +90,20 @@ class TestBeamCutsProcessor : public baboon::BaboonProcessor {
 		 *
 		 */
 		virtual baboon::Return End();
+
+	protected:
+
+		double electronConcentrationCut;
+		double muonConcentrationCut;
+		int totalNbOfHitsCut;
+		double muonMultiplicityCut;
+		int nbOfProcessedEvent;
+		int nbOfCutOnMuon;
+		int nbOfCutOnElectron;
+		int nbOfCutOnHits;
+
+		std::string slcioOutputFile;
+		IO::LCWriter* lcWriter;
 
 
 

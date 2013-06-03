@@ -20,16 +20,45 @@ using namespace std;
 using namespace baboon;
 using namespace EVENT;
 
+TestBeamCutsProcessor aTestBeamCutsProcessor;
+
 TestBeamCutsProcessor::TestBeamCutsProcessor()
 	: BaboonProcessor("TestBeamCutsProcessor") {
 
 	  _description = "TestBeamCutsProcessor to apply some basic cuts after test beams. Cut electrons and muons, keep only pions";
 
+	  registerProcessorParameter("electronConcentrationCut",
+				     "cut on concentration coreHits/isolatedHits",
+				     electronConcentrationCut,
+				     0.0);
+
+	  registerProcessorParameter("muonConcentrationCut",
+				     "cut on concentration isolatedHits/total",
+				     muonConcentrationCut,
+				     0.0);
+
+	  registerProcessorParameter("muonMultiplicityCut",
+				     "cut on muon multiplicity ",
+				     muonMultiplicityCut,
+				     0.0);
+
+	  registerProcessorParameter("totalNbOfHitsCut",
+				     "cut on concentration total number of hits",
+				     totalNbOfHitsCut,
+				     100000);
+
+	  registerProcessorParameter("slcioOutputFile",
+				     "lcio output file",
+				     slcioOutputFile,
+				     string(""));
+
+	  lcWriter = IOIMPL::LCFactory::getInstance()->createLCWriter();
+
 }
 
 TestBeamCutsProcessor::~TestBeamCutsProcessor() {
 
-
+	delete lcWriter;
 }
 
 
@@ -37,10 +66,18 @@ TestBeamCutsProcessor::~TestBeamCutsProcessor() {
 Return TestBeamCutsProcessor::Init() {
 
 	// Add the Hough Transform Algorithm for track reconstruction within the sdhcal
-	algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new HoughTransformAlgorithm() ) );
 
-	// Add clustering (2D) algorithm
-	algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() );
+	// Add clustering algorithm
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new ClusteringAlgorithm() ) );
+
+	// Add core finder algorithm
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new CoreFinderAlgorithm() ) );
+
+	// Add isolation tagging algorithm
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new IsolationTaggingAlgorithm() ) );
+
+	lcWriter->open( slcioOutputFile , LCIO::WRITE_NEW );
 
 	return BABOON_SUCCESS();
 
@@ -53,14 +90,120 @@ Return TestBeamCutsProcessor::ProcessRunHeader( LCRunHeader* run ) {
 }
 
 
-Return TestBeamCutsProcessor::ProcessEvent( const unsigned int &evtNb ) {
+Return TestBeamCutsProcessor::ProcessEvent( EVENT::LCEvent * evt ) {
 
+	unsigned int evtNb = evt->getEventNumber();
 	cout << "event " << evtNb <<  endl;
+	nbOfProcessedEvent++;
 
 	HitCollection *hitCollection = hitManager->GetHitCollection();
 
-	analysisManager->Set("Variables","Nhit",int(hitCollection->size()));
-	analysisManager->Fill("Variables");
+	if( hitCollection->size() < totalNbOfHitsCut ) {
+		nbOfCutOnHits++;
+		return BABOON_SUCCESS();
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("IsolationTaggingAlgorithm") ) {
+
+		cout << "IsolationTaggingAlgorithm found" << endl;
+		IsolationTaggingAlgorithm* isolationAlgo = (IsolationTaggingAlgorithm *) algorithmManager->GetAlgorithm("IsolationTaggingAlgorithm");
+		isolationAlgo->Process();
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("CoreFinderAlgorithm") ) {
+
+		cout << "CoreFinderAlgorithm found" << endl;
+		CoreFinderAlgorithm *coreFinder = (CoreFinderAlgorithm*) algorithmManager->GetAlgorithm("CoreFinderAlgorithm");
+		coreFinder->Process();
+	}
+
+	if( algorithmManager->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
+
+		cout << "ClusteringAlgorithm found" << endl;
+		ClusterCollection *clustCol = new ClusterCollection();
+		ClusteringAlgorithm* clusteringAlgo = (ClusteringAlgorithm *) algorithmManager->GetAlgorithm("ClusteringAlgorithm");
+		clusteringAlgo->SetClusteringMode( fClustering3D );
+		clusteringAlgo->SetTaggingMode( fClusterTagMode );
+		clusteringAlgo->AddHitTagToCluster( fCore );
+		clusteringAlgo->SetClusterCollection( clustCol );
+		clusteringAlgo->Process();
+
+		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+
+			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
+			Core *core = new Core();
+			for( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , core->AddHit( hitCol->at(j) ) );
+			}
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->AddCore( core ) );
+		}
+		clustCol->clear();
+		delete clustCol;
+	}
+
+	double coreHits = 0;
+	double isolatedHits = 0;
+
+	vector<int> touchedLayers;
+
+	for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
+
+		if( hitCollection->at(i)->GetHitTag() == fCore )
+			coreHits++;
+		else if( hitCollection->at(i)->GetHitTag() == fIsolated )
+			isolatedHits++;
+		int layer = hitCollection->at(i)->GetIJK().at(2);
+		if( std::find( touchedLayers.begin() , touchedLayers.end() , layer ) == touchedLayers.end() )
+			touchedLayers.push_back( layer );
+	}
+
+	if( isolatedHits == 0 )
+		isolatedHits++;
+
+	cout << "core percent : " << coreHits/hitCollection->size() << endl;
+	cout << "isolated percent : " << isolatedHits/hitCollection->size() << endl;
+	cout << "coreHits/isolatedHits : " << coreHits/isolatedHits << endl;
+
+
+	// cut on muon if
+	if( isolatedHits/hitCollection->size() > muonConcentrationCut ) {
+		nbOfCutOnMuon++;
+		return BABOON_SUCCESS();
+	}
+
+	// another cut on muon if
+	if( touchedLayers.size()/hitCollection->size() > muonMultiplicityCut ) {
+		nbOfCutOnMuon++;
+		return BABOON_SUCCESS();
+	}
+
+	// cut on electron if
+	if( coreHits/isolatedHits > electronConcentrationCut ) {
+		nbOfCutOnElectron++;
+		return BABOON_SUCCESS();
+	}
+
+	for(unsigned int j=0 ; j<hitCollection->size() ; j++) {
+
+		IntVector ijk = hitCollection->at(j)->GetIJK();
+
+		if( hitCollection->at(j)->GetHitTag() == fTrack ) {
+			if( graphicalEnvironment )
+				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kRed);
+		}
+		else if( hitCollection->at(j)->GetHitTag() == fCore ) {
+			if( graphicalEnvironment )
+				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kMagenta);
+		}
+		else if( hitCollection->at(j)->GetHitTag() == fIsolated ) {
+			if( graphicalEnvironment )
+				calorimeter->GetNodeAt(ijk.at(0),ijk.at(1),ijk.at(2))->GetVolume()->SetLineColor(kBlue);
+		}
+	}
+
+
+	// write the final event in an other file.
+	lcWriter->writeEvent( evt );
 
 	return BABOON_SUCCESS();
 }
@@ -73,6 +216,10 @@ Return TestBeamCutsProcessor::Check( LCEvent *evt ) {
 
 Return TestBeamCutsProcessor::End() {
 
+	lcWriter->close();
+	cout << "nbOfCutOnHits     : " << nbOfCutOnHits << "/" << nbOfProcessedEvent << endl;
+	cout << "nbOfCutOnElectron : " << nbOfCutOnElectron << "/" << nbOfProcessedEvent << endl;
+	cout << "nbOfCutOnMuon     : " << nbOfCutOnMuon << "/" << nbOfProcessedEvent << endl;
 	return BABOON_SUCCESS();
 }
 
