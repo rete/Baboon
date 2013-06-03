@@ -41,6 +41,8 @@ OverlayEstimatorProcessor::~OverlayEstimatorProcessor() {
 
 Return OverlayEstimatorProcessor::Init() {
 
+	system("ls");
+
 
 	// Add pca algorithm
 	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->RegisterAlgorithm( new PrincipalComponentAnalysis() ) );
