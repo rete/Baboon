@@ -23,7 +23,7 @@
 #include <cmath> 
 #include <vector> 
 
-#include "Reconstruction/Objects/Core.hh"
+#include "Objects/Core.hh"
 
 namespace baboon {
 
