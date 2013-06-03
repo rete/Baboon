@@ -72,11 +72,7 @@ namespace baboon {
 
 			Return ClearAllContent();
 
-			void BuildVolumeMap();
-
-//			void BeginOfEvent( EVENT::LCCollection* );
-
-//			void EndOfEvent();
+			Return BuildVolumeMap();
 
 			bool PadIsTouched( unsigned int I , unsigned int J , unsigned int K );
 
@@ -85,16 +81,11 @@ namespace baboon {
 
 			Matrix3D<Hit*> GetHitCubeAt( unsigned int I, unsigned int J, unsigned int K, unsigned int size);
 
-//			EVENT::CalorimeterHitVec *GetCalorimeterHitCollection();
-
 			Hit *GetHitAt( unsigned int I , unsigned int J , unsigned int K );
 
 			DoubleVector PositionToIJK( const ThreeVector& v );
 
-//			static HitCollection *GetNewHitCollection( EVENT::LCCollection* lcCol );
-
 			bool PadExists( int I , int J , int K );
-
 
 	};
 
