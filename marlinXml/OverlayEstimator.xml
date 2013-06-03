@@ -8,20 +8,20 @@
 		<!--/home/remi/ilcsoft/SDHCAL/output/Overlay/double_calorimeterhit_pi_40_40GeV_I0_1_overlay_20pads_new.slcio --> 
 		<!--/home/remi/ilcsoft/SDHCAL/data/pi-/single_calorimeterhit_pi-_60GeV_I0.slcio -->
 		<!--/home/remi/ilcsoft/SDHCAL/data/mu-/single_calorimeterhit_mu-_30GeV_I1.slcio-->
+		<!-- double_calorimeterhit_pi_10_10GeV_I0_1_overlay_20pads_new_TB.slcio -->
 		<parameter name="LCIOInputFiles">
-		/home/remi/ilcsoft/SDHCAL/output/Overlay/double_calorimeterhit_pi_40_40GeV_I0_1_overlay_20pads_new.slcio
+		double_calorimeterhit_pi_20_20GeV_I0_1_overlay_20pads_new_TB.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
 		<parameter name="MaxRecordNumber" value="2000" />
 		<parameter name="SkipNEvents" value="0" />
 		<parameter name="SupressCheck" value="false" />
 		<!--parameter name="GearXMLFile"> gear_ldc.xml </parameter-->  
-		<parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE  </parameter> 
+		<parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> SILENT  </parameter> 
 		<!--parameter name="RandomSeed" value="1234567890" /-->
 	</global>
 	
 	<processor name="OverlayEstimatorProcessor" type="OverlayEstimatorProcessor">
-	
 		<!--OverlayEstimatorProcessor does whatever it does ...-->
 		
 		<!-- BABOON_HOME env variable. Do not change it untill you run it on an other computer! -->
@@ -29,13 +29,16 @@
 		<!--Name of the SDHCAL hit collection-->
 		<parameter name="collectionName" type="string"> HCALBarrel </parameter>
 		<!--Name of the ROOT file where tree is stored-->
-		<parameter name="rootOutputFile" type="string"> OverlayEstimator.root </parameter>
+		<parameter name="rootOutputFile" type="string"> toto.root </parameter>
 		<!--Name of the cfg file for Algorithm parameters -->
 		<parameter name="Algorithm_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/Algorithm.cfg </parameter>
 		<!--Name of the cfg file for SDHCAL parameters -->
 		<parameter name="SDHCAL_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/SDHCAL.cfg </parameter>
 		<!--Default decoder-->
 		<parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
+		<!--Graphical Environment-->
+		<parameter name="graphicalEnvironment" type="bool"> false </parameter>
+		
 		<!--Overlay Estimator method-->
 		<parameter name="overlayEstimatorMethod" type="string"> pca </parameter>
 

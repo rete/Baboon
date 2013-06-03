@@ -9,10 +9,10 @@
 		<!--/home/remi/ilcsoft/SDHCAL/data/simulation/pi-/single_calorimeterhit_pi-_60GeV_I0.slcio -->
 		<!--/home/remi/ilcsoft/SDHCAL/data/simulation/mu-/single_calorimeterhit_mu-_30GeV_I1.slcio-->
 		<parameter name="LCIOInputFiles">
-		/home/remi/ilcsoft/SDHCAL/data/simulation/pi-/single_calorimeterhit_pi-_10GeV_I0.slcio
+		/home/remi/ilcsoft/SDHCAL/data/simulation/e-/single_calorimeterhit_e-_40GeV.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
-		<parameter name="MaxRecordNumber" value="3" />
+		<parameter name="MaxRecordNumber" value="2000" />
 		<parameter name="SkipNEvents" value="0" />
 		<parameter name="SupressCheck" value="false" />
 		<!--parameter name="GearXMLFile"> gear_ldc.xml </parameter-->  
@@ -29,7 +29,7 @@
 		<!--Name of the SDHCAL hit collection-->
 		<parameter name="collectionName" type="string"> HCALBarrel </parameter>
 		<!--Name of the ROOT file where tree is stored-->
-		<parameter name="rootOutputFile" type="string"> ShowerSplitter.root </parameter>
+		<parameter name="rootOutputFile" type="string"> </parameter>
 		<!--Name of the cfg file for Algorithm parameters -->
 		<parameter name="Algorithm_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/Algorithm.cfg </parameter>
 		<!--Name of the cfg file for SDHCAL parameters -->

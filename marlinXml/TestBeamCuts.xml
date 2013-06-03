@@ -5,11 +5,15 @@
 	</execute>
 
 	<global>
+		<!-- /home/remi/ilcsoft/SDHCAL/data/testBeam/TDHCAL_716321.slcio -->
+		<!-- /home/remi/ilcsoft/SDHCAL/data/simulation/pi-/single_calorimeterhit_pi-_30GeV_I0.slcio -->
+		<!-- /home/remi/ilcsoft/SDHCAL/data/simulation/mu-/single_calorimeterhit_mu-_30GeV_I1.slcio -->
+		<!-- /home/remi/ilcsoft/SDHCAL/data/simulation/e-/single_calorimeterhit_e-_30GeV.slcio -->
 		<parameter name="LCIOInputFiles">
-		/home/remi/ilcsoft/SDHCAL/data/testBeam/TDHCAL_716321.slcio
+		/home/remi/ilcsoft/SDHCAL/data/testBeam/TDHCAL_716308.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
-		<parameter name="MaxRecordNumber" value="20" />
+		<!-- parameter name="MaxRecordNumber" value="2000" /-->
 		<parameter name="SkipNEvents" value="0" />
 		<parameter name="SupressCheck" value="false" />
 		<!--parameter name="GearXMLFile"> gear_ldc.xml </parameter-->  
@@ -24,16 +28,32 @@
 		<!-- BABOON_HOME env variable. Do not change it untill you run it on an other computer! -->
 		<parameter name="BABOON_HOME" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon </parameter>
 		<!--Name of the SDHCAL hit collection-->
-		<parameter name="collectionName" type="string"> HCALBarrel </parameter>
+		<parameter name="collectionName" type="string"> SDHCAL_HIT </parameter>
 		<!--Name of the ROOT file where tree is stored-->
-		<parameter name="rootOutputFile" type="string"> ShowerSplitter.root </parameter>
+		<parameter name="rootOutputFile" type="string"> </parameter>
 		<!--Name of the cfg file for Algorithm parameters -->
-		<parameter name="Algorithm_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/Algorithm.cfg </parameter>
+		<parameter name="Algorithm_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/TestBeamCutAlgorithm.cfg </parameter>
 		<!--Name of the cfg file for SDHCAL parameters -->
 		<parameter name="SDHCAL_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/SDHCAL.cfg </parameter>
 		<!--Default decoder-->
 		<parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
+		<!--Graphical Environment-->
+		<parameter name="graphicalEnvironment" type="bool"> false </parameter>
+		
+		<!--Cut on electron -->
+		<parameter name="electronConcentrationCut" type="double"> 2.0 </parameter>
+		<!--Cut on muon -->
+		<parameter name="muonConcentrationCut" type="double"> 0.6 </parameter>
+		<!--Cut on electron -->
+		<parameter name="totalNbOfHitsCut" type="int"> 100 </parameter>
+		<!--Cut on muon multiplicity -->
+		<parameter name="muonMultiplicityCut" type="double"> 4.0 </parameter>
+		<!--Lcio output file -->
+		<parameter name="slcioOutputFile" type="string"> TB_SDHCAL_pi-_30GeV.slcio </parameter>
 
+
+		
+		
 	</processor>
 	
 </marlin>
