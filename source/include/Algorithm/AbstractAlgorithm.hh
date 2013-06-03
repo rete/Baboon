@@ -85,10 +85,10 @@ namespace baboon {
 			 */
 			void Process() {
 
-				this->Init();
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->Init() );
 				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->CheckConsistency() );
-				this->Execute();
-				this->End();
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->Execute() );
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->End() );
 			}
 
 
@@ -161,7 +161,7 @@ namespace baboon {
 			 * @brief Initialize the algorithm, i.e by initializing specific variables
 			 *
 			 */
-			virtual void Init() = 0;
+			virtual Return Init() = 0;
 
 
 			/*!
@@ -169,7 +169,7 @@ namespace baboon {
 			 * @brief Execute the algorithm
 			 *
 			 */
-			virtual void Execute() = 0;
+			virtual Return Execute() = 0;
 
 
 			/*!
@@ -177,7 +177,7 @@ namespace baboon {
 			 * @brief Finalize the algorithm
 			 *
 			 */
-			virtual void End() = 0;
+			virtual Return End() = 0;
 
 
 			/*!
