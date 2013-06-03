@@ -35,7 +35,7 @@
 #include "TBranch.h"
 
 #include "Analysis/TTreeWrapper.hh"
-
+#include "Utilities/ReturnValues.hh"
 
 
 namespace baboon {
@@ -75,10 +75,10 @@ namespace baboon {
 				{ outputFileName = fName; }
 
 
-			void Init();
+			Return Init();
 
 
-			void End();
+			Return End();
 
 
 	};
