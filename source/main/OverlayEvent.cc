@@ -30,6 +30,8 @@
 #include "IO/LCWriter.h"
 #include "IOIMPL/LCFactory.h"
 #include "EVENT/LCCollection.h"
+#include "EVENT/CalorimeterHit.h"
+#include "IMPL/CalorimeterHitImpl.h"
 #include "UTIL/LCTOOLS.h"
 #include "IMPL/LCCollectionVec.h"
 #include "IMPL/LCEventImpl.h"
@@ -40,13 +42,13 @@
 #include "lcio.h"
 
 // baboon includes
-#include "Utils/Converters.hh"
-#include "Utils/HitComputing.hh"
 #include "Overlay/Overlayer.hh"
 #include "Objects/Hit.hh"
 #include "Utilities/ReturnValues.hh"
-
-
+#include "Managers/AnalysisManager.hh"
+#include "Reconstruction/EnergyCalculator/SimpleEnergyCalculator.hh"
+#include "Utilities/Internal.hh"
+#include "Utilities/ReturnValues.hh"
 
 // root includes
 #include "TCanvas.h"
@@ -148,6 +150,7 @@ int main (int argc ,char *argv[]) {
 	string codingPattern2 = "";
 	string outputCollectionName = "";
 	string outputCodingPattern = "";
+	string rootOutputFile = "";
 	int separationDistance = 0;
 	int nbOfEventsToOverlay = 0;
 
@@ -173,6 +176,14 @@ int main (int argc ,char *argv[]) {
 	parser->GetValue("output","collectionName",&outputCollectionName);
 	parser->GetValue("output","codingPattern",&outputCodingPattern);
 
+	try {
+		parser->GetValue("output","rootOutputFile",&rootOutputFile);
+	}
+	catch ( DataException &e ) {
+
+		cout << "ROOT output file not given!" << endl;
+	}
+
 
 	/*****************************************
 	 * LC readers (input) and writer (output)
@@ -186,6 +197,10 @@ int main (int argc ,char *argv[]) {
 	lcWriter->open( slcioOutputFile , LCIO::WRITE_NEW );
 	EVENT::LCEvent *evt1;
 	EVENT::LCEvent *evt2;
+
+	AnalysisManager *analysisManager = AnalysisManager::GetInstance();
+	analysisManager->SetRootFileName( rootOutputFile );
+	analysisManager->Init();
 
 	/*******************************************
 	 * Check if the number of events to overlay
@@ -220,11 +235,11 @@ int main (int argc ,char *argv[]) {
 
 
 	/********************************************************************
-	 * Loop over events. Overlap two events from two input files.
+	 * Loop over events. Overlap two events with two input files.
 	 * If by redefining a hit position the hit is out of the sdhcal
-	 * the hit is deleted form the output collection. The list of skipped
-	 * is printed at the end for the user. Stop overlapping when the a
-	 * given number of events are overlapped (see cfg file).
+	 * the hit is deleted from the output collection. The list of skipped
+	 * event is printed at the end for the user. Stop overlaying when the
+	 * a given number of events are overlaid (see cfg file).
 	 ********************************************************************/
 
 	int nbOfSkippedEvents = 0;
@@ -262,6 +277,8 @@ int main (int argc ,char *argv[]) {
 		HitCollection *collection1 = new HitCollection();
 		HitCollection *collection2 = new HitCollection();
 
+		SimpleEnergyCalculator *calculator = new SimpleEnergyCalculator();
+
 		// Copy collection 1
 		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern1 );
 		UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder1( lcCollection1 );
@@ -294,6 +311,10 @@ int main (int argc ,char *argv[]) {
 			Hit *hit = new Hit( params );
 			collection1->push_back( hit );
 		}
+
+		calculator->SetHitCollection( collection1 );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+		double energyCollection1 = calculator->GetEnergy();
 
 		// Copy collection 2
 		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern2 );
@@ -328,9 +349,13 @@ int main (int argc ,char *argv[]) {
 			collection2->push_back( hit );
 		}
 
+		calculator->SetHitCollection( collection2 );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+		double energyCollection2 = calculator->GetEnergy();
+
 		// Compute the centers of gravity
-		ThreeVector cog1 = GetCenterOfGravity( collection1 );
-		ThreeVector cog2 = GetCenterOfGravity( collection2 );
+		ThreeVector cog1 = collection1->GetBarycenter();
+		ThreeVector cog2 = collection2->GetBarycenter();
 
 		Overlayer overlayer(collection1,collection2);
 
@@ -384,7 +409,7 @@ int main (int argc ,char *argv[]) {
 
 		IMPL::LCFlagImpl chFlag(0);
 		EVENT::LCIO bitinfo;
-		chFlag.setBit(bitinfo.CHBIT_LONG );   // sim calorimeter hit position
+		chFlag.setBit(bitinfo.CHBIT_LONG );   // calorimeter hit position
 		chFlag.setBit(bitinfo.CHBIT_ID1 );    // cell ID
 		chFlag.setBit(bitinfo.CHBIT_STEP );   // step info
 
@@ -399,10 +424,8 @@ int main (int argc ,char *argv[]) {
 		// write the final event
 		lcWriter->writeEvent(outputEvent);
 
-//		delete outputEvent;
 		nbOfLostHits += overlayer.GetNumberOfLostHits();
 		evtID++;
-//*/
 	}
 
 
@@ -414,6 +437,8 @@ int main (int argc ,char *argv[]) {
 	lcReader2->close();
 
 	SdhcalConfig::Kill();
+	analysisManager->End();
+	AnalysisManager::Kill();
 	delete parser;
 	delete lcReader1;
 	delete lcReader2;
