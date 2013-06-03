@@ -85,16 +85,11 @@ namespace baboon {
 
 	Return HitManager::ClearAllContent() {
 
-//		cerr << "ok" << endl;
 		hitMapVolumePtr.Clear();
-//		cerr << "ok" << endl;
 
 		if( hitCollection != 0 ) {
-//			cerr << "ok" << endl;
-//			cout << "hit col size = " << hitCollection->size() << endl;
 			for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
 				if( hitCollection->at(i) != 0 ) {
-//					cout << "i = " << i << endl;
 					delete hitCollection->at(i);
 				}
 
@@ -102,21 +97,19 @@ namespace baboon {
 			hitCollection->clear();
 		}
 		else {
-//			cerr << "ok" << endl;
 			hitCollection = new HitCollection();
 		}
-//		cerr << "ok" << endl;
 		return BABOON_SUCCESS("Content cleared!");
-
 	}
 
 
-	void HitManager::BuildVolumeMap() {
+	Return HitManager::BuildVolumeMap() {
 
 		for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
 			IntVector ijk = hitCollection->at(i)->GetIJK();
 			hitMapVolumePtr.SetValue( ijk.at(0) , ijk.at(1) , ijk.at(2) , hitCollection->at(i) );
 		}
+		return BABOON_SUCCESS();
 	}
 
 
