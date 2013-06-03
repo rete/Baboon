@@ -104,7 +104,7 @@ namespace baboon {
 		if( graphicalEnvironment ) {
 
 			calorimeter = SDHCALPrototype::GetInstance();
-			calorimeter->BuildGeometry();
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calorimeter->BuildGeometry() );
 			TGeoVolume *caloVolume = SDHCALPrototype::GetGeoManager()->GetTopVolume();
 			caloVolume->Draw("ogl");
 			TGLViewer *viewer = (TGLViewer*) gPad->GetViewer3D("ogl");
@@ -129,7 +129,7 @@ namespace baboon {
 
 		// Load the hits on the current scene id the graphical environment is set.
 		if( graphicalEnvironment )
-			calorimeter->LoadHitCollection( hitManager->GetHitCollection() );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calorimeter->LoadHitCollection( hitManager->GetHitCollection() ) );
 
 
 		/*
@@ -138,7 +138,7 @@ namespace baboon {
 		 * Must be implemented by the user.
 		 *
 		 */
-		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->ProcessEvent( evt->getEventNumber() ) );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->ProcessEvent( evt ) );
 
 
 		if( graphicalEnvironment ) {
@@ -146,7 +146,6 @@ namespace baboon {
 			gPad->Update();
 			gPad->WaitPrimitive();
 		}
-
 
 		this->ClearAllContent();
 	}
@@ -164,7 +163,7 @@ namespace baboon {
 
 		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->End() );
 
-		AnalysisManager::GetInstance()->End();
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , AnalysisManager::GetInstance()->End() );
 		AnalysisManager::Kill();
 		AlgorithmManager::Kill();
 		HitManager::Kill();
@@ -177,7 +176,7 @@ namespace baboon {
 
 
 
-	void BaboonProcessor::LoadManagers() {
+	Return BaboonProcessor::LoadManagers() {
 
 		/************************
 		 * SDHCAL configurations
@@ -207,7 +206,7 @@ namespace baboon {
 		if( !rootOutputFile.empty() )
 			cout << "ROOT output file : " << rootOutputFile << endl;
 		analysisManager->SetRootFileName( rootOutputFile );
-		analysisManager->Init();
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , analysisManager->Init() );
 
 
 		/**************************************************************
@@ -215,42 +214,42 @@ namespace baboon {
 		 **************************************************************/
 
 		algorithmManager->SetConfigFileName( algorithmFileName );
-		algorithmManager->Initialize();
-		cout << "end of load managers!" << endl;
-
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , algorithmManager->Initialize() );
+		return BABOON_SUCCESS();
 	}
 
 
 
 
-	void BaboonProcessor::LoadEvent( LCEvent *evt ) {
+	Return BaboonProcessor::LoadEvent( LCEvent *evt ) {
 
 
 		caloHitCreator = new CaloHitCreator();
 		caloHitCreator->SetDecoderString( decoderString );
 		caloHitCreator->SetCollectionName( collectionName );
-		caloHitCreator->CreateCaloHits( evt );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , caloHitCreator->CreateCaloHits( evt ) );
 
 		HitManager *hitManager = HitManager::GetInstance();
-		hitManager->BuildVolumeMap();
-
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , hitManager->BuildVolumeMap() );
+		return BABOON_SUCCESS();
 	}
 
 
 
 
-	void BaboonProcessor::ClearAllContent() {
+	Return BaboonProcessor::ClearAllContent() {
 
-		clusteringManager->ClearAllContent();
-		hitManager->ClearAllContent();
-		coreManager->ClearAllContent();
-		trackManager->ClearAllContent();
-		showerManager->ClearAllContent();
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , clusteringManager->ClearAllContent() );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , hitManager->ClearAllContent() );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->ClearAllContent() );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , trackManager->ClearAllContent() );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , showerManager->ClearAllContent() );
 
 		if( graphicalEnvironment )
-			calorimeter->ClearCalorimeter();
-
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calorimeter->ClearCalorimeter() );
 		delete caloHitCreator;
+
+		return BABOON_SUCCESS();
 	}
 
 
