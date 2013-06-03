@@ -121,21 +121,21 @@ namespace baboon {
 			 * @brief Laod the baboon objects. Called at beginning of event in processEvent()
 			 *
 			 */
-			void LoadEvent( EVENT::LCEvent *evt );
+			Return LoadEvent( EVENT::LCEvent *evt );
 
 			/*!
 			 *
 			 * @brief Clear all the baboon content. Called at the end of event in processEvent()
 			 *
 			 */
-			void ClearAllContent();
+			Return ClearAllContent();
 
 			/*!
 			 *
 			 * @brief Load the managers. Called in init() function.
 			 *
 			 */
-			void LoadManagers();
+			Return LoadManagers();
 
 			/*!
 			 *
@@ -156,7 +156,7 @@ namespace baboon {
 			 * @brief Must be defined by the user. Process an event in the BABOON framework
 			 *
 			 */
-			virtual Return ProcessEvent( const unsigned int &evtNb ) = 0;
+			virtual Return ProcessEvent( EVENT::LCEvent * ) = 0;
 
 			/*!
 			 *
