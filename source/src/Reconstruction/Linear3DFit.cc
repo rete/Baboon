@@ -30,15 +30,17 @@ namespace baboon {
 	Linear3DFit::~Linear3DFit() {}
 
 
-	void Linear3DFit::ComputeChi2() {
+	Return Linear3DFit::ComputeChi2() {
 
+		if( positions.empty() )
+			return BABOON_NOT_INITIALIZED("Position vector for fit is empty");
 		chi2 = 0;
 		for( unsigned int i=0 ; i<positions.size() ; i++ ) {
 			ThreeVector temp(this->GetNormaleProjection( positions.at(i) ));
-//			cout << "vector normale projection : " << temp << endl;
 			double d = this->GetNormaleProjection( positions.at(i) ).mag();
 			chi2 += d*d;
 		}
+		return BABOON_SUCCESS();
 	}
 
 	// The position of the projection of the point on the real line
@@ -58,7 +60,7 @@ namespace baboon {
 		return ( vec - this->VectorFromRealLine(vec) );
 	}
 
-	void Linear3DFit::Fit() {
+	Return Linear3DFit::Fit() {
 
 		params[0] = params[1] = params[2] = params[3] = 0;
 
@@ -100,6 +102,7 @@ namespace baboon {
 		params[2] = (D1*C2-E2*A1)/(B1*D1-A1*A1);
 		params[3] = (E2*B1-C2*A1)/(B1*D1-A1*A1);
 
+		return BABOON_SUCCESS();
 	}
 
 
