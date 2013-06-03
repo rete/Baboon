@@ -41,7 +41,7 @@ namespace baboon {
 	}
 
 
-	void HoughTransformAlgorithm::Init() {
+	Return HoughTransformAlgorithm::Init() {
 
 		data.GetValue("thetaMax",&thetaMax);
 		data.GetValue("rMax",&rMax);
@@ -53,10 +53,9 @@ namespace baboon {
 		data.GetValue("maximumDistanceBetweenHitsForLayers",&maximumDistanceBetweenHitsForLayers);
 		data.GetValue("maximumDistanceAllowedForHitsInTrack",&maximumDistanceAllowedForHitsInTrack);
 
-
 		this->DeleteHoughSpace();
 		this->AllocateHoughSpace();
-
+		return BABOON_SUCCESS();
 	}
 
 	void HoughTransformAlgorithm::AllocateHoughSpace() {
@@ -116,12 +115,12 @@ namespace baboon {
 ////////////////////////////////////////////////////////////////
 
 
-	void HoughTransformAlgorithm::Execute() {
+	Return HoughTransformAlgorithm::Execute() {
 
 		ClusterCollection *clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
 
 		if( clusterCollection->empty() )
-			return;
+			return BABOON_SUCCESS();
 
 		HoughClusterCollection *houghClusterCollection = new HoughClusterCollection();
 
@@ -331,11 +330,16 @@ namespace baboon {
 
 		houghClusterCollection->clear();
 		delete houghClusterCollection;
+
+		return BABOON_SUCCESS();
 	}
 
 
 
-	void HoughTransformAlgorithm::End() {}
+	Return HoughTransformAlgorithm::End() {
+
+		return BABOON_SUCCESS();
+	}
 
 }
 
