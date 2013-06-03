@@ -35,6 +35,7 @@ namespace baboon {
 		SdhcalConfig::GetInstance()->GetData("layers").GetValue("thickness",&layerThickness);
 		overlaidCollection = new HitCollection();
 		collectionsTranslated = false;
+		lostHitCollection = new HitCollection();
 	}
 
 	Overlayer::~Overlayer() {
@@ -42,16 +43,19 @@ namespace baboon {
 		delete overlaidCollection;
 		delete collectionTranslation1;
 		delete collectionTranslation2;
+		delete lostHitCollection;
 	}
 
-	void Overlayer::TranslateCollections() {
+	Return Overlayer::TranslateCollections() {
 
 		if( !collectionsTranslated ) {
 
 			lostHits = 0;
 
-			if( collectionTranslation1 == 0 ) return;
-			if( collectionTranslation2 == 0 ) return;
+			if( collectionTranslation1 == 0 )
+				return BABOON_NOT_INITIALIZED("Assertion collectionTranslation1 != 0 failed");
+			if( collectionTranslation2 == 0 )
+				return BABOON_NOT_INITIALIZED("Assertion collectionTranslation2 != 0 failed");
 
 			for(int eltID=0 ; eltID<collection1->size() ; eltID++) {
 
@@ -66,9 +70,9 @@ namespace baboon {
 				||  ( ijk.at(1) + round( collectionTranslation1->y()) ) > nbOfPadsXYZ.at(1)
 				||  ( ijk.at(2) + round( collectionTranslation1->z()) ) > nbOfPadsXYZ.at(2) ) {
 
-					delete hit;
 					collection1->erase( collection1->begin() + eltID );
 					lostHits++;
+					lostHitCollection->push_back( hit );
 				}
 				else {
 					hit->SetIJK( ijk.at(0) + round( collectionTranslation1->x() )
@@ -99,9 +103,9 @@ namespace baboon {
 				||  ( ijk.at(1) + round( collectionTranslation2->y()) ) > nbOfPadsXYZ.at(1)
 				||  ( ijk.at(2) + round( collectionTranslation2->z()) ) > nbOfPadsXYZ.at(2) ) {
 
-					delete hit;
 					collection2->erase( collection2->begin() + eltID );
 					lostHits++;
+					lostHitCollection->push_back( hit );
 				}
 				else {
 					hit->SetIJK( ijk.at(0) + round( collectionTranslation2->x() )
@@ -119,13 +123,15 @@ namespace baboon {
 				}
 			}
 			collectionsTranslated = true;
+			return BABOON_SUCCESS();
 		}
+		return BABOON_ERROR("Can't translate collections more than one time");
 	}
 
 
-	void Overlayer::OverlayCollections() {
+	Return Overlayer::OverlayCollections() {
 
-		this->TranslateCollections();
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->TranslateCollections() );
 
 		for( unsigned int i=0 ; i<collection1->size() ; i++ )
 			overlaidCollection->push_back( collection1->at(i) );
@@ -169,6 +175,7 @@ namespace baboon {
 
 			if( !hitIsOverlaid ) overlaidCollection->push_back( hit2 );
 		}
+		return BABOON_SUCCESS();
 	}
 
 
