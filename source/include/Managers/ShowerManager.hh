@@ -23,7 +23,7 @@
 #include <cmath>
 #include <vector>
 
-#include "Reconstruction/Objects/Shower.hh"
+#include "Objects/Shower.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 #include "Managers/TrackManager.hh"
