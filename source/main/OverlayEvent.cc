@@ -77,13 +77,13 @@ int main (int argc ,char *argv[]) {
 	 * Grab the most useful environment variable
 	 ********************************************/
 
-	char *pathToBab = NULL;
-	pathToBab = getenv("BABOON_HOME");
-	if( pathToBab == NULL )
+	char *babHome = NULL;
+	babHome = getenv("BABOON_HOME");
+	if( babHome == NULL )
 		throw runtime_error("'BABOON_HOME' env variable is not set.\n "
 		"Please source init_Baboon.sh before running.");
 
-	string pathToBaboon(pathToBab);
+	string baboonHome(babHome);
 
 	/*********************************
 	 * Define the command line parser
@@ -91,13 +91,6 @@ int main (int argc ,char *argv[]) {
 
 	string footer = "Please report bug to <rete@ipnl.in2p3.fr>";
 	TCLAP::CmdLine cmd(footer, ' ', "1.0");
-	TCLAP::ValueArg<std::string> baboonHomeArg(
-				"p"
-				,"baboon-home"
-				,"path to baboon to run the script"
-				,false
-				,"/home/remi/ilcsoft/SDHCAL/Baboon"
-				,"string" );
 	TCLAP::ValueArg<std::string> cfgFileArg(
 				"f"
 				,"cfgfile"
@@ -120,10 +113,8 @@ int main (int argc ,char *argv[]) {
 	cmd.add( cfgFileArg );
 	cmd.add( discreteModeArg );
 	cmd.add( gridModeArg );
-	cmd.add( baboonHomeArg );
 	cmd.parse( argc, argv );
 
-	string baboonHome = baboonHomeArg.getValue();
 	bool discreteMode = discreteModeArg.getValue();
 
 
