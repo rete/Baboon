@@ -303,8 +303,8 @@ int main (int argc ,char *argv[]) {
 			params.ijk = ijk1;
 			params.type = 1;
 			params.time = caloHit->getTime();
-			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold2;
-			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold1;
+			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold1;
+			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold2;
 			else if( caloHit->getEnergy() == 3.0 ) params.threshold = fThreshold3;
 			else throw runtime_error("Calo hit energy is not 1.0 , 2.0 or 3.0 as expected for SDHCAL. Check your inputs!");
 
@@ -340,8 +340,8 @@ int main (int argc ,char *argv[]) {
 			params.ijk = ijk2;
 			params.type = 2;
 			params.time = caloHit->getTime();
-			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold2;
-			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold1;
+			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold1;
+			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold2;
 			else if( caloHit->getEnergy() == 3.0 ) params.threshold = fThreshold3;
 			else throw runtime_error("Calo hit energy is not 1.0 , 2.0 or 3.0 as expected for SDHCAL. Check your inputs!");
 
