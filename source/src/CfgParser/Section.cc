@@ -94,6 +94,7 @@ namespace cfgparser {
 		return CFGPARSER_SUCCESS();
 	}
 
+
 	StatusCode Section::GetValue( const string &key , vector<string> *value ){
 
 		string val;
@@ -112,10 +113,98 @@ namespace cfgparser {
 			if( i == val.size() - 1 )
 				value->push_back( s );
 		}
-
-		if( value->empty() )
-			throw CfgParserException("Vector value empty (key \'"+key+"\')");
+		return CFGPARSER_SUCCESS();
 	}
+
+
+	StatusCode Section::GetValue( const std::string &key , std::vector<double> *value ) {
+
+		string value;
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetValue( k , &value) );
+		string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				value->push_back( s );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				value->push_back( atof( s.c_str() ) );
+		}
+		return CFGPARSER_SUCCESS();
+	}
+
+
+
+
+
+	StatusCode Section::GetValue( const std::string &key , std::vector<int> *value ) {
+
+		string value;
+		GetValue( k , &value);
+		string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				value->push_back( s );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				value->push_back( atoi( s.c_str() ) );
+		}
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	bool Section::IsEmpty() {
+		return keyValueMap.empty();
+	}
+
+
+	StatusCode Section::Print() {
+
+		if( this->IsEmpty() )
+			return CFGPARSER_SUCCESS();
+
+		cout << "[" << name << "]" << endl;
+		KeyValueMap::iterator it;
+		for(it=keyValueMap.begin() ; it!=keyValueMap.end() ; it++)
+			cout << "  " << (*it).first << " = " << (*it).second << endl;
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	void Section::Clear() {
+		keyValueMap.clear();
+	}
+
+	Section& Section::operator +=( const Section& section ) {
+
+		KeyValueMap::iterator it;
+		for (it = section.keyValueMap.begin() ; it != section.keyValueMap.end() ; it++)
+			this->Append( (*it).first , (*it).second );
+		return *this;
+	}
+
+
+	Section operator+ ( const Data &data1 , const Data &data2 ) {
+
+		Data data;
+		data += data1;
+		data += data2;
+		data.SetName( data1.GetName() );
+		return data;
+	}
+
 
 
 }  // namespace 
