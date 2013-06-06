@@ -174,6 +174,18 @@ TARGET_LINK_LIBRARIES(
 )
 
 
+# ---------------- Lcio split file ------------------
+FILE( GLOB_RECURSE
+	 LCIO_SPLIT_FILE_SRC_FILES 
+	 main/LcioSplitFile.cc 
+)
+ADD_EXECUTABLE( LcioSplitFile ${LCIO_SPLIT_FILE_SRC_FILES} )
+TARGET_LINK_LIBRARIES( 
+	LcioSplitFile
+	Baboon
+)
+
+
 
 # ------------------ LcioToRoot ---------------------
 ADD_EXECUTABLE( LcioToRoot main/LcioToRoot.cc )
@@ -239,7 +251,7 @@ ENDIF()
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis OverlayRecoEnergy
+	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis OverlayRecoEnergy LcioSplitFile
 	DESTINATION 
 	bin
 )
