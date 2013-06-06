@@ -50,7 +50,7 @@ namespace cfgparser {
 		fParserInterploationDepthError,
 		fParserInterpolationMissingOptionError,
 		fParserInterpolationSyntaxError,
-		fParserMissingSectionHeaderError,
+		fParserMissingSectionNameError,
 		fParserInvalidSectionKey,
 		fParserParsingError
 	};
@@ -83,6 +83,8 @@ namespace cfgparser {
 	StatusCode CFGPARSER_SECTION_HEADER_ERROR();
 
 	StatusCode CFGPARSER_INVALID_SECTION_KEY();
+
+	StatusCode CFGPARSER_MISSING_SECTION_NAME_ERROR();
 
 	StatusCode CFGPARSER_PARSING_ERROR();
 
