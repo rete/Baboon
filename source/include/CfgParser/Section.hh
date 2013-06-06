@@ -173,6 +173,14 @@ namespace cfgparser {
 
 			/*!
 			 *
+			 * @brief Return the Key/Value map containing all key-value pairs.
+			 *
+			 */
+			inline KeyValueMap GetKeyValueMap() const
+				{ return keyValueMap; }
+
+			/*!
+			 *
 			 * @brief Print the section with all key-value pairs
 			 *
 			 */
@@ -190,7 +198,7 @@ namespace cfgparser {
 			 * @brief operator to add section
 			 *
 			 */
-			Section& operator +=( const Section& section );
+			friend Section& operator +=( const Section& section );
 
 
 	};  // class
