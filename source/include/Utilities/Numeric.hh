@@ -23,6 +23,7 @@
 #include <vector>
 #include <utility>
 #include <numeric>
+#include <algorithm>
 
 namespace baboon {
 
@@ -33,6 +34,15 @@ namespace baboon {
 	double gauss2D(double *x, double *par);
 
 	double doubleGauss2D(double *x, double *par);
+
+	double Mean( const std::vector<double> &vec );
+
+	double RMS( const std::vector<double> &vec );
+
+	double RMS90( const std::vector<double> &vec );
+
+	double RecoveryProbabilityWithinSigma( const std::vector<double> &vec , const int &nbOfSigmas );
+
 }
 
 #endif  // NUMERIC_HH
