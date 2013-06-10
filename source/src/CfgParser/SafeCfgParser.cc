@@ -14,13 +14,20 @@
  */
 
 
-#include "SafeCfgParser.hh"
+#include "CfgParser/SafeCfgParser.hh"
+
+using namespace std;
 
 namespace cfgparser {
 
-SafeCfgParser::SafeCfgParser() : CfgParser() {;}
+	SafeCfgParser::SafeCfgParser()
+		: CfgParser() {
 
-SafeCfgParser::~SafeCfgParser() {;}
+	}
+
+	SafeCfgParser::~SafeCfgParser() {
+
+	}
 
 
 }  // namespace 
