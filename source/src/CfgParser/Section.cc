@@ -23,10 +23,13 @@ namespace cfgparser {
 
 	Section::Section() {
 
+		keyValueMap.clear();
+		name = "";
 	}
 
-	Section::Section( const string n ) {
+	Section::Section( const string &n ) {
 		name = n;
+		keyValueMap.clear();
 	}
 
 
@@ -37,22 +40,19 @@ namespace cfgparser {
 	}
 
 	Section::~Section() {
-
+		keyValueMap.clear();
 	}
 
 
-	void Section::Append( const string &key , const string &value ) {
+	StatusCode Section::SetValue( const string &key , const string &value ) {
 
-		keyValueMap[k] = v;
+		keyValueMap[ key ] = value;
+		return CFGPARSER_SUCCESS();
 	}
 
 
 	bool Section::HasKey( const string &key ) {
 
-//		KeyValueMap::iterator it;
-//		for (it=keyValueMap.begin() ; it!=keyValueMap.end() ; it++)
-//			if(it->first==k) return true;
-//		return false;
 		return (keyValueMap.find( key ) != keyValueMap.end() );
 	}
 
@@ -65,12 +65,12 @@ namespace cfgparser {
 		if( keyValueMap.empty() )
 			return CFGPARSER_INVALID_SECTION_KEY( string("Section is empty. Couldn't find key ") + key+ string("in section ") + name  );
 
-		string key = k;
-		NormalizeName(&key);
+		string k = key;
+		NormalizeName(&k);
 
-		KeyValueMap::iterator it = keyValueMap.find( key );
+		KeyValueMap::iterator it = keyValueMap.find( k );
 		if( it == keyValueMap.end() )
-			return CFGPARSER_INVALID_SECTION_KEY( string("Couldn't find key ") + key + string("in section ") + name );
+			return CFGPARSER_INVALID_SECTION_KEY( string("Couldn't find key ") + k + string("in section ") + name );
 
 		*value = it->second;
 
@@ -91,6 +91,19 @@ namespace cfgparser {
 		string val;
 		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetValue( key , &val ) );
 		*value = atof( val.c_str() );
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::GetValue( const string &key , bool *value ) {
+
+		string val;
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetValue( key , &val ) );
+		if( val == "true" || val == "1" || val == "on" || val == "yes" )
+			*value = true;
+		else if ( val == "false" || val == "0" || val == "off" || val == "no" )
+			*value = false;
+		else return CFGPARSER_VALUE_ERROR("No known conversion from "+ val +" to boolean type.");
 		return CFGPARSER_SUCCESS();
 	}
 
@@ -119,8 +132,8 @@ namespace cfgparser {
 
 	StatusCode Section::GetValue( const std::string &key , std::vector<double> *value ) {
 
-		string value;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetValue( k , &value) );
+		string val;
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetValue( key , &val) );
 		string s;
 		char motif = ':';
 
@@ -129,7 +142,7 @@ namespace cfgparser {
 			if( val[i] != motif )
 				s.push_back( val[i] ) ;
 			else {
-				value->push_back( s );
+				value->push_back( atof( s.c_str() ) );
 				s = "";
 			}
 			if( i == val.size() - 1 )
@@ -144,8 +157,8 @@ namespace cfgparser {
 
 	StatusCode Section::GetValue( const std::string &key , std::vector<int> *value ) {
 
-		string value;
-		GetValue( k , &value);
+		string val;
+		GetValue( key , &val);
 		string s;
 		char motif = ':';
 
@@ -154,7 +167,33 @@ namespace cfgparser {
 			if( val[i] != motif )
 				s.push_back( val[i] ) ;
 			else {
-				value->push_back( s );
+				value->push_back( atoi( s.c_str() ) );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				value->push_back( atoi( s.c_str() ) );
+		}
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::GetValue( const std::string &key , std::vector<bool> *value ) {
+
+		string val;
+		GetValue( key , &val);
+		string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				if( s == "true" || s == "1" || s == "on" || s == "yes" )
+					value->push_back( true );
+				else if ( s == "false" || s == "0" || s == "off" || s == "no" )
+					value->push_back( false );
+//				else return CFGPARSER_INVALID_VALUE();
 				s = "";
 			}
 			if( i == val.size() - 1 )
@@ -183,26 +222,40 @@ namespace cfgparser {
 	}
 
 
-	void Section::Clear() {
+	StatusCode Section::Clear() {
+
 		keyValueMap.clear();
+		return CFGPARSER_SUCCESS();
 	}
 
 	Section& Section::operator +=( const Section& section ) {
 
 		KeyValueMap::iterator it;
-		for (it = section.keyValueMap.begin() ; it != section.keyValueMap.end() ; it++)
-			this->Append( (*it).first , (*it).second );
+		for (it = section.GetKeyValueMap().begin() ; it != section.GetKeyValueMap().end() ; it++)
+			this->SetValue( (*it).first , (*it).second );
 		return *this;
 	}
 
 
-	Section operator+ ( const Data &data1 , const Data &data2 ) {
+	Section operator+ ( const Section &section1 , const Section &section2 ) {
 
-		Data data;
-		data += data1;
-		data += data2;
-		data.SetName( data1.GetName() );
-		return data;
+		Section section;
+		section += section1;
+		section += section2;
+		section.SetName( section1.GetName() );
+		return section;
+	}
+
+	StatusCode Section::RemoveKey( const std::string &key ) {
+
+		if( key.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Assertion !key.empty() failed!");
+
+		if( keyValueMap.find( key ) != keyValueMap.end() )
+			keyValueMap.erase(key);
+		else return CFGPARSER_INVALID_SECTION_KEY("Key '"+ key +"' not found!");
+
+		return CFGPARSER_SUCCESS();
 	}
 
 
