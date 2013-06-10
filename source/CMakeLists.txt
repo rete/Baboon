@@ -10,7 +10,7 @@ INCLUDE_DIRECTORIES( BEFORE "${PROJECT_BINARY_DIR}" ) # generated BaboonConfig.h
 
 # require proper c++
 ADD_DEFINITIONS( "-pedantic -Wunused-value -O2" )
-ADD_DEFINITIONS("-Wno-long-long")
+ADD_DEFINITIONS("-Wno-long-long -Wreturn-type")
 IF( OPENMP_FOUND )
 	ADD_DEFINITIONS("-fopenmp")
 ENDIF()
