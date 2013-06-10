@@ -21,9 +21,12 @@
 #include <string> 
 #include <cstdlib> 
 #include <cmath> 
-#include <vector> 
+#include <vector>
+#include <map>
+#include <algorithm>
 
 #include "CfgParser/ParserStatus.hh"
+#include "CfgParser/StrOp.hh"
 
 namespace cfgparser {
 
@@ -54,7 +57,7 @@ namespace cfgparser {
 			 * Constructor with section name
 			 *
 			 */
-			Section( const std::string &t )
+			Section( const std::string &n );
 
 			/*!
 			 *
@@ -83,7 +86,7 @@ namespace cfgparser {
 			 *
 			 */
 			inline void SetName( const std::string &n )
-				{ name = ;n}
+				{ name = n;}
 
 			/*!
 			 *
@@ -144,6 +147,13 @@ namespace cfgparser {
 
 			/*!
 			 *
+			 * @brief Return a bool vector value
+			 *
+			 */
+			StatusCode GetValue( const std::string &key , std::vector<bool> *value );
+
+			/*!
+			 *
 			 * @brief Return true if the section contains the given key
 			 *
 			 */
@@ -161,15 +171,14 @@ namespace cfgparser {
 			 * @brief Append a key-value pair
 			 *
 			 */
-			StatusCode Append( const std::string &key , const std::string &val );
+			StatusCode SetValue( const std::string &key , const std::string &value );
 
 			/*!
 			 *
 			 * @brief Delete a a key from the section
 			 *
 			 */
-			StatusCode Delete( const std::string &key )
-				{ if(!keyValueMap.find(key)->first.empty()) keyValueMap.erase(key); }
+			StatusCode RemoveKey( const std::string &key );
 
 			/*!
 			 *
@@ -198,7 +207,7 @@ namespace cfgparser {
 			 * @brief operator to add section
 			 *
 			 */
-			friend Section& operator +=( const Section& section );
+			Section& operator +=( const Section& section );
 
 
 	};  // class
