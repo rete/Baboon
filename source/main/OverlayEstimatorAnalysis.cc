@@ -22,13 +22,14 @@
 #include <iomanip>
 
 // CfgParser includes
-#include "CfgParser/CfgParser.hh"
-#include "CfgParser/Data.hh"
+#include "CfgParser/RawCfgParser.hh"
+#include "CfgParser/Section.hh"
 
-// sdhcal includes
+// baboon includes
 #include "Analysis/InputTreeWrapper.hh"
 #include "Analysis/BasicDraw.hh"
 #include "Analysis/OverlayEstimator/TreeProcessor.hh"
+#include "Utilities/Numeric.hh"
 
 // root includes
 #include "TApplication.h"
@@ -87,32 +88,234 @@ int main (int argc ,char *argv[]) {
 	cmd.add( cfgFileArg );
 	cmd.parse( argc, argv );
 
-
+	// Mandatory for executables if graphs...
 	TApplication app("appOfTheDeath",0,0);
 
-	CfgParser *parser = new CfgParser( cfgFileArg.getValue() );
-	parser->Read();
+	// Load the cfg file and grabs the variables
+	string energy1;
+	string energy2;
+	vector<string> padDistances;
+	string pathToTBRootFiles;
+	string pathToSimRootFiles;
+	string G4PhysicsList;
+	int energy1Val = 0;
+	int energy2Val = 0;
+	vector<int> padDistancesVal;
 
+	RawCfgParser *parser = new RawCfgParser();
+	parser->Read( cfgFileArg.getValue() );
+	parser->GetValue("paths","pathToTBRootFiles",&pathToTBRootFiles);
+	parser->GetValue("paths","pathToSimRootFiles",&pathToSimRootFiles);
+	parser->GetValue("variables","energy1",&energy1);
+	parser->GetValue("variables","energy2",&energy2);
+	parser->GetValue("variables","padDistances",&padDistances);
+	parser->GetValue("variables","G4PhysicsList",&G4PhysicsList);
+
+	energy1Val = atoi( energy1.c_str() );
+	energy2Val = atoi( energy2.c_str() );
+	for( unsigned int i=0 ; i<padDistances.size() ; i++ )
+		padDistancesVal.push_back( atoi( padDistances.at(i).c_str() ) );
+
+
+	// Graphs and histograms declaration
+	TH1D *measRecovSim5pads = NewTH1D( "measRecovSim5pads" , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy1Val,energy2Val) , 1 );
+	TH1D *measRecovTB5pads  = NewTH1D( "measRecovTB5pads"  , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy2Val,energy2Val) , 2 );
+
+	TH1D *measRecovSim30pads = NewTH1D( "measRecovSim30pads" , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy1Val,energy2Val) , 1 );
+	TH1D *measRecovTB30pads  = NewTH1D( "measRecovTB30pads"  , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy1Val,energy2Val) , 2 );
+
+	TGraph *meanRecMeasSim = NewTGraph( padDistances.size() , 1 );
+	TGraph *meanRecMeasTB  = NewTGraph( padDistances.size() , 2 );
+
+	TGraph *sigmaRecMeasSim = NewTGraph( padDistances.size() , 1 );
+	TGraph *sigmaRecMeasTB  = NewTGraph( padDistances.size() , 2 );
+
+	TGraph *sigma90RecMeasSim = NewTGraph( padDistances.size() , 1 );
+	TGraph *sigma90RecMeasTB  = NewTGraph( padDistances.size() , 2 );
+
+	TGraph *proba2SigmaSim = NewTGraph( padDistances.size() , 1 );
+	TGraph *proba2SigmaTB  = NewTGraph( padDistances.size() , 2 );
+
+	TGraph *proba3SigmaSim = NewTGraph( padDistances.size() , 1 );
+	TGraph *proba3SigmaTB  = NewTGraph( padDistances.size() , 2 );
+
+	vector<double> deltaRecoEnergySim;
+	vector<double> deltaRecoEnergyTB;
+
+
+	for( unsigned int p=0 ; p<padDistances.size() ; p++ ) {
+
+		ostringstream ss;
+		ss << "/pi-_" << energy1 << "_" << energy2 << "GeV_" << padDistances.at( p ) << "pads.root";
+
+		TFile *fileSim = TFile::Open( ( pathToSimRootFiles + ss.str() ).c_str() );
+		TFile *fileTB  = TFile::Open( ( pathToTBRootFiles  + ss.str() ).c_str() );
+
+		TTree *treeSim = (TTree *) fileSim->Get("EstimatorVariables");
+		TTree *treeTB  = (TTree *)  fileTB->Get("EstimatorVariables");
+
+		InputTTreeWrapper *wrapperSim = new InputTTreeWrapper( treeSim );
+		InputTTreeWrapper *wrapperTB  = new InputTTreeWrapper( treeTB );
+
+		int nbOfEntriesSim = wrapperSim->GetNbOfEntries();
+		int nbOfEntriesTB  = wrapperTB->GetNbOfEntries();
+
+
+		for( int entry=0 ; entry<nbOfEntriesSim ; entry++ ) {
+
+			wrapperSim->LoadEntry( entry );
+
+			double deltaRecoEnergy1 = 0;
+			bool showersFound = false;
+
+			wrapperTB->GetValue( "showersFound" , showersFound );
+
+			if( !showersFound )
+				continue;
+
+			wrapperSim->GetValue( "deltaRecoEnergy1" , deltaRecoEnergy1 );
+
+			if( padDistancesVal.at(p) == 5 )
+				measRecovSim5pads->Fill( deltaRecoEnergy1 );
+			else if( padDistancesVal.at(p) == 30 )
+				measRecovSim30pads->Fill( deltaRecoEnergy1 );
+
+			deltaRecoEnergySim.push_back( deltaRecoEnergy1 );
+		}
+
+		for( int entry=0 ; entry<nbOfEntriesTB ; entry++ ) {
+
+			wrapperTB->LoadEntry( entry );
+
+			double deltaRecoEnergy1 = 0;
+			bool showersFound = false;
+
+			wrapperTB->GetValue( "showersFound" , showersFound );
+
+			if( !showersFound )
+				continue;
+
+			wrapperTB->GetValue( "deltaRecoEnergy1" , deltaRecoEnergy1 );
+
+			if( padDistancesVal.at(p) == 5 )
+				measRecovTB5pads->Fill( deltaRecoEnergy1 );
+			else if( padDistancesVal.at(p) == 30 )
+				measRecovTB30pads->Fill( deltaRecoEnergy1 );
+
+			deltaRecoEnergyTB.push_back( deltaRecoEnergy1 );
+		}
+
+		meanRecMeasSim->SetPoint( p , padDistancesVal.at(p) , Mean( deltaRecoEnergySim ) );
+		meanRecMeasTB->SetPoint( p , padDistancesVal.at(p) , Mean( deltaRecoEnergyTB ) );
+
+		sigmaRecMeasSim->SetPoint( p , padDistancesVal.at(p) , RMS( deltaRecoEnergySim ) );
+		sigmaRecMeasTB->SetPoint( p , padDistancesVal.at(p) , RMS( deltaRecoEnergyTB ) );
+
+		sigma90RecMeasSim->SetPoint( p , padDistancesVal.at(p) , RMS90( deltaRecoEnergySim ) );
+		sigma90RecMeasTB->SetPoint( p , padDistancesVal.at(p) , RMS90( deltaRecoEnergyTB ) );
+
+		proba2SigmaSim->SetPoint( p , padDistancesVal.at(p) , RecoveryProbabilityWithinSigma( deltaRecoEnergySim , 2 ) );
+		proba2SigmaTB->SetPoint( p , padDistancesVal.at(p) , RecoveryProbabilityWithinSigma( deltaRecoEnergyTB , 2 ) );
+
+		proba3SigmaSim->SetPoint( p , padDistancesVal.at(p) , RecoveryProbabilityWithinSigma( deltaRecoEnergySim , 3 ) );
+		proba3SigmaTB->SetPoint( p , padDistancesVal.at(p) , RecoveryProbabilityWithinSigma( deltaRecoEnergyTB , 3 ) );
+
+		fileSim->Close();
+		fileTB->Close();
+		delete fileSim;
+		delete fileTB;
+	}
+
+	vector<TLegend*> legendStorage;
+
+	TCanvas *measRecov5padsCanvas = new TCanvas("measRecov5padsCanvas","Master Canvas for WaitPrimitive()");
+	TCanvas *measRecov30padsCanvas = new TCanvas("measRecov30padsCanvas");
+	TCanvas *meanRecMeasCanvas = new TCanvas("meanRecMeasCanvas");
+	TCanvas *sigmaRecMeasCanvas = new TCanvas("sigmaRecMeasCanvas");
+	TCanvas *sigma90RecMeasCanvas = new TCanvas("sigma90RecMeasCanvas");
+	TCanvas *proba2SigmaCanvas = new TCanvas("proba2SigmaCanvas");
+	TCanvas *proba3SigmaCanvas = new TCanvas("proba3SigmaCanvas");
+
+	string legendTitle = energy2 + "-GeV track";
+	string testBeamLegend = "Data";
+
+	measRecov5padsCanvas->cd();
+	measRecovSim5pads->Draw();
+	measRecovTB5pads->Draw("same");
+
+	measRecov30padsCanvas->cd();
+	measRecovSim30pads->Draw();
+	measRecovTB30pads->Draw("same");
+
+	meanRecMeasCanvas->cd();
+	meanRecMeasSim->Draw("p");
+	meanRecMeasTB->Draw("same p");
+
+	sigmaRecMeasCanvas->cd();
+	sigmaRecMeasSim->Draw("p");
+	sigmaRecMeasTB->Draw("same p");
+
+	sigma90RecMeasCanvas->cd();
+	sigma90RecMeasSim->Draw("p");
+	sigma90RecMeasTB->Draw("same p");
+
+	proba2SigmaCanvas->cd();
+	proba2SigmaSim->Draw("p");
+	proba2SigmaTB->Draw("same p");
+
+	proba3SigmaCanvas->cd();
+	proba3SigmaSim->Draw("p");
+	proba3SigmaTB->Draw("same p");
+	TLegend *proba3SigmaLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	proba3SigmaLegend->AddEntry( proba3SigmaSim , G4PhysicsList.c_str() , "L" );
+	proba3SigmaLegend->AddEntry( proba3SigmaTB , testBeamLegend.c_str() , "L" );
+	legendStorage.push_back( proba3SigmaLegend );
+
+	measRecov5padsCanvas->Update();
+	measRecov30padsCanvas->Update();
+	meanRecMeasCanvas->Update();
+	sigmaRecMeasCanvas->Update();
+	sigma90RecMeasCanvas->Update();
+	proba2SigmaCanvas->Update();
+	proba3SigmaCanvas->Update();
+
+	measRecov5padsCanvas->WaitPrimitive();
+
+	for( unsigned int i=0 ; i<legendStorage.size() ; i++ )
+		delete legendStorage.at(i);
+	legendStorage.clear();
+
+	delete measRecov5padsCanvas;
+	delete measRecov30padsCanvas;
+	delete meanRecMeasCanvas;
+	delete sigmaRecMeasCanvas;
+	delete sigma90RecMeasCanvas;
+	delete proba2SigmaCanvas;
+	delete proba3SigmaCanvas;
+
+	/*
 //	vector<string> energy1;
 	string energy1;
-	vector<string> energy2;
+	string energy2;
 	vector<string> pads;
-	string pathToRootFiles;
+
 
 	parser->GetValue("variables","energy1",&energy1);
 	parser->GetValue("variables","energy2",&energy2);
 	parser->GetValue("variables","pads",&pads);
-	parser->GetValue("paths","pathToRootFiles",&pathToRootFiles);
+	parser->GetValue("paths","pathToTBRootFiles",&pathToTBRootFiles);
+	parser->GetValue("paths","pathToSimRootFiles",&pathToSimRootFiles);
 
-	map< string , TGraph* > purityGraphs;
-	map< string , TGraph* > contaminationGraphs;
+	map< string , TGraph* > shower1DeltaRecoveryGraphs;
+	map< string , TGraph* > shower2DeltaRecoveryGraphs;
 	map< string , TGraph* > algorithmEfficiencyGraphs;
 
 
 	for( unsigned int i=0 ; i<pads.size() ; i++ ) {
-		purityGraphs[ pads.at(i) ] = NewTGraph(5,i+1);
-		contaminationGraphs[ pads.at(i) ] = NewTGraph(5,i+1);
-		algorithmEfficiencyGraphs[ pads.at(i) ] = NewTGraph(5,i+1);
+
+		shower1DeltaRecoveryGraphs[ pads.at(i) ] = NewTGraph( 6 , i+1 );
+		shower2DeltaRecoveryGraphs[ pads.at(i) ] = NewTGraph( 6 , i+1 );
+		algorithmEfficiencyGraphs[ pads.at(i) ] = NewTGraph( 6 , i+1 );
 	}
 
 
@@ -274,7 +477,7 @@ int main (int argc ,char *argv[]) {
 	delete ccPadsAlgorithmEfficiency;
 
 	delete calicePreliminary;
-
+*/
 
 	return 0;
 }
