@@ -26,12 +26,11 @@
 #include "CfgParser/CfgParserException.hh"
 
 #define CFGPARSER_THROW_RESULT_IF( Status , Operator , Command )                                    \
-	{                        																		 \
-                                                     	 	 	 	 	 	 	 	 	 	 	 	 \
+	{   																							 \
 		if( Status.fParserStatus Operator Command.fParserStatus ) { 								 \
 																									 \
 	        std::cerr << #Command << " throw " << Command.ToString() << std::endl;                   \
-	        std::cerr << "    in function : " << __FUNCTION__ << std::endl							 \
+	        std::cerr << "    in function : " << __FUNCTION__ << std::endl;							 \
 	        std::cerr << "    in file :     " << __FILE__ << " line#: " << __LINE__ << std::endl;    \
 	        std::cerr << "    message :     " << Command.message << std::endl;                       \
 	        throw CfgParserException(Command.message);												 \
@@ -42,16 +41,19 @@ namespace cfgparser {
 
 
 	enum ParserStatus {
+
 		fParserSuccess,
+		fParserError,
 		fParserNoSectionError,
 		fParserDuplicateSectionError,
 		fParserNoOptionError,
 		fParserInterpolationError,
-		fParserInterploationDepthError,
+		fParserInterpolationDepthError,
 		fParserInterpolationMissingOptionError,
 		fParserInterpolationSyntaxError,
 		fParserMissingSectionNameError,
 		fParserInvalidSectionKey,
+		fParserValueError,
 		fParserParsingError
 	};
 
@@ -59,34 +61,40 @@ namespace cfgparser {
 
 	class StatusCode {
 
-		ParserStatus fParserStatus;
-		std::string message;
-		std::string ToString();
+		public:
+			StatusCode() : fParserStatus(fParserSuccess) , message("") {}
+			ParserStatus fParserStatus;
+			std::string message;
+			StatusCode& operator =(const StatusCode& statusCode);
+			std::string ToString();
 	};
 
-	StatusCode CFGPARSER_SUCCESS();
 
-	StatusCode CFGPARSER_NO_SECTION_ERROR();
+	StatusCode CFGPARSER_SUCCESS( const std::string &message = "" );
 
-	StatusCode CFGPARSER_DUPLICATE_SECTION();
+	StatusCode CFGPARSER_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_NO_OPTION_ERROR();
+	StatusCode CFGPARSER_NO_SECTION_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_INTERPOLATION_ERROR();
+	StatusCode CFGPARSER_DUPLICATE_SECTION_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_INTERPOLATION_DEPTH_ERROR();
+	StatusCode CFGPARSER_NO_OPTION_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_INTERPOLATION_MISSING_OPTION_ERROR();
+	StatusCode CFGPARSER_VALUE_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_INTERPOLATION_SYNTAX_ERROR();
+	StatusCode CFGPARSER_INTERPOLATION_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_SECTION_HEADER_ERROR();
+	StatusCode CFGPARSER_INTERPOLATION_DEPTH_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_INVALID_SECTION_KEY();
+	StatusCode CFGPARSER_INTERPOLATION_MISSING_OPTION_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_MISSING_SECTION_NAME_ERROR();
+	StatusCode CFGPARSER_INTERPOLATION_SYNTAX_ERROR( const std::string &message = "" );
 
-	StatusCode CFGPARSER_PARSING_ERROR();
+	StatusCode CFGPARSER_INVALID_SECTION_KEY( const std::string &message = "" );
+
+	StatusCode CFGPARSER_MISSING_SECTION_NAME_ERROR( const std::string &message = "" );
+
+	StatusCode CFGPARSER_PARSING_ERROR( const std::string &message = "" );
 
 }  // namespace 
 
