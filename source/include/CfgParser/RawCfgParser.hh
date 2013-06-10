@@ -21,11 +21,13 @@
 #include <string> 
 #include <cstdlib> 
 #include <cmath> 
-#include <vector> 
+#include <vector>
+#include <algorithm>
+#include <fstream>
 
 
 #include "CfgParser/Section.hh"
-
+#include "CfgParser/ParserStatus.hh"
 
 
 
@@ -59,7 +61,7 @@ namespace cfgparser {
 
 			StatusCode CreateSection( const std::string &secName );
 
-			StatusCode AddSection( const Section *section );
+			StatusCode AddSection( Section *section );
 
 			StatusCode GetValue( const std::string& section , const std::string &key, std::string *value ) const;
 
@@ -83,47 +85,49 @@ namespace cfgparser {
 
 			bool HasSection( const Section *section ) const;
 
-			StatusCode GetSection( const std::string &sectionName , Section &sec );
+			StatusCode GetSection( const std::string &sectionName , Section &sec ) const;
 
-			StatusCode GetSection( const std::string &sectionName , Section *sec );
+			StatusCode GetSection( const std::string &sectionName , Section *&sec ) const;
 
-			StatucCode GetKeys( const std::string &sectionName , std::vector< std::string > &keys );
+			StatusCode GetKeys( const std::string &sectionName , std::vector< std::string > &keys ) const;
 
 			StatusCode Read( const std::string &fileName );
 
 			StatusCode Read( const std::vector< std::string > &fileNames );
 
-			StatusCode Read( const std::ifstream& stream );
+			StatusCode Read( std::ifstream& stream );
 
-			StatusCode Read( const std::ifstream* stream );
+			StatusCode Read( std::ifstream* stream );
 
 			StatusCode RemoveKey( const std::string &sectionName , const std::string &key );
 
 			StatusCode RemoveSection( const std::string &sectionName );
 
-			StatusCode GetSections( SectionCollection &sections );
+			StatusCode GetSections( SectionCollection &sec ) const;
 
-			StatusCode SetValue( const std::string& section , const std::string &key, std::string *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const std::string &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, int *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const int &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, double *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const double &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, bool *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const bool &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, std::vector< std::string > *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< std::string > &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, std::vector< int > *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< int > &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, std::vector< double > *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< double > &value );
 
-			StatusCode SetValue( const std::string& section , const std::string &key, std::vector< bool > *value );
+			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< bool > &value );
 
-			StatusCode Write( const std::string &fileName );
+			StatusCode Write( const std::string &fileName ) const;
 
-			StatusCode Write( const std::ifstream& stream );
+			StatusCode Write( std::ofstream& stream ) const;
 
-			StatusCode Write( const std::ifstream* stream );
+			StatusCode Write( std::ofstream* stream ) const;
+
+			StatusCode Print() const;
 
 		protected:
 
