@@ -343,6 +343,7 @@ namespace cfgparser {
 
 				value += lineBuffer[i++];
 			}
+			StrTrim( &value );
 			currentSection->SetValue( key , value );
 		}
 		return CFGPARSER_SUCCESS();
