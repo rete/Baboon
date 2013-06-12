@@ -162,6 +162,28 @@ TARGET_LINK_LIBRARIES(
 )
 
 
+# --------------------- Event Display lib processor -------------------------------
+
+FILE (
+	GLOB_RECURSE
+	EventDisplay_FILES
+	include/MarlinProcessor/EventDisplay.hh
+	src/MarlinProcessor/EventDisplay.cc
+)
+ADD_LIBRARY( EventDisplay_lib SHARED ${EventDisplay_FILES} )
+SET_TARGET_PROPERTIES( EventDisplay_lib PROPERTIES OUTPUT_NAME EventDisplay )
+INSTALL(
+	TARGETS EventDisplay_lib
+	LIBRARY DESTINATION lib 
+)
+
+TARGET_LINK_LIBRARIES( 
+	EventDisplay_lib 
+	${ROOT_COMPONENT_LIBRARIES} 
+	Baboon
+)
+
+
 # ---------------- Overlay Event ------------------
 FILE( GLOB_RECURSE
 	 OVERLAY_EVENT_SRC_FILES 
