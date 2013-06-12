@@ -90,7 +90,7 @@ namespace baboon {
 			distanceFromMean.push_back( abs(mean - vec.at(i))  );
 
 		std::sort( distanceFromMean.begin() , distanceFromMean.end() );
-		distanceFromMean.erase( distanceFromMean.begin() , distanceFromMean.begin() + erasePosition );
+		distanceFromMean.erase( distanceFromMean.end() - erasePosition, distanceFromMean.end() );
 
 		return RMS( distanceFromMean );
 	}
@@ -100,11 +100,12 @@ namespace baboon {
 		double mean = Mean( vec );
 		double sigma = RMS( vec );
 		int entriesWithinSigmas = 0;
-		for( unsigned int i=0 ; i<vec.size() ; i++ )
+		for( unsigned int i=0 ; i<vec.size() ; i++ ) {
 			if( abs(vec.at(i) - mean ) < sigma*nbOfSigmas )
 				entriesWithinSigmas++;
+		}
 
-		return double( vec.size() ) / double( entriesWithinSigmas ) ;
+		return double( entriesWithinSigmas ) / double( vec.size() );
 	}
 
 
