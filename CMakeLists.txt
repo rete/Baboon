@@ -25,7 +25,7 @@ INCLUDE( ilcsoft_default_settings )
 FIND_PACKAGE( LCIO REQUIRED )
 FIND_PACKAGE( Marlin 1.0 REQUIRED )
 FIND_PACKAGE( CLHEP REQUIRED )
-FIND_PACKAGE( ROOT 5.27.06 REQUIRED COMPONENTS Gui Geom RGL) # look for ROOT versions >= 5.27.06
+FIND_PACKAGE( ROOT 5.27.06 REQUIRED COMPONENTS Gui Geom TreePlayer RGL GeomPainter Eve) # look for ROOT versions >= 5.27.06
 
 FOREACH( pkg LCIO ROOT Marlin CLHEP )
     IF( ${pkg}_FOUND )
