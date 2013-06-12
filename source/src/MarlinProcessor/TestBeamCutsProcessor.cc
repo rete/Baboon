@@ -172,7 +172,7 @@ Return TestBeamCutsProcessor::ProcessEvent( EVENT::LCEvent * evt ) {
 	}
 
 	// another cut on muon if
-	if( touchedLayers.size()/hitCollection->size() > muonMultiplicityCut ) {
+	if( hitCollection->size()/touchedLayers.size() < muonMultiplicityCut ) {
 		nbOfCutOnMuon++;
 		return BABOON_SUCCESS();
 	}
