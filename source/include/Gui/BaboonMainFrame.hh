@@ -35,6 +35,7 @@
 
 #include "IO/LCReader.h"
 #include "IOIMPL/LCFactory.h"
+#include "EVENT/LCRunHeader.h"
 
 extern TEveManager *gEve;
 

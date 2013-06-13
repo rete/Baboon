@@ -28,7 +28,7 @@
 #include "MarlinProcessor/CaloHitCreator.hh"
 
 // baboon gui includes
-#include "BaboonMainFrame.hh"
+#include "Gui/BaboonMainFrame.hh"
 
 // lcio includes
 #include "IO/LCReader.h"

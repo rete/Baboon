@@ -14,7 +14,9 @@
  */
 
 
-#include "EventNavigator.hh"
+#include "Gui/EventNavigator.hh"
+
+using namespace std;
 
 namespace baboon {
 
@@ -41,7 +43,7 @@ namespace baboon {
 	    goToEventLabel = new TGLabel(eventFrame2, " Go to \n event" );
 
 	    browseLcioButton = new TGPictureButton(eventFrame2,gClient->GetPicture(icondir + "fileopen.xpm"));
-	    browseLcioButton->Connect("Clicked()", "EventNavigator", this, "PopUpSlcioBrowser()");
+	    browseLcioButton->Connect("Clicked()", "baboon::EventNavigator", this, "PopUpSlcioBrowser()");
 
 	    eventLoader = new EventLoader();
 
@@ -70,10 +72,15 @@ namespace baboon {
 		fileInfo.fFileTypes = filetypes;
 		fileInfo.fIniDir = StrDup(TString("."));
 
-		new TGFileDialog(gClient->GetRoot(), parent, kFDOpen, &fileInfo);
+		new TGFileDialog(gClient->GetRoot(), parent, kFDOpen, &fileInfo);   //  deleted by root when closing
 
+		cout << "Selected LCIO file name : " << fileInfo.fFilename << endl;
+		eventLoader->LoadLCIOFile( string(fileInfo.fFilename) );
 	}
 
+	void EventNavigator::ProcessEvent() {
+
+	}
 
 }  // namespace 
 

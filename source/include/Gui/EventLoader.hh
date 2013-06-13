@@ -26,6 +26,7 @@
 
 // lcio includes
 #include "IO/LCReader.h"
+#include "IOIMPL/LCFactory.h"
 
 // baboon includes
 #include "Utilities/ReturnValues.hh"
@@ -59,15 +60,16 @@ namespace baboon {
 
 			Return ClearCaloHitBoxes();
 
-
+			void LoadLCIOFile( const std::string & );
 
 		protected:
 
+			IO::LCReader *lcReader;
 			EVENT::LCEvent *currentLCEvent;
+			std::map< Hit* , TEveBox* > caloHitBoxes;
+
 
 			Return LoadHitCollection( HitCollection *hitCol );
-
-			std::map< Hit* , TEveBox* > caloHitBoxes;
 
 
 	};  // class

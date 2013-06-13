@@ -14,7 +14,7 @@
  */
 
 
-#include "EventLoader.hh"
+#include "Gui/EventLoader.hh"
 
 using namespace std;
 
@@ -22,11 +22,11 @@ namespace baboon {
 
 	EventLoader::EventLoader() {
 		currentLCEvent = 0;
-
+		lcReader = IOIMPL::LCFactory::getInstance()->createLCReader();
 	}
 
 	EventLoader::~EventLoader() {
-
+		delete lcReader;
 	}
 
 
@@ -45,10 +45,8 @@ namespace baboon {
 		}
 		currentLCEvent = event;
 		CaloHitCreator *creator = new CaloHitCreator();
-//		creator->SetDecoderString( "M:3,S-1:3,I:9,J:9,K-1:6" );
 		creator->SetCollectionName( "HCALBarrel" );
 		creator->CreateCaloHits( event );
-//		hitManager->BeginOfEvent( lcCollection );
 		this->LoadHitCollection( hitManager->GetHitCollection() );
 		return BABOON_SUCCESS();
 	}
@@ -99,6 +97,12 @@ namespace baboon {
 		HitManager::GetInstance()->ClearAllContent();
 		return BABOON_SUCCESS();
 	}
+
+
+	void EventLoader::LoadLCIOFile( const std::string & ) {
+
+	}
+
 
 }  // namespace 
 

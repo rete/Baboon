@@ -14,7 +14,7 @@
  */
 
 
-#include "BaboonMainFrame.hh"
+#include "Gui/BaboonMainFrame.hh"
 
 namespace baboon {
 

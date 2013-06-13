@@ -34,6 +34,7 @@
 #include "TGFileDialog.h"
 #include <RQ_OBJECT.h>
 #include "EventLoader.hh"
+//#include "TGenericClassInfo.h"
 
 namespace baboon {
 
@@ -46,6 +47,8 @@ namespace baboon {
 		RQ_OBJECT("EventNavigator")
 
 		public:
+
+//			EventNavigator();
 			/*! Default Constructor */
 			EventNavigator( TGMainFrame* prt );
 			/*! Default Destructor */
@@ -70,7 +73,7 @@ namespace baboon {
 			EventLoader *eventLoader;
 
 
-//			ClassDef(EventNavigator, 0)
+			ClassDef(EventNavigator, 0)
 	};  // class
 
 }  // namespace 

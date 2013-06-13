@@ -46,9 +46,19 @@ namespace baboon {
 		fUndefinedCaloHit
 	};
 
+	enum CaloHitThreshold {
 
-	/*
+		fCaloHitThr1,
+		fCaloHitThr2,
+		fCaloHitThr3
+	};
+
+
+
+	/*!
+	 *
 	 * Class CaloHit
+	 *
 	 */
 
 	class CaloHit {
@@ -81,43 +91,59 @@ namespace baboon {
 			 *
 			 *
 			 */
-			Return SetTime( const double &time );
+			Return SetTime( const double &t );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			Return SetCaloHitTag( const CaloHitTag &tag );
+			Return SetTag( const CaloHitTag &t );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			Return SetCaloHitWeight( const double &w );
+			Return SetWeight( const double &w );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			Return SetCaloHitStave( const int &s );
+			Return SetStave( const int &s );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			Return SetCaloHitModule( const int &m );
+			Return SetModule( const int &m );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetEnergy( const double &e );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetThreshold( const CaloHitThreshold &fThr );
 
 	  protected:
 
-			CaloHitType caloHitType;
+			CaloHitType type;
+			CaloHitTag tag;
+			CaloHitThreshold threshold;
 			ThreeVector position;
+			double energy;
 			double time;
 			double weight;
-			CaloHitTag caloHitTag;
 			int stave;
 			int module;
 
@@ -128,8 +154,8 @@ namespace baboon {
 			 *
 			 *
 			 */
-			inline CaloHitType GetCaloHitType() const
-				{ return caloHitType; }
+			inline CaloHitType GetType() const
+				{ return type; }
 
 			/*!
 			 *
@@ -152,15 +178,15 @@ namespace baboon {
 			 *
 			 *
 			 */
-			inline CaloHitTag GetCaloHitTag() const
-				{ return caloHitTag; }
+			inline CaloHitTag GetTag() const
+				{ return tag; }
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			inline double GetCaloHitWeight() const
+			inline double GetWeight() const
 				{ return weight; }
 
 			/*!
@@ -168,7 +194,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			inline double GetCaloHitStave() const
+			inline int GetStave() const
 				{ return stave; }
 
 			/*!
@@ -176,8 +202,24 @@ namespace baboon {
 			 *
 			 *
 			 */
-			inline double GetCaloHitModule() const
+			inline int GetModule() const
 				{ return module; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline CaloHitThreshold GetThreshold() const
+				{ return threshold; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline double GetEnergy() const
+				{ return energy; }
 
 
 	};  // class

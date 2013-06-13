@@ -19,12 +19,14 @@
 namespace baboon {
 
 	CaloHit::CaloHit( const CaloHitType &caloType )
-		: caloHitType( caloType )
+		: type( caloType )
 		,time(0.0)
-		,caloHitTag(fUndefinedCaloHit)
+		,tag( fUndefinedCaloHit )
 		,weight(0)
 		,module(0)
-		,stave(0) {
+		,stave(0)
+		,threshold( fCaloHitThr1 )
+		,energy(0.0) {
 
 	}
 
@@ -49,14 +51,14 @@ namespace baboon {
 	}
 
 
-	Return CaloHit::SetCaloHitTag( const CaloHitTag &tag ) {
+	Return CaloHit::SetTag( const CaloHitTag &t ) {
 
-		caloHitTag = tag;
+		tag = t;
 		return BABOON_SUCCESS();
 	}
 
 
-	Return CaloHit::SetCaloHitWeight( const double &w ) {
+	Return CaloHit::SetWeight( const double &w ) {
 
 		if( w < 0 )
 			return BABOON_INVALID_PARAMETER("Weight < 0");
@@ -64,7 +66,7 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
-	Return CaloHit::SetCaloHitStave( const int &s ) {
+	Return CaloHit::SetStave( const int &s ) {
 
 		if( s < 0 )
 			return BABOON_INVALID_PARAMETER("Stave < 0");
@@ -72,11 +74,25 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
-	Return CaloHit::SetCaloHitModule( const int &m ) {
+	Return CaloHit::SetModule( const int &m ) {
 
 		if( m < 0 )
 			return BABOON_INVALID_PARAMETER("Module < 0");
 		module = m;
+		return BABOON_SUCCESS();
+	}
+
+	Return CaloHit::SetEnergy( const double &e ) {
+
+		if( e < 0 )
+			return BABOON_INVALID_PARAMETER("Energy < 0");
+		energy = e;
+		return BABOON_SUCCESS();
+	}
+
+	Return CaloHit::SetThreshold( const CaloHitThreshold &fThr ) {
+
+		threshold = fThr;
 		return BABOON_SUCCESS();
 	}
 
