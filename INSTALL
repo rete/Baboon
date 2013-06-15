@@ -38,7 +38,7 @@ INSTALL:
 
     mkdir build (if there's not)
     cd build
-    cmake -C $ILCSOFT/ILCSoft.cmake ..
+    cmake -C $ILCSOFT/ILCSoft.cmake .. # add -DBABOON_GUI=ON to build the GUI
     make install -j N  # for N processor on your machine
  
  
