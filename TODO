@@ -8,10 +8,29 @@ TO DO LIST :
 
 
 
-21/05/13:
+02/06/13:
 
+	Coté code :
+	
+	- implementer l'interface geometry du SDHCAL avec gear
 	- l'interface Algorithm - Xml parser
-	- algorithm d'agglomeration pour les hits connaissant les débuts de gerbes H
+	- implementer CfgParser pour qu'il écrive et que Data soit remplacé par Section
+
+	Organisation :
+
+	- 
+	
+	Algorithmes et avancées :
+	
+	- continuer travail sur la shower PDF.
+	- algorithm d'agglomeration pour les hits connaissant les débuts de gerbes H et la PDF
+	- algorithm d'agglomération avec le cone a la pandora + ponderation des hits
+	- étude de la perte d'energie lors de la procedure d'overlay
+	- ecrire rapport
+	- faire presentation these
+	
+	
+
 	
 	
 
