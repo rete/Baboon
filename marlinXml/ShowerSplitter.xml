@@ -9,7 +9,7 @@
 		<!--/home/remi/ilcsoft/SDHCAL/data/simulation/pi-/single_calorimeterhit_pi-_60GeV_I0.slcio -->
 		<!--/home/remi/ilcsoft/SDHCAL/data/simulation/mu-/single_calorimeterhit_mu-_30GeV_I1.slcio-->
 		<parameter name="LCIOInputFiles">
-		/home/remi/ilcsoft/SDHCAL/data/simulation/e-/single_calorimeterhit_e-_40GeV.slcio
+		/home/remi/ilcsoft/SDHCAL/data/simulation/overlay/pi-/pi_10_10GeV_new_I0_1_overlay_10pads.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
 		<parameter name="MaxRecordNumber" value="2000" />

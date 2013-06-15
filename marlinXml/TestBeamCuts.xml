@@ -10,7 +10,7 @@
 		<!-- /home/remi/ilcsoft/SDHCAL/data/simulation/mu-/single_calorimeterhit_mu-_30GeV_I1.slcio -->
 		<!-- /home/remi/ilcsoft/SDHCAL/data/simulation/e-/single_calorimeterhit_e-_30GeV.slcio -->
 		<parameter name="LCIOInputFiles">
-		/home/remi/ilcsoft/SDHCAL/data/testBeam/TDHCAL_716308.slcio
+		/home/remi/ilcsoft/SDHCAL/data/testBeam/pi-/TDHCAL_716308_I0.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
 		<!-- parameter name="MaxRecordNumber" value="2000" /-->
@@ -25,7 +25,7 @@
 	
 		<!--TestBeamCutsProcessor does whatever it does ...-->
 		
-		<!-- BABOON_HOME env variable. Do not change it untill you run it on an other computer! -->
+		<!-- BABOON_HOME env variable. Do not change it until you run it on an other computer! -->
 		<parameter name="BABOON_HOME" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon </parameter>
 		<!--Name of the SDHCAL hit collection-->
 		<parameter name="collectionName" type="string"> SDHCAL_HIT </parameter>
@@ -47,9 +47,9 @@
 		<!--Cut on electron -->
 		<parameter name="totalNbOfHitsCut" type="int"> 100 </parameter>
 		<!--Cut on muon multiplicity -->
-		<parameter name="muonMultiplicityCut" type="double"> 4.0 </parameter>
+		<parameter name="muonMultiplicityCut" type="double"> 3.0 </parameter>
 		<!--Lcio output file -->
-		<parameter name="slcioOutputFile" type="string"> TB_SDHCAL_pi-_30GeV.slcio </parameter>
+		<parameter name="slcioOutputFile" type="string"> pouette.slcio </parameter>
 
 
 		

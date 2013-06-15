@@ -9,8 +9,10 @@
 		<!--/home/remi/ilcsoft/SDHCAL/data/pi-/single_calorimeterhit_pi-_60GeV_I0.slcio -->
 		<!--/home/remi/ilcsoft/SDHCAL/data/mu-/single_calorimeterhit_mu-_30GeV_I1.slcio-->
 		<!-- double_calorimeterhit_pi_10_10GeV_I0_1_overlay_20pads_new_TB.slcio -->
+		<!-- /home/remi/ilcsoft/SDHCAL/data/testBeam/overlay/double_calorimeterhit_pi_10_10GeV_I0_1_overlay_10pads_TB.slcio -->
+		<!-- /home/remi/ilcsoft/SDHCAL/data/simulation/overlay/pi-/pi_10_10GeV_new_I0_1_overlay_10pads.slcio -->
 		<parameter name="LCIOInputFiles">
-		double_calorimeterhit_pi_20_20GeV_I0_1_overlay_20pads_new_TB.slcio
+		pi_30_50GeV_new_I0_1_overlay_5pads.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
 		<parameter name="MaxRecordNumber" value="2000" />
@@ -29,7 +31,7 @@
 		<!--Name of the SDHCAL hit collection-->
 		<parameter name="collectionName" type="string"> HCALBarrel </parameter>
 		<!--Name of the ROOT file where tree is stored-->
-		<parameter name="rootOutputFile" type="string"> toto.root </parameter>
+		<parameter name="rootOutputFile" type="string"> /home/remi/ilcsoft/SDHCAL/output/OverlayEstimator/simulation/pi-/pi-_10_10GeV_5pads.root </parameter>
 		<!--Name of the cfg file for Algorithm parameters -->
 		<parameter name="Algorithm_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/Algorithm.cfg </parameter>
 		<!--Name of the cfg file for SDHCAL parameters -->
@@ -37,7 +39,7 @@
 		<!--Default decoder-->
 		<parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
 		<!--Graphical Environment-->
-		<parameter name="graphicalEnvironment" type="bool"> false </parameter>
+		<parameter name="graphicalEnvironment" type="bool"> true </parameter>
 		
 		<!--Overlay Estimator method-->
 		<parameter name="overlayEstimatorMethod" type="string"> pca </parameter>
