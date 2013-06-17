@@ -113,8 +113,11 @@ int main (int argc ,char *argv[]) {
 
 	energy1Val = atoi( energy1.c_str() );
 	energy2Val = atoi( energy2.c_str() );
+
 	for( unsigned int i=0 ; i<padDistances.size() ; i++ )
 		padDistancesVal.push_back( atoi( padDistances.at(i).c_str() ) );
+
+	vector<TObject*> storage;
 
 
 	// Graphs and histograms declaration
@@ -141,6 +144,21 @@ int main (int argc ,char *argv[]) {
 
 	vector<double> deltaRecoEnergySim;
 	vector<double> deltaRecoEnergyTB;
+
+	storage.push_back( measRecovSim5pads );
+	storage.push_back( measRecovTB5pads );
+	storage.push_back( measRecovSim30pads );
+	storage.push_back( measRecovTB30pads );
+	storage.push_back( meanRecMeasSim );
+	storage.push_back( meanRecMeasTB );
+	storage.push_back( sigmaRecMeasSim );
+	storage.push_back( sigmaRecMeasTB );
+	storage.push_back( sigma90RecMeasSim );
+	storage.push_back( sigma90RecMeasTB );
+	storage.push_back( proba2SigmaSim );
+	storage.push_back( proba2SigmaTB );
+	storage.push_back( proba3SigmaSim );
+	storage.push_back( proba3SigmaTB );
 
 
 	for( unsigned int p=0 ; p<padDistances.size() ; p++ ) {
@@ -226,8 +244,6 @@ int main (int argc ,char *argv[]) {
 		delete fileTB;
 	}
 
-	vector<TLegend*> legendStorage;
-
 	TCanvas *measRecov5padsCanvas = new TCanvas("measRecov5padsCanvas","Master Canvas for WaitPrimitive()");
 	TCanvas *measRecov30padsCanvas = new TCanvas("measRecov30padsCanvas");
 	TCanvas *meanRecMeasCanvas = new TCanvas("meanRecMeasCanvas");
@@ -236,40 +252,102 @@ int main (int argc ,char *argv[]) {
 	TCanvas *proba2SigmaCanvas = new TCanvas("proba2SigmaCanvas");
 	TCanvas *proba3SigmaCanvas = new TCanvas("proba3SigmaCanvas");
 
+	TLegend *measRecov5padsLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	TLegend *measRecov30padsLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	TLegend *meanRecMeasLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	TLegend *sigmaRecMeasLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	TLegend *sigma90RecMeasLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	TLegend *proba2SigmaLegend = NewTLegend(0.55,0.65,0.76,0.82);
+	TLegend *proba3SigmaLegend = NewTLegend(0.55,0.65,0.76,0.82);
+
+	TMultiGraph *meanRecMeasMulti = new TMultiGraph();
+	TMultiGraph *sigmaRecMeasMulti = new TMultiGraph();
+	TMultiGraph *sigma90RecMeasMulti = new TMultiGraph();
+	TMultiGraph *proba2SigmaMulti = new TMultiGraph();
+	TMultiGraph *proba3SigmaMulti = new TMultiGraph();
+
+	DrawText("CALICE Preliminary");
+
+	storage.push_back( measRecov5padsCanvas );
+	storage.push_back( measRecov30padsCanvas );
+	storage.push_back( meanRecMeasCanvas );
+	storage.push_back( sigmaRecMeasCanvas );
+	storage.push_back( sigma90RecMeasCanvas );
+	storage.push_back( proba2SigmaCanvas );
+	storage.push_back( proba3SigmaCanvas );
+
+	storage.push_back( measRecov5padsLegend );
+	storage.push_back( measRecov30padsLegend );
+	storage.push_back( meanRecMeasLegend );
+	storage.push_back( sigmaRecMeasLegend );
+	storage.push_back( sigma90RecMeasLegend );
+	storage.push_back( proba2SigmaLegend );
+	storage.push_back( proba3SigmaLegend );
+
+	storage.push_back( meanRecMeasMulti );
+	storage.push_back( sigmaRecMeasMulti );
+	storage.push_back( sigma90RecMeasMulti );
+	storage.push_back( proba2SigmaMulti );
+	storage.push_back( proba3SigmaMulti );
+
+
 	string legendTitle = energy2 + "-GeV track";
 	string testBeamLegend = "Data";
 
 	measRecov5padsCanvas->cd();
+	storage.push_back( DrawText("CALICE Preliminary") );
 	measRecovSim5pads->Draw();
 	measRecovTB5pads->Draw("same");
 
 	measRecov30padsCanvas->cd();
+	storage.push_back( DrawText("CALICE Preliminary") );
 	measRecovSim30pads->Draw();
 	measRecovTB30pads->Draw("same");
 
 	meanRecMeasCanvas->cd();
-	meanRecMeasSim->Draw("p");
-	meanRecMeasTB->Draw("same p");
+	storage.push_back( DrawText("CALICE Preliminary") );
+	meanRecMeasMulti->Add( meanRecMeasSim );
+	meanRecMeasMulti->Add( meanRecMeasTB );
+	meanRecMeasLegend->AddEntry( meanRecMeasSim , G4PhysicsList.c_str() , "l" );
+	meanRecMeasLegend->AddEntry( meanRecMeasTB , testBeamLegend.c_str() , "l" );
+	meanRecMeasMulti->Draw("alp");
+	meanRecMeasLegend->Draw();
 
 	sigmaRecMeasCanvas->cd();
-	sigmaRecMeasSim->Draw("p");
-	sigmaRecMeasTB->Draw("same p");
+	storage.push_back( DrawText("CALICE Preliminary") );
+	sigmaRecMeasMulti->Add( sigmaRecMeasSim );
+	sigmaRecMeasMulti->Add( sigmaRecMeasTB );
+	sigmaRecMeasLegend->AddEntry( sigmaRecMeasSim , G4PhysicsList.c_str() , "l" );
+	sigmaRecMeasLegend->AddEntry( sigmaRecMeasSim , testBeamLegend.c_str() , "l" );
+	sigmaRecMeasMulti->Draw("alp");
+	sigmaRecMeasLegend->Draw();
 
 	sigma90RecMeasCanvas->cd();
-	sigma90RecMeasSim->Draw("p");
-	sigma90RecMeasTB->Draw("same p");
+	storage.push_back( DrawText("CALICE Preliminary") );
+	sigma90RecMeasMulti->Add( sigma90RecMeasSim );
+	sigma90RecMeasMulti->Add( sigma90RecMeasTB );
+	sigma90RecMeasLegend->AddEntry( sigma90RecMeasSim , G4PhysicsList.c_str() , "l" );
+	sigma90RecMeasLegend->AddEntry( sigma90RecMeasSim , G4PhysicsList.c_str() , "l" );
+	sigma90RecMeasMulti->Draw("alp");
+	sigma90RecMeasLegend->Draw();
 
 	proba2SigmaCanvas->cd();
-	proba2SigmaSim->Draw("p");
-	proba2SigmaTB->Draw("same p");
+	storage.push_back( DrawText("CALICE Preliminary") );
+	proba2SigmaMulti->Add( proba2SigmaSim );
+	proba2SigmaMulti->Add( proba2SigmaTB );
+	proba2SigmaLegend->AddEntry( proba2SigmaSim , G4PhysicsList.c_str() , "l" );
+	proba2SigmaLegend->AddEntry( proba2SigmaTB , G4PhysicsList.c_str() , "l" );
+	proba2SigmaMulti->Draw("alp");
+	proba2SigmaLegend->Draw();
 
 	proba3SigmaCanvas->cd();
-	proba3SigmaSim->Draw("p");
-	proba3SigmaTB->Draw("same p");
-	TLegend *proba3SigmaLegend = NewTLegend(0.55,0.65,0.76,0.82);
-	proba3SigmaLegend->AddEntry( proba3SigmaSim , G4PhysicsList.c_str() , "L" );
-	proba3SigmaLegend->AddEntry( proba3SigmaTB , testBeamLegend.c_str() , "L" );
-	legendStorage.push_back( proba3SigmaLegend );
+	storage.push_back( DrawText("CALICE Preliminary") );
+	proba3SigmaMulti->Add( proba3SigmaSim );
+	proba3SigmaMulti->Add( proba3SigmaTB );
+	proba3SigmaLegend->AddEntry( proba3SigmaSim , G4PhysicsList.c_str() , "l" );
+	proba3SigmaLegend->AddEntry( proba3SigmaTB , testBeamLegend.c_str() , "l" );
+	proba3SigmaMulti->Draw("alp");
+	proba3SigmaLegend->Draw();
 
 	measRecov5padsCanvas->Update();
 	measRecov30padsCanvas->Update();
@@ -281,203 +359,10 @@ int main (int argc ,char *argv[]) {
 
 	measRecov5padsCanvas->WaitPrimitive();
 
-	for( unsigned int i=0 ; i<legendStorage.size() ; i++ )
-		delete legendStorage.at(i);
-	legendStorage.clear();
+	for( unsigned int i=0 ; i<storage.size() ; i++ )
+		delete storage.at(i);
 
-	delete measRecov5padsCanvas;
-	delete measRecov30padsCanvas;
-	delete meanRecMeasCanvas;
-	delete sigmaRecMeasCanvas;
-	delete sigma90RecMeasCanvas;
-	delete proba2SigmaCanvas;
-	delete proba3SigmaCanvas;
-
-	/*
-//	vector<string> energy1;
-	string energy1;
-	string energy2;
-	vector<string> pads;
-
-
-	parser->GetValue("variables","energy1",&energy1);
-	parser->GetValue("variables","energy2",&energy2);
-	parser->GetValue("variables","pads",&pads);
-	parser->GetValue("paths","pathToTBRootFiles",&pathToTBRootFiles);
-	parser->GetValue("paths","pathToSimRootFiles",&pathToSimRootFiles);
-
-	map< string , TGraph* > shower1DeltaRecoveryGraphs;
-	map< string , TGraph* > shower2DeltaRecoveryGraphs;
-	map< string , TGraph* > algorithmEfficiencyGraphs;
-
-
-	for( unsigned int i=0 ; i<pads.size() ; i++ ) {
-
-		shower1DeltaRecoveryGraphs[ pads.at(i) ] = NewTGraph( 6 , i+1 );
-		shower2DeltaRecoveryGraphs[ pads.at(i) ] = NewTGraph( 6 , i+1 );
-		algorithmEfficiencyGraphs[ pads.at(i) ] = NewTGraph( 6 , i+1 );
-	}
-
-
-	for( unsigned int e2=0 ; e2<energy2.size() ; e2++ ) {
-		for( unsigned int p=0 ; p<pads.size() ; p++ ) {
-
-
-			string rootFile = pathToRootFiles
-							+ string("/")
-							+ energy1
-							+ string("GeV/")
-							+ string("double_calorimeterhit_pi_")
-							+ energy1
-							+ string("_")
-							+ energy2.at(e2)
-							+ string("GeV_I0_1_overlay_")
-							+ pads.at(p)
-							+ string("pads_new.root");
-
-			string treeName = string("double_calorimeterhit_pi_")
-							+ energy1
-							+ string("_")
-							+ energy2.at(e2)
-							+ string("GeV_I0_1_overlay_")
-							+ pads.at(p)
-							+ string("pads_new.root");
-
-			TTree *tree = 0;
-			TFile *file = new TFile( rootFile.c_str() );
-			tree = (TTree *) file->Get( treeName.c_str() );
-			cout << "root file : " << rootFile.c_str() << endl;
-			cout << "tree name : " << treeName.c_str() << endl;
-			TreeProcessor proc( tree );
-			proc.Loop();
-			EstimatorVars vars = proc.GetMeans();
-
-			(purityGraphs[ pads.at(p) ])->SetPoint( e2 , atoi( energy2.at(e2).c_str() ) , vars.purity1 );
-			(contaminationGraphs[ pads.at(p) ])->SetPoint( e2 , atoi( energy2.at(e2).c_str() ) , vars.contamination1 );
-			(algorithmEfficiencyGraphs[ pads.at(p) ])->SetPoint( e2 , atoi( energy2.at(e2).c_str() ) , vars.algorithmEfficiency*100 );
-
-			delete file;
-
-		}
-	}
-
-
-	string ccPadsPurityTitle = string("Purity for a ")+ energy1 +string(" GeV track");
-	string ccPadsContaminationTitle = string("Contamination for a ")+ energy1 +string(" GeV track");
-	string ccPadsAlgorithmEfficiencyTitle = string("Algorithm efficiency for a ")+ energy1 +string(" GeV track");
-
-	TCanvas *ccPadsPurity = new TCanvas( "ccPadsPurity" , ccPadsPurityTitle.c_str() );
-	TCanvas *ccPadsContamination = new TCanvas( "ccPadsContamination" , ccPadsContaminationTitle.c_str() );
-	TCanvas *ccPadsAlgorithmEfficiency = new TCanvas( "ccPadsAlgorithmEfficiency" , ccPadsAlgorithmEfficiencyTitle.c_str() );
-
-
-
-	TMultiGraph *multiPadsPurity = new TMultiGraph();
-	TLegend *legendPadsPurity = NewTLegend(0.55,0.65,0.76,0.82);
-
-	TMultiGraph *multiPadsContamination = new TMultiGraph();
-	TLegend *legendPadsContamination = NewTLegend(0.55,0.65,0.76,0.82);
-
-	TMultiGraph *multiPadsAlgorithmEfficiency = new TMultiGraph();
-	TLegend *legendPadsAlgorithmEfficiency = NewTLegend(0.55,0.65,0.76,0.82);
-
-
-	for( unsigned int i=0 ; i<pads.size() ; i++ ) {
-
-		string legend = pads.at(i) + string(" cm");
-
-		legendPadsPurity->AddEntry( (purityGraphs[ pads.at(i) ]) , legend.c_str() , "L" );
-		multiPadsPurity->Add( (purityGraphs[ pads.at(i) ]) );
-
-		legendPadsContamination->AddEntry( (contaminationGraphs[ pads.at(i) ]) , legend.c_str() , "L" );
-		multiPadsContamination->Add( (contaminationGraphs[ pads.at(i) ]) );
-
-		legendPadsAlgorithmEfficiency->AddEntry( (algorithmEfficiencyGraphs[ pads.at(i) ]) , legend.c_str() , "L" );
-		multiPadsAlgorithmEfficiency->Add( (algorithmEfficiencyGraphs[ pads.at(i) ]) );
-	}
-
-
-	// Draw purity graph
-	ccPadsPurity->cd();
-	ccPadsPurity->SetLogy(1);
-	CaliceStyle();
-	multiPadsPurity->Draw("alp");
-	TPaveText* calicePreliminary = DrawText("CALICE Preliminary");
-	legendPadsPurity->Draw();
-
-	multiPadsPurity->GetXaxis()->SetTitle("E [GeV]");
-	multiPadsPurity->GetYaxis()->SetTitle("Purity");
-	multiPadsPurity->GetXaxis()->SetTitleSize(0.04);
-	multiPadsPurity->GetYaxis()->SetTitleSize(0.04);
-	multiPadsPurity->GetYaxis()->SetRangeUser(1,105);
-
-	gPad->Modified();
-
-
-	// Draw contamination graph
-	ccPadsContamination->cd();
-	ccPadsContamination->SetLogy(1);
-	CaliceStyle();
-	multiPadsContamination->Draw("alp");
-	calicePreliminary->Draw();
-	legendPadsContamination->Draw();
-
-	multiPadsContamination->GetXaxis()->SetTitle("E [GeV]");
-	multiPadsContamination->GetYaxis()->SetTitle("Contamination");
-	multiPadsContamination->GetXaxis()->SetTitleSize(0.04);
-	multiPadsContamination->GetYaxis()->SetTitleSize(0.04);
-	multiPadsContamination->GetYaxis()->SetRangeUser(0.4,105);
-
-	gPad->Modified();
-
-
-	// Draw algorithm efficiency graph
-	ccPadsAlgorithmEfficiency->cd();
-//	ccPadsAlgorithmEfficiency->SetLogy(1);
-	CaliceStyle();
-	multiPadsAlgorithmEfficiency->Draw("alp");
-	calicePreliminary->Draw();
-	legendPadsAlgorithmEfficiency->Draw();
-
-	multiPadsAlgorithmEfficiency->GetXaxis()->SetTitle("E [GeV]");
-	multiPadsAlgorithmEfficiency->GetYaxis()->SetTitle("Algorithm Efficiency");
-	multiPadsAlgorithmEfficiency->GetXaxis()->SetTitleSize(0.04);
-	multiPadsAlgorithmEfficiency->GetYaxis()->SetTitleSize(0.04);
-	multiPadsAlgorithmEfficiency->GetYaxis()->SetRangeUser(0.4,105);
-
-	gPad->Modified();
-
-
-	// Update graphs
-	ccPadsPurity->Update();
-	ccPadsContamination->Update();
-	ccPadsAlgorithmEfficiency->Update();
-
-	ccPadsPurity->WaitPrimitive();
-	ccPadsContamination->WaitPrimitive();
-	ccPadsAlgorithmEfficiency->WaitPrimitive();
-
-
-
-	// Deletion area
-	for( unsigned int i=0 ; i<pads.size() ; i++ ) {
-		delete purityGraphs[ pads.at(i) ];
-		delete contaminationGraphs[ pads.at(i) ];
-	}
-	delete legendPadsPurity;
-	delete multiPadsPurity;
-	delete ccPadsPurity;
-
-	delete legendPadsContamination;
-	delete multiPadsContamination;
-	delete ccPadsContamination;
-
-	delete legendPadsAlgorithmEfficiency;
-	delete multiPadsAlgorithmEfficiency;
-	delete ccPadsAlgorithmEfficiency;
-
-	delete calicePreliminary;
-*/
+	storage.clear();
 
 	return 0;
 }
