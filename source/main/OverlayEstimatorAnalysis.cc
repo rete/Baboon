@@ -186,7 +186,7 @@ int main (int argc ,char *argv[]) {
 			double deltaRecoEnergy1 = 0;
 			bool showersFound = false;
 
-			wrapperTB->GetValue( "showersFound" , showersFound );
+			wrapperSim->GetValue( "showersFound" , showersFound );
 
 			if( !showersFound )
 				continue;
