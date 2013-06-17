@@ -360,6 +360,8 @@ int main (int argc ,char *argv[]) {
 	proba3SigmaMulti->Draw("alp");
 	proba3SigmaLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
+	measRecovSim30pads->SetYTitle("Probability of recovering within 2 #Sigma");
+	measRecovSim30pads->SetXTitle("Distance between shower axis [cm]");
 
 	measRecov5padsCanvas->Update();
 	measRecov30padsCanvas->Update();
