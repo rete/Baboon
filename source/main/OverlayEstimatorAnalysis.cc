@@ -313,8 +313,8 @@ int main (int argc ,char *argv[]) {
 	measRecovTB30pads->Draw("same");
 	storage.push_back( DrawText("CALICE Preliminary") );
 	measRecov30padsLegend->Draw();
-	measRecovSim5pads->SetXTitle("Energy [GeV]");
-	measRecovSim5pads->SetTitle("Mean Energy (Measured-Recovered) , d=30cm");
+	measRecovSim30pads->SetXTitle("Energy [GeV]");
+	measRecovSim30pads->SetTitle("Mean Energy (Measured-Recovered) , d=30cm");
 
 	meanRecMeasCanvas->cd();
 	meanRecMeasMulti->Add( meanRecMeasSim );

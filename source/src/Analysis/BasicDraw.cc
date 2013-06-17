@@ -50,8 +50,8 @@ namespace baboon {
 	TPaveText *DrawText( TString string ) {
 
 	  TPaveText *pt = new TPaveText(0.10, 0.91, 0.43, 0.96, "tbNDC");
-	  pt->SetTextSize(0.035);
-	  pt->SetTextColor(kGray+2);
+	  pt->SetTextSize(0.04);
+	  pt->SetTextColor(kGray);
 	  pt->SetFillColor(0);
 	  pt->SetLineWidth(0);
 	  pt->SetBorderSize(0);
