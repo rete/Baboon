@@ -121,11 +121,11 @@ int main (int argc ,char *argv[]) {
 
 
 	// Graphs and histograms declaration
-	TH1D *measRecovSim5pads = NewTH1D( "measRecovSim5pads" , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy1Val,energy2Val) , 1 );
-	TH1D *measRecovTB5pads  = NewTH1D( "measRecovTB5pads"  , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy2Val,energy2Val) , 2 );
+	TH1D *measRecovSim5pads = NewTH1D( "measRecovSim5pads" , "" , 4*(energy1Val+energy2Val)+1 , -2*(energy1Val+energy2Val) , 2*(energy1Val+energy2Val) , 1 );
+	TH1D *measRecovTB5pads  = NewTH1D( "measRecovTB5pads"  , "" , 4*(energy1Val+energy2Val)+1 , -2*(energy1Val+energy2Val) , 2*(energy1Val+energy2Val) , 2 );
 
-	TH1D *measRecovSim30pads = NewTH1D( "measRecovSim30pads" , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy1Val,energy2Val) , 1 );
-	TH1D *measRecovTB30pads  = NewTH1D( "measRecovTB30pads"  , "" , 2*max(energy1Val,energy2Val)+1 , -max(energy1Val,energy2Val) , max(energy1Val,energy2Val) , 2 );
+	TH1D *measRecovSim30pads = NewTH1D( "measRecovSim30pads" , "" , 4*(energy1Val+energy2Val)+1 , -2*(energy1Val+energy2Val) , 2*(energy1Val+energy2Val) , 1 );
+	TH1D *measRecovTB30pads  = NewTH1D( "measRecovTB30pads"  , "" , 4*(energy1Val+energy2Val)+1 , -2*(energy1Val+energy2Val) , 2*(energy1Val+energy2Val) , 2 );
 
 	TGraph *meanRecMeasSim = NewTGraph( padDistances.size() , 1 );
 	TGraph *meanRecMeasTB  = NewTGraph( padDistances.size() , 2 );
@@ -295,59 +295,59 @@ int main (int argc ,char *argv[]) {
 	string testBeamLegend = "Data";
 
 	measRecov5padsCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	measRecovSim5pads->Draw();
 	measRecovTB5pads->Draw("same");
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	measRecov30padsCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	measRecovSim30pads->Draw();
 	measRecovTB30pads->Draw("same");
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	meanRecMeasCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	meanRecMeasMulti->Add( meanRecMeasSim );
 	meanRecMeasMulti->Add( meanRecMeasTB );
 	meanRecMeasLegend->AddEntry( meanRecMeasSim , G4PhysicsList.c_str() , "l" );
 	meanRecMeasLegend->AddEntry( meanRecMeasTB , testBeamLegend.c_str() , "l" );
 	meanRecMeasMulti->Draw("alp");
 	meanRecMeasLegend->Draw();
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	sigmaRecMeasCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	sigmaRecMeasMulti->Add( sigmaRecMeasSim );
 	sigmaRecMeasMulti->Add( sigmaRecMeasTB );
 	sigmaRecMeasLegend->AddEntry( sigmaRecMeasSim , G4PhysicsList.c_str() , "l" );
 	sigmaRecMeasLegend->AddEntry( sigmaRecMeasSim , testBeamLegend.c_str() , "l" );
 	sigmaRecMeasMulti->Draw("alp");
 	sigmaRecMeasLegend->Draw();
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	sigma90RecMeasCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	sigma90RecMeasMulti->Add( sigma90RecMeasSim );
 	sigma90RecMeasMulti->Add( sigma90RecMeasTB );
 	sigma90RecMeasLegend->AddEntry( sigma90RecMeasSim , G4PhysicsList.c_str() , "l" );
 	sigma90RecMeasLegend->AddEntry( sigma90RecMeasSim , G4PhysicsList.c_str() , "l" );
 	sigma90RecMeasMulti->Draw("alp");
 	sigma90RecMeasLegend->Draw();
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	proba2SigmaCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	proba2SigmaMulti->Add( proba2SigmaSim );
 	proba2SigmaMulti->Add( proba2SigmaTB );
 	proba2SigmaLegend->AddEntry( proba2SigmaSim , G4PhysicsList.c_str() , "l" );
 	proba2SigmaLegend->AddEntry( proba2SigmaTB , G4PhysicsList.c_str() , "l" );
 	proba2SigmaMulti->Draw("alp");
 	proba2SigmaLegend->Draw();
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	proba3SigmaCanvas->cd();
-	storage.push_back( DrawText("CALICE Preliminary") );
 	proba3SigmaMulti->Add( proba3SigmaSim );
 	proba3SigmaMulti->Add( proba3SigmaTB );
 	proba3SigmaLegend->AddEntry( proba3SigmaSim , G4PhysicsList.c_str() , "l" );
 	proba3SigmaLegend->AddEntry( proba3SigmaTB , testBeamLegend.c_str() , "l" );
 	proba3SigmaMulti->Draw("alp");
 	proba3SigmaLegend->Draw();
+	storage.push_back( DrawText("CALICE Preliminary") );
 
 	measRecov5padsCanvas->Update();
 	measRecov30padsCanvas->Update();
