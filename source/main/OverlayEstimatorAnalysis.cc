@@ -324,6 +324,8 @@ int main (int argc ,char *argv[]) {
 	meanRecMeasMulti->Draw("alp");
 	meanRecMeasLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
+	meanRecMeasMulti->GetYaxis()->SetTitle("Mean Energy (Measured-Recovered)");
+	meanRecMeasMulti->GetXaxis()->SetTitle("Distance between shower axis [cm]");
 
 	sigmaRecMeasCanvas->cd();
 	sigmaRecMeasMulti->Add( sigmaRecMeasSim );
@@ -333,6 +335,8 @@ int main (int argc ,char *argv[]) {
 	sigmaRecMeasMulti->Draw("alp");
 	sigmaRecMeasLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
+	sigmaRecMeasMulti->GetYaxis()->SetTitle("Deviation #sigma (Measured-Recovered)");
+	sigmaRecMeasMulti->GetXaxis()->SetTitle("Distance between shower axis [cm]");
 
 	sigma90RecMeasCanvas->cd();
 	sigma90RecMeasMulti->Add( sigma90RecMeasSim );
@@ -342,6 +346,8 @@ int main (int argc ,char *argv[]) {
 	sigma90RecMeasMulti->Draw("alp");
 	sigma90RecMeasLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
+	sigma90RecMeasMulti->GetYaxis()->SetTitle("Deviation #sigma_{90} (Measured-Recovered)");
+	sigma90RecMeasMulti->GetXaxis()->SetTitle("Distance between shower axis [cm]");
 
 	proba2SigmaCanvas->cd();
 	proba2SigmaMulti->Add( proba2SigmaSim );
@@ -351,6 +357,8 @@ int main (int argc ,char *argv[]) {
 	proba2SigmaMulti->Draw("alp");
 	proba2SigmaLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
+	proba2SigmaMulti->GetYaxis()->SetTitle("Probability of recovering within 2 #sigma");
+	proba2SigmaMulti->GetXaxis()->SetTitle("Distance between shower axis [cm]");
 
 	proba3SigmaCanvas->cd();
 	proba3SigmaMulti->Add( proba3SigmaSim );
@@ -360,8 +368,8 @@ int main (int argc ,char *argv[]) {
 	proba3SigmaMulti->Draw("alp");
 	proba3SigmaLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
-	measRecovSim30pads->SetYTitle("Probability of recovering within 2 #Sigma");
-	measRecovSim30pads->SetXTitle("Distance between shower axis [cm]");
+	proba3SigmaMulti->GetYaxis()->SetTitle("Probability of recovering within 3 #sigma");
+	proba3SigmaMulti->GetXaxis()->SetTitle("Distance between shower axis [cm]");
 
 	measRecov5padsCanvas->Update();
 	measRecov30padsCanvas->Update();
