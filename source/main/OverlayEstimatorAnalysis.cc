@@ -294,15 +294,27 @@ int main (int argc ,char *argv[]) {
 	string legendTitle = energy2 + "-GeV track";
 	string testBeamLegend = "Data";
 
+	CaliceStyle();
+
 	measRecov5padsCanvas->cd();
+	measRecov5padsLegend->AddEntry( measRecovSim5pads , G4PhysicsList.c_str() , "l" );
+	measRecov5padsLegend->AddEntry( measRecovTB5pads , testBeamLegend.c_str() , "l" );
 	measRecovSim5pads->Draw();
 	measRecovTB5pads->Draw("same");
 	storage.push_back( DrawText("CALICE Preliminary") );
+	measRecov5padsLegend->Draw();
+	measRecovSim5pads->SetXTitle("Energy [GeV]");
+	measRecovSim5pads->SetTitle("Mean Energy (Measured-Recovered) , d=5cm");
 
 	measRecov30padsCanvas->cd();
+	measRecov30padsLegend->AddEntry( measRecovSim30pads , G4PhysicsList.c_str() , "l" );
+	measRecov30padsLegend->AddEntry( measRecovTB30pads , testBeamLegend.c_str() , "l" );
 	measRecovSim30pads->Draw();
 	measRecovTB30pads->Draw("same");
 	storage.push_back( DrawText("CALICE Preliminary") );
+	measRecov30padsLegend->Draw();
+	measRecovSim5pads->SetXTitle("Energy [GeV]");
+	measRecovSim5pads->SetTitle("Mean Energy (Measured-Recovered) , d=30cm");
 
 	meanRecMeasCanvas->cd();
 	meanRecMeasMulti->Add( meanRecMeasSim );
@@ -317,7 +329,7 @@ int main (int argc ,char *argv[]) {
 	sigmaRecMeasMulti->Add( sigmaRecMeasSim );
 	sigmaRecMeasMulti->Add( sigmaRecMeasTB );
 	sigmaRecMeasLegend->AddEntry( sigmaRecMeasSim , G4PhysicsList.c_str() , "l" );
-	sigmaRecMeasLegend->AddEntry( sigmaRecMeasSim , testBeamLegend.c_str() , "l" );
+	sigmaRecMeasLegend->AddEntry( sigmaRecMeasTB , testBeamLegend.c_str() , "l" );
 	sigmaRecMeasMulti->Draw("alp");
 	sigmaRecMeasLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
@@ -326,7 +338,7 @@ int main (int argc ,char *argv[]) {
 	sigma90RecMeasMulti->Add( sigma90RecMeasSim );
 	sigma90RecMeasMulti->Add( sigma90RecMeasTB );
 	sigma90RecMeasLegend->AddEntry( sigma90RecMeasSim , G4PhysicsList.c_str() , "l" );
-	sigma90RecMeasLegend->AddEntry( sigma90RecMeasSim , G4PhysicsList.c_str() , "l" );
+	sigma90RecMeasLegend->AddEntry( sigma90RecMeasTB , testBeamLegend.c_str() , "l" );
 	sigma90RecMeasMulti->Draw("alp");
 	sigma90RecMeasLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
@@ -335,7 +347,7 @@ int main (int argc ,char *argv[]) {
 	proba2SigmaMulti->Add( proba2SigmaSim );
 	proba2SigmaMulti->Add( proba2SigmaTB );
 	proba2SigmaLegend->AddEntry( proba2SigmaSim , G4PhysicsList.c_str() , "l" );
-	proba2SigmaLegend->AddEntry( proba2SigmaTB , G4PhysicsList.c_str() , "l" );
+	proba2SigmaLegend->AddEntry( proba2SigmaTB , testBeamLegend.c_str() , "l" );
 	proba2SigmaMulti->Draw("alp");
 	proba2SigmaLegend->Draw();
 	storage.push_back( DrawText("CALICE Preliminary") );
