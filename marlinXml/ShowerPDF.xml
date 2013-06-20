@@ -35,6 +35,8 @@
 		<parameter name="SDHCAL_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/SDHCAL.cfg </parameter>
 		<!--Default decoder-->
 		<parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
+		<!--IJK encoding for calorimeter hit creation-->
+		<parameter name="IJKEncoding" type="StringVec"> I J K-1 </parameter>
 		<!--Graphical Environment-->
 		<parameter name="graphicalEnvironment" type="bool"> false </parameter>
 

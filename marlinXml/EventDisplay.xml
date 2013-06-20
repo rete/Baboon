@@ -6,7 +6,7 @@
 
 	<global>
 		<parameter name="LCIOInputFiles">
-		pi_30_50GeV_new_I0_1_overlay_5pads.slcio
+		/home/remi/ilcsoft/SDHCAL/output/Overlay/double_calorimeterhit_pi_10_10GeV_I0_1_overlay_20pads_new.slcio
 		</parameter>
 		<!-- limit the number of processed records (run+evt): -->  
 		<parameter name="MaxRecordNumber" value="2000" />
@@ -32,6 +32,8 @@
 		<parameter name="SDHCAL_cfg" type="string"> /home/remi/ilcsoft/SDHCAL/Baboon/config/SDHCAL.cfg </parameter>
 		<!--Default decoder-->
 		<parameter name="decoderString" type="string"> "M:3,S-1:3,I:9,J:9,K-1:6" </parameter>
+		<!--IJK encoding for calorimeter hit creation-->
+		<parameter name="IJKEncoding" type="StringVec"> I J K-1 </parameter>
 		<!--Graphical Environment-->
 		<parameter name="graphicalEnvironment" type="bool"> true </parameter>
 		

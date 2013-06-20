@@ -26,6 +26,7 @@ namespace baboon {
 
 		collectionName = "HCALBarrel";
 		decoderString = "M:3,S-1:3,I:9,J:9,K-1:6";
+		IJKEncoding = StringVector(3,string(""));
 	}
 
 	CaloHitCreator::~CaloHitCreator() {
@@ -56,9 +57,9 @@ namespace baboon {
 				position.setY( caloHit->getPosition()[1] );
 				position.setZ( caloHit->getPosition()[2] );
 				hitParams.position = position;
-				int I = cellIdDecoder(caloHit)["I"];
-				int J = cellIdDecoder(caloHit)["J"];
-				int K = cellIdDecoder(caloHit)["K-1"];
+				int I = cellIdDecoder(caloHit)[IJKEncoding.at(0).c_str()];
+				int J = cellIdDecoder(caloHit)[IJKEncoding.at(1).c_str()];
+				int K = cellIdDecoder(caloHit)[IJKEncoding.at(2).c_str()];
 				IntVector ijk;
 				ijk.push_back( I );
 				ijk.push_back( J );
@@ -83,6 +84,14 @@ namespace baboon {
 	}
 
 
+	Return CaloHitCreator::SetIJKEncoding( const StringVector &ijkEnco ) {
+
+		if( ijkEnco.size() != 3 )
+			return BABOON_INVALID_PARAMETER("Invalid IJK encoding vector");
+
+		IJKEncoding = ijkEnco;
+		return BABOON_SUCCESS();
+	}
 
 }  // namespace
 

@@ -62,6 +62,7 @@ namespace baboon {
 
 			std::string collectionName;
 			std::string decoderString;
+			StringVector IJKEncoding;
 			baboon::HitCollection *hitCollection;
 
 		public :
@@ -70,6 +71,8 @@ namespace baboon {
 
 			void SetDecoderString( const std::string &decoderStr )
 				{ decoderString = decoderStr; }
+
+			Return SetIJKEncoding( const StringVector &ijkEnco );
 
 
 	};  // class

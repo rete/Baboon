@@ -63,6 +63,15 @@ namespace baboon {
 					     graphicalEnvironment,
 					     false);
 
+		  vector<string> ijkVec;
+		  ijkVec.push_back("I");
+		  ijkVec.push_back("J");
+		  ijkVec.push_back("K-1");
+		  registerProcessorParameter("IJKEncoding",
+					     "I J K hit encoding",
+					     IJKEncoding,
+					     ijkVec);
+
 	}
 
 	BaboonProcessor::~BaboonProcessor() {
@@ -227,6 +236,7 @@ namespace baboon {
 		caloHitCreator = new CaloHitCreator();
 		caloHitCreator->SetDecoderString( decoderString );
 		caloHitCreator->SetCollectionName( collectionName );
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , caloHitCreator->SetIJKEncoding( IJKEncoding ) );
 		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , caloHitCreator->CreateCaloHits( evt ) );
 
 		HitManager *hitManager = HitManager::GetInstance();

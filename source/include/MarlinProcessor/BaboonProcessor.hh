@@ -179,6 +179,7 @@ namespace baboon {
 			std::string algorithmFileName;
 			std::string rootOutputFile;
 			std::string decoderString;
+			std::vector<std::string> IJKEncoding;
 			std::string collectionName;
 			bool graphicalEnvironment;
 
