@@ -81,6 +81,7 @@ namespace baboon {
 			ClusterCollection *clusterCollection;
 			unsigned int clusterSizeLowerLimit;
 			unsigned int neighborDistance;
+			HitCollection treatedHits;
 
 			/*!
 			 *
@@ -133,6 +134,13 @@ namespace baboon {
 			 *
 			 */
 			bool CheckTag( const Tag &fTag );
+
+			/*
+			 *
+			 *
+			 *
+			 */
+			Return FindCluster( Hit *hit , Cluster *cluster );
 
 
 		public:
