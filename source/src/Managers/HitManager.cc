@@ -138,7 +138,7 @@ namespace baboon {
 	bool HitManager::PadExists( int I , int J , int K ) {
 
 		if( I <= nbOfPadsXYZ.at(0) && I > 0
-		 && J <= nbOfPadsXYZ.at(1) && K > 0
+		 && J <= nbOfPadsXYZ.at(1) && J > 0
 		 && K < nbOfPadsXYZ.at(2) && K >= 0 )
 			return true;
 
