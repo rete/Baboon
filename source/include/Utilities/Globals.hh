@@ -31,6 +31,16 @@ namespace baboon {
 	typedef std::vector<double> DoubleVector;
 	typedef std::vector<bool> BoolVector;
 
+
+	template <typename T>
+	std::vector<T> operator +( std::vector<T> &vec1 , std::vector<T> &vec2 ) {
+
+		std::vector<T> vec;
+		for( unsigned int i=0 ; i<vec1.size() ; i++ ) vec.push_back( vec1.at(i) );
+		for( unsigned int i=0 ; i<vec2.size() ; i++ ) vec.push_back( vec2.at(i) );
+		return vec;
+	}
+
 }  // namespace 
 
 #endif  //  GLOBALS_HH
