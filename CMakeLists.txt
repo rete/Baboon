@@ -11,7 +11,7 @@ PROJECT( Baboon )
 
 SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
 SET( ${PROJECT_NAME}_VERSION_MINOR 4 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 3 )
 
 
 # --------------- ilcsoft dependencies -----------
