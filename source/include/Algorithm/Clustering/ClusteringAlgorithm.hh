@@ -137,7 +137,8 @@ namespace baboon {
 
 			/*
 			 *
-			 *
+			 * @brief Recursive method that add a hit closed to another one.
+			 * This is repeated for the added hit, etc...
 			 *
 			 */
 			Return FindCluster( Hit *hit , Cluster *cluster );

@@ -71,8 +71,6 @@ namespace baboon {
 			if( find( treatedHits.begin() , treatedHits.end() , hit ) != treatedHits.end() )
 				continue;
 
-//			cout << "Hit at : " << ijk.at(0) << " " << ijk.at(1) << " " << ijk.at(2) << endl;
-
 			treatedHits.push_back( hit );
 
 			if ( !CheckTag( hitCollection->at( i )->GetHitTag() ) )
@@ -90,92 +88,8 @@ namespace baboon {
 				delete cluster;
 				continue;
 			}
-
-			clusterCollection->push_back( cluster );
-
-		}
-
-		/*
-		map<int,Hit*> hitMap;
-
-		for( unsigned int i=0 ; i<hitCollection->size(); i++ ) {
-
-			IntVector ijk = hitCollection->at(i)->GetIJK();
-
-			int key = IJKToKey( ijk.at(0), ijk.at(1) , ijk.at(2)  );
-			hitMap[  key ] = hitCollection->at(i);
-		}
-		//for(std::map<int,Hit*>::iterator it=hitMap.begin(); it!=hitMap.end(); ++it)
-			//std::cout << it->first <<"=?"<< it->second->GetIJK()[2]<<it->second->GetIJK()[1]<<it->second->GetIJK()[0]<< std::endl;
-
-
-		HitCollection treatedHits;
-
-		map<int,Hit*>::iterator it1;
-//		for( unsigned int hitID=0 ; hitID<hitCollection->size() ; hitID++ ) {
-
-		for( it1=hitMap.begin() ; it1!=hitMap.end() ; it1++ ) {
-
-			if( find( treatedHits.begin() , treatedHits.end() , it1->second ) != treatedHits.end() )
-				continue;
-
-//			if ( !CheckTag( hitCollection->at(hitID)->GetHitTag() ) ) continue;
-
-			treatedHits.push_back( it1->second );
-			HitCollection *hitCol = new HitCollection();
-			hitCol->push_back( it1->second );
-			IntVector ijk = it1->second->GetIJK();
-			//std::vector<int> ijk=decoder(it1>first);
-			map<int,Hit*>::iterator it2;
-			for( it2=hitMap.begin() ; it2!=hitMap.end() ; it2++ ) {
-
-//				Hit *hit2 = hitCollection->at(hitID2);
-
-//				if ( !CheckTag( hit2->GetHitTag() ) )
-//					continue;
-
-				if( find( treatedHits.begin() , treatedHits.end() , it2->second ) != treatedHits.end() )
-					continue;
-
-				IntVector ijk2 = it2->second->GetIJK();
-				//std::vector<int> ijk2=decoder(it2->first);
-//				if( fClusteringMode == fClustering2D )
-					if(  ijk.at(2) != ijk2.at(2) )
-						continue;
-
-
-				for( unsigned int hitID3=0 ; hitID3<hitCol->size() ; hitID3++ ) {
-
-					IntVector ijk3 = hitCol->at(hitID3)->GetIJK();
-					if( ijk2.at(0)==49&&ijk2.at(1)==46&&ijk2.at(2)==2 ){
-						std::cout << ijk3.at(0)<<", "<<ijk3.at(1)<<", "<<ijk3.at(2)<<std::endl;
-						std::cout << ijk3.at(0)-ijk2.at(0)<<", "<<ijk3.at(1)-ijk2.at(1)<<", "<<ijk3.at(2)-ijk2.at(2)<<std::endl;
-					}
-					if( abs( ijk3.at(0)-ijk2.at(0) ) <= neighborDistance
-					 && abs( ijk3.at(1)-ijk2.at(1) ) <= neighborDistance
-//					 && abs( ijk3.at(2)-ijk2.at(2) ) <= neighborDistance
-					 ) {
-
-						treatedHits.push_back( it2->second );
-						hitCol->push_back( it2->second );
-						break;
-					}
-				}
-			}
-//			if( hitCol->size() < clusterSizeLowerLimit ) {
-//				hitCol->clear();
-//				delete hitCol;
-//				continue;
-//			}
-			Cluster *cluster = new Cluster();
-			cluster->SetHitCollection( hitCol );
-			if( fClusteringMode == fClustering2D ) cluster->SetType( fCluster2D );
-			else if( fClusteringMode == fClustering3D ) cluster->SetType( fCluster3D );
 			clusterCollection->push_back( cluster );
 		}
-		treatedHits.clear();
-		*/
-
 		return BABOON_SUCCESS();
 	}
 
