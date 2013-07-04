@@ -46,18 +46,6 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	 }
 
-
-	int IJKToKey( int I , int J , int K ) {
-		return 100*100*K+100*J+I;
-	}
-	std::vector<int> decoder(int ijk){
-		std::vector<int> dec;
-		dec.push_back(ijk%100);
-		dec.push_back((ijk/100)%100);
-		dec.push_back(ijk/100/100);
-		return dec;
-	}
-
 	Return ClusteringAlgorithm::Execute() {
 
 		HitManager *hitManager = HitManager::GetInstance();
