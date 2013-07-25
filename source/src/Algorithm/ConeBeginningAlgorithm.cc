@@ -65,7 +65,7 @@ namespace baboon {
 
 
 	Return ConeBeginningAlgorithm::Execute() {
-
+/*
 		HitManager* hitManager = HitManager::GetInstance();
 		CoreManager *coreManager = CoreManager::GetInstance();
 		ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
@@ -83,9 +83,9 @@ namespace baboon {
 			if( core->Size() < coreSizeLowerLimit )
 				continue;
 
-			ThreeVector coreCog = core->CenterOfGravity();
+			ThreeVector coreCog = core->GetHitCollection()->GetBarycenter();
 
-			int firstHitLayer = core->GetFirstHitLayer();
+			int firstHitLayer = core->GetHitCollection()->GetFirstLayer();
 
 			HitCollection *hitCol = core->GetHitCollection();
 			DoubleVector coreRMS = hitCol->GetRMS();
@@ -192,7 +192,7 @@ namespace baboon {
 
 //			cout << "bestCone->GetPeakPosition()" << bestCone->GetPeakPosition() << endl;
 
-			/******************************/
+
 
 
 			ThreeVector forwardMinimumConePeakPosition = coneCoreStartingPoint - coneBackwardDistance*coneDirected.unit();
@@ -265,6 +265,7 @@ namespace baboon {
 			}
 
 		}
+		*/
 		return BABOON_SUCCESS();
 	}
 
