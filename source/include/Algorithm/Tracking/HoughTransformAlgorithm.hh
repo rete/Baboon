@@ -38,6 +38,10 @@
 #include "Utilities/ReturnValues.hh"
 #include "Reconstruction/Linear3DFit.hh"
 
+#include "TH2D.h"
+#include "TCanvas.h"
+#include "TGraph.h"
+
 namespace baboon {
 
 
@@ -81,6 +85,36 @@ namespace baboon {
 
 		typedef std::vector<HoughCluster*> HoughClusterCollection;
 
+		typedef struct {
+
+			public :
+				Hit *hit;
+				std::vector<int> rhox;
+				std::vector<int> rhoy;
+				HoughTag tagx;
+				HoughTag tagy;
+				HoughTag finalTag;
+
+		} HoughHit;
+
+		typedef std::vector<HoughHit*> HoughHitCollection;
+
+
+		/*!
+		 *
+		 * HoughPoint struct for Hough Transform Algorithm
+		 *
+		 */
+		typedef struct {
+
+			Hit* hit;
+			double theta;
+			double rho;
+			int pointID;
+
+		} HoughPoint;
+
+		typedef std::vector<HoughPoint*> HoughPointCollection;
 
 		public :
 			/*!
@@ -157,6 +191,24 @@ namespace baboon {
 			int maximumDistanceBetweenHitsInPlane;
 			int maximumDistanceBetweenHitsForLayers;
 			double maximumDistanceAllowedForHitsInTrack;
+			int minimumNumberOfLayersForTrack;
+			double normalizedChi2Limit;
+			double chi2DifferenceLimit;
+
+//		    pathfinder::FinderParameter* _myFinderParameter;
+//		    pathfinder::HoughTrafoTrackFinder* _trackFinder;
+
+		    int trackModel;
+		    int minHitOnTrack;
+		    double maxHitDistXY;
+		    double maxHitDistZ;
+		    int binningLevel;
+		    int baseBinning;
+
+		    // new hough transform
+		    double deltaThetaCluster;
+		    double deltaRhoCluster;
+		    int houghPointCollectionMinimumSize;
 
 			int ** houghSpaceX;
 			int ** houghSpaceY;

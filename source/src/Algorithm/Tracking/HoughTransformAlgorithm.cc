@@ -19,7 +19,6 @@
 using namespace std;
 
 
-
 namespace baboon {
 
 
@@ -43,6 +42,7 @@ namespace baboon {
 
 	Return HoughTransformAlgorithm::Init() {
 
+		// initial hough transform
 		data.GetValue("thetaMax",&thetaMax);
 		data.GetValue("rMax",&rMax);
 		data.GetValue("clusterSizeLimit",&clusterSizeLimit);
@@ -52,6 +52,26 @@ namespace baboon {
 		data.GetValue("maximumDistanceBetweenHitsInPlane",&maximumDistanceBetweenHitsInPlane);
 		data.GetValue("maximumDistanceBetweenHitsForLayers",&maximumDistanceBetweenHitsForLayers);
 		data.GetValue("maximumDistanceAllowedForHitsInTrack",&maximumDistanceAllowedForHitsInTrack);
+		data.GetValue("minimumNumberOfLayersForTrack",&minimumNumberOfLayersForTrack);
+		data.GetValue("normalizedChi2Limit",&normalizedChi2Limit);
+		data.GetValue("chi2DifferenceLimit",&chi2DifferenceLimit);
+
+
+
+
+
+//		// from path finder
+//		data.GetValue("trackModel",&trackModel);
+//		data.GetValue("minHitOnTrack",&minHitOnTrack);
+//		data.GetValue("maxHitDistXY",&maxHitDistXY);
+//		data.GetValue("maxHitDistZ",&maxHitDistZ);
+//		data.GetValue("baseBinning",&baseBinning);
+//		data.GetValue("binningLevel",&binningLevel);
+//
+//		// new hough transform
+//		data.GetValue("deltaThetaCluster",&deltaThetaCluster);
+//		data.GetValue("deltaRhoCluster",&deltaRhoCluster);
+//		data.GetValue("houghPointCollectionMinimumSize",&houghPointCollectionMinimumSize);
 
 		this->DeleteHoughSpace();
 		this->AllocateHoughSpace();
@@ -114,152 +134,260 @@ namespace baboon {
 //			   ( i l ),-''  ( l i),'  ( ( ! .-'
 ////////////////////////////////////////////////////////////////
 
+//	Return HoughTransformAlgorithm::Execute() {
+//
+//		_myFinderParameter = new FinderParameter();
+//		_trackFinder = new HoughTrafoTrackFinder();
+//
+//	    _myFinderParameter->setSaveRootFile(false);
+//
+//	    //Set the track model in the finder parameters
+//	    switch (trackModel) {
+//	        case 0:
+//	            _myFinderParameter->setFindCurler(false);
+//	            _myFinderParameter->setIsHelix(false);
+//	            _myFinderParameter->setIsStraightLine(true);
+//	            break;
+//	        case 1:
+//	            _myFinderParameter->setFindCurler(false);
+//	            _myFinderParameter->setIsHelix(true);
+//	            _myFinderParameter->setIsStraightLine(false);
+//	            break;
+//	        case 2:
+//	            _myFinderParameter->setFindCurler(true);
+//	            _myFinderParameter->setIsHelix(false);
+//	            _myFinderParameter->setIsStraightLine(false);
+//	            break;
+//	        default:
+//	            return BABOON_ERROR("Track Model not recognized.");
+//
+//	    }
+//	    if (minHitOnTrack > 1) {
+//	        _myFinderParameter->setMinimumHitNumber(minHitOnTrack);
+//	    }
+//	    else {
+//	        return BABOON_ERROR("Invalid value for the minimum numbers of hit on a track. It must be more than 1.");
+//	    }
+//
+//	    _myFinderParameter->setMaxXYDistance(maxHitDistXY);
+//	    _myFinderParameter->setMaxSZDistance(maxHitDistZ);
+//
+//	    _myFinderParameter->setNumberXYDzeroBins(binningLevel * baseBinning);
+//	    _myFinderParameter->setNumberSZDzeroBins(binningLevel * baseBinning);
+//	    _myFinderParameter->setNumberXYThetaBins(binningLevel * baseBinning);
+//	    _myFinderParameter->setNumberSZThetaBins(binningLevel * baseBinning);
+//	    _myFinderParameter->setNumberXYOmegaBins(binningLevel * baseBinning);
+//
+//
+//	    _trackFinder->setFinderParameter(*_myFinderParameter);
+//	    std::vector<basicHit> PFHitVector;
+//	    PFHitVector.clear();
+//
+//	    HitCollection *hitCollection = HitManager::GetInstance()->GetHitCollection();
+//
+//	    for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+//
+//	    	Hit *hit = hitCollection->at(i);
+//	    	if( hit->GetHitTag() == fIsolated ) {
+//
+//	    		basicHit PFHit = basicHit( hit->GetIJK().at(0) , hit->GetIJK().at(1) , hit->GetIJK().at(2) , hit);
+//	    		PFHitVector.push_back( PFHit );
+//	    	}
+//
+//	    }
+//
+//	    _trackFinder->setInitialHits(PFHitVector);
+//	    bool trackFound = _trackFinder->find();
+//	    cout << _trackFinder->getTracks().size() << " tracks found !" << endl;
+//
+//	    delete _myFinderParameter;
+//		delete _trackFinder;
+//		return BABOON_SUCCESS();
+//	}
+
 
 	Return HoughTransformAlgorithm::Execute() {
 
-		ClusterCollection *clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
+		HitCollection *hitCollection = HitManager::GetInstance()->GetHitCollection();
+		ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 
-		if( clusterCollection->empty() )
-			return BABOON_SUCCESS();
+		TGraph *houghSpaceXGraph = new TGraph();
+		TH2D *houghSpaceXHisto = new TH2D("houghSpaceXHisto","",thetaMax,0,3.14,(rMax+1),0,rMax);
+		TH2D *houghSpaceXClustersHisto = new TH2D("houghSpaceXClustersHisto","",thetaMax,0,3.14,(rMax+1)*1,0,rMax);
+		TH2D *houghSpaceYHisto = new TH2D("houghSpaceYHisto","",thetaMax,0,3.14,(rMax+1),0,rMax);
+		TH2D *houghSpaceYClustersHisto = new TH2D("houghSpaceYClustersHisto","",thetaMax,0,3.14,(rMax+1)*1,0,rMax);
+		TGraph *houghSpaceXClustersGraph = new TGraph();
 
-		HoughClusterCollection *houghClusterCollection = new HoughClusterCollection();
+		HoughPointCollection *houghPointsX = new HoughPointCollection();
 
-		for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) {
+		cout << "pouette" << endl;
+		int pointID = 0;
+		int nbOfIsolatedHits = 0;
 
-			Cluster *cluster = clusterCollection->at(i);
-			if( cluster->GetClusterSize() > clusterSizeLimit ) continue;
-			if( cluster->IsIsolatedFromClusters(clusterCollection) ) {
+		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
 
-				HoughCluster *houghCluster = new HoughCluster();
+			Hit *hit = hitCollection->at(i);
+			IntVector ijk = hit->GetIJK();
+			if( clusteringManager->GetClusterAt( fCluster2D , ijk.at(0) , ijk.at(1) , ijk.at(2) )->Size() > clusterSizeLimit )
+				continue;
+
+			if( hit->GetHitTag() == fIsolated ) {
+				nbOfIsolatedHits++;
 
 				for( int t=0 ; t<thetaMax ; t++ ) {
 
-					houghCluster->rhox.push_back( (int) abs( cluster->GetPosition().z() * cos(-M_PI/2.0 + t*M_PI/thetaMax)
-									+ cluster->GetPosition().x() * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
-					houghCluster->rhoy.push_back( (int) abs( cluster->GetPosition().z() * cos(-M_PI/2.0 + t*M_PI/thetaMax)
-									+ cluster->GetPosition().y() * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
-					houghSpaceX[ t ][ houghCluster->rhox.at( t ) ]++;
-					
-				}
-				houghCluster->cluster = cluster;
-				houghClusterCollection->push_back( houghCluster );
-			}
-		}
+					HoughPoint *houghPointX = new HoughPoint();
 
-		for( int t=0 ; t<thetaMax ; t++ ) {
-			for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
+					// for x direction
+					houghPointX->rho = abs( hit->GetIJK().at(2) * cos(-M_PI/2.0 + t*M_PI/thetaMax)
+									+ hit->GetIJK().at(0) * sin(-M_PI/2.0 + t*M_PI/thetaMax) );
+					houghPointX->theta = t*M_PI/thetaMax;
+					houghPointX->pointID = pointID;
+					houghPointX->hit = hit;
 
-				HoughCluster *houghCluster = houghClusterCollection->at(i);
-				if( houghSpaceX [ t ][ houghCluster->rhox.at(t) ] < minimumBinning ) continue;
+					// add them to collections
+					houghPointsX->push_back( houghPointX );
 
-				houghCluster->tagx = fGood;
-				int inc = 0;
-
-				for( unsigned int j=0 ; j<houghClusterCollection->size() ; j++ ) {
-
-					HoughCluster *houghCluster2 = houghClusterCollection->at(j);
-					if( houghCluster->cluster->GetPosition().z() == houghCluster2->cluster->GetPosition().z()
-					 || houghCluster->rhox.at(t) - houghCluster2->rhox.at(t) != 0 )
-						continue;
-
-					if( abs( houghCluster2->cluster->GetPosition().x() - houghCluster->cluster->GetPosition().x() ) < deltaPosMax
-					 && abs( houghCluster2->cluster->GetPosition().y() - houghCluster->cluster->GetPosition().y() ) < deltaPosMax
-					 && abs( houghCluster2->cluster->GetPosition().z() - houghCluster->cluster->GetPosition().z() ) < deltaPosMax )
-						inc++;
+					houghSpaceXGraph->SetPoint( pointID , houghPointX->theta , houghPointX->rho );
+					houghSpaceXHisto->Fill( houghPointX->theta , houghPointX->rho );
+					pointID++;
 				}
 
-				if( inc < 2 ) continue;
-
-				for( int t2=0 ; t2<thetaMax ; t2++ )
-					houghSpaceY[ t2 ][ houghCluster->rhoy.at(t2) ] ++;
 
 			}
 		}
 
-		for( int t=0 ; t<thetaMax ; t++ ) {
-			for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
 
-				HoughCluster *houghCluster = houghClusterCollection->at(i);
-				if( houghSpaceY [ t ][ houghCluster->rhoy.at(t) ] < minimumBinning ) continue;
-				houghCluster->tagy = fGood;
-			}
-		}
+		int nbOfHoughPoints = houghPointsX->size();
+		int pointIDCluster = 0;
 
-		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
-			HoughCluster *houghCluster = houghClusterCollection->at(i);
-			if( houghCluster->tagx == fGood && houghCluster->tagy == fGood ) {
-				houghCluster->finalTag = fGood;
-			}
-		}
+		HitCollection *finalTrackHits = new HitCollection();
 
-		TrackCollection *trackCollection = new TrackCollection();
-		HoughClusterCollection houghClusterTemp;
+		for( int i=0 ; i<houghSpaceXHisto->GetNbinsX() ; i++ ) {
+			for( int j=0 ; j<houghSpaceXHisto->GetNbinsY() ; j++ ) {
 
-		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
-
-			HoughCluster *houghCluster = houghClusterCollection->at( i );
-			if( houghCluster->finalTag != fGood ) continue;
-
-			if( find(houghClusterTemp.begin()
-									,houghClusterTemp.end()
-									,houghCluster )
-									!= houghClusterTemp.end() )
-								continue;
-
-			houghClusterTemp.push_back( houghClusterCollection->at( i ) );
-
-			HoughClusterCollection tracks;
-			tracks.push_back( houghClusterCollection->at( i ) );
-
-			for(unsigned int j=0 ; j<houghClusterCollection->size() ; j++) {
-
-				HoughCluster *houghCluster2 = houghClusterCollection->at( j );
-
-				if( houghCluster2->finalTag != fGood ) continue;
-
-				if( find(houghClusterTemp.begin()
-						,houghClusterTemp.end()
-						,houghCluster2 )
-						!= houghClusterTemp.end() )
+				if( houghSpaceXHisto->GetBinContent(i,j) < minimumBinning )
 					continue;
 
-				for( unsigned int k=0 ; k<tracks.size() ; k++ ) {
+				houghSpaceXClustersHisto->SetBinContent( i , j , houghSpaceXHisto->GetBinContent(i,j) );
 
-					HoughCluster *track = tracks.at(k);
+				HitCollection hitCollectionTemp;
+				int binToCompare = houghSpaceXHisto->GetBin(i,j);
 
-					if( abs(track->cluster->GetPosition().z() - houghCluster2->cluster->GetPosition().z()) <= maximumDistanceBetweenHitsForLayers
-					 && abs(track->cluster->GetPosition().y() - houghCluster2->cluster->GetPosition().y()) <= maximumDistanceBetweenHitsInPlane
-					 && abs(track->cluster->GetPosition().x() - houghCluster2->cluster->GetPosition().x()) <= maximumDistanceBetweenHitsInPlane ) {
+				for( unsigned int k=0 ; k<houghPointsX->size() ; k++ ) {
+					int bin = houghSpaceXHisto->FindBin( houghPointsX->at(k)->theta , houghPointsX->at(k)->rho );
+					if( bin == binToCompare )
+						hitCollectionTemp.push_back( houghPointsX->at(k)->hit );
+				}
 
-						tracks.push_back( houghClusterCollection->at( j ) );
-						houghClusterTemp.push_back( houghClusterCollection->at( j ) );
+				// for y direction now
+				HoughPointCollection *houghPointsY = new HoughPointCollection();
+
+				for( unsigned int k=0 ; k<hitCollectionTemp.size() ; k++ ) {
+					for( int t=0 ; t<thetaMax ; t++ ) {
+
+						HoughPoint *houghPointY = new HoughPoint();
+
+						houghPointY->rho = abs( hitCollectionTemp.at(k)->GetIJK().at(2) * cos(-M_PI/2.0 + t*M_PI/thetaMax)
+										+ hitCollectionTemp.at(k)->GetIJK().at(1) * sin(-M_PI/2.0 + t*M_PI/thetaMax) );
+						houghPointY->theta = t*M_PI/thetaMax;
+						houghPointY->pointID = pointID;
+						houghPointY->hit = hitCollectionTemp.at(k);
+						houghPointsY->push_back( houghPointY );
+						houghSpaceYHisto->Fill( houghPointY->theta , houghPointY->rho );
+					}
+				}
+
+				for( int iy=0 ; iy<houghSpaceYHisto->GetNbinsX() ; iy++ ) {
+					for( int jy=0 ; jy<houghSpaceYHisto->GetNbinsY() ; jy++ ) {
+
+						if( houghSpaceYHisto->GetBinContent(iy,jy) < minimumBinning )
+							continue;
+
+						cout << "Second binning cut passed!" << endl;
+
+						int binToCompare2 = houghSpaceYHisto->GetBin(iy,jy);
+
+						for( unsigned int ky=0 ; ky<houghPointsY->size() ; ky++ ) {
+							int bin2 = houghSpaceYHisto->FindBin( houghPointsY->at(ky)->theta , houghPointsY->at(ky)->rho );
+							if( bin2 == binToCompare2 ) {
+								finalTrackHits->push_back( houghPointsY->at(ky)->hit );
+							}
+						}
+					}
+				}
+
+				houghSpaceYHisto->Reset();
+
+				// deletion for hough space in y direction
+				for( unsigned int k=0 ; k<houghPointsY->size() ; k++ )
+					delete houghPointsY->at(k);
+				houghPointsY->clear();
+				delete houghPointsY;
+			}
+		}
+
+		/*
+		 * End of hough hit tagging
+		 */
+
+
+		HitCollection treatedHits;
+
+		for( unsigned int i=0 ; i<finalTrackHits->size() ; i++ ) {
+
+			Hit *hit = finalTrackHits->at( i );
+
+			if( find(treatedHits.begin()
+					,treatedHits.end()
+					,hit )
+					!= treatedHits.end() )
+				continue;
+
+			treatedHits.push_back( finalTrackHits->at( i ) );
+
+			HitCollection aTrackHits;
+			aTrackHits.push_back( finalTrackHits->at( i ) );
+
+			for(unsigned int j=0 ; j<finalTrackHits->size() ; j++) {
+
+				Hit *hit2 = finalTrackHits->at( j );
+
+				if( find(treatedHits.begin()
+						,treatedHits.end()
+						,hit2 )
+						!= treatedHits.end() )
+					continue;
+
+				for( unsigned int k=0 ; k<aTrackHits.size() ; k++ ) {
+
+					Hit *trackHit = aTrackHits.at(k);
+
+					if( abs( trackHit->GetIJK().at(2) - hit2->GetIJK().at(2) ) <= maximumDistanceBetweenHitsForLayers
+					 && abs( trackHit->GetIJK().at(1) - hit2->GetIJK().at(1) ) <= maximumDistanceBetweenHitsInPlane
+					 && abs( trackHit->GetIJK().at(0) - hit2->GetIJK().at(0) ) <= maximumDistanceBetweenHitsInPlane ) {
+
+						aTrackHits.push_back( finalTrackHits->at( j ) );
+						treatedHits.push_back( finalTrackHits->at( j ) );
 						break;
 					}
 				}
 			}
 
 
-			HitCollection tempHitCollection;
+//			HitCollection tempHitCollection;
 
-			// Copy all the clusters hits in a hit collection.
-			for(unsigned int j=0 ; j<tracks.size() ; j++) {
-				HitCollection *hitColTemp = tracks.at(j)->cluster->GetHitCollection();
-				for(unsigned int k=0 ; k<hitColTemp->size() ; k++ ) {
-					tempHitCollection.push_back( hitColTemp->at(k) );
-				}
-			}
+			// Check for hits in track which are too far from the other hits in the track and remove them.
+			for( unsigned int k=0 ; k<aTrackHits.size() ; k++ ) {
 
-			// Check for hits in track which are to far from the other hits in the track and remove them.
-			for( unsigned int k=0 ; k<tempHitCollection.size() ; k++ ) {
-
-				Hit *hit1 = tempHitCollection.at(k);
+				Hit *hit1 = aTrackHits.at(k);
 				IntVector ijk1 = hit1->GetIJK();
 				double minimumDistance = 10000;
 
-				for( unsigned int j=0 ; j<tempHitCollection.size() ; j++ ) {
+				for( unsigned int j=0 ; j<aTrackHits.size() ; j++ ) {
 
 					if( k == j ) continue;
-					Hit *hit2 = tempHitCollection.at(j);
+					Hit *hit2 = aTrackHits.at(j);
 					IntVector ijk2 = hit2->GetIJK();
 
 					double distance = sqrt( (ijk2.at(0)-ijk1.at(0)) * (ijk2.at(0)-ijk1.at(0))
@@ -270,70 +398,529 @@ namespace baboon {
 						minimumDistance = distance;
 				}
 				if( minimumDistance > maximumDistanceAllowedForHitsInTrack ) {
-					tempHitCollection.erase( tempHitCollection.begin() + k );
+					aTrackHits.erase( aTrackHits.begin() + k );
 					k--;
 				}
 			}
-
-			// Un-tag all the clusters of the track. No need anymore.
-			for( unsigned int k=0 ; k<tracks.size() ; k++ )
-				tracks.at(k)->cluster->SetClusterTag( fUndefined );
 
 			/*
 			 * Check if the number of remaining hits in the hit track
 			 * collection is enough to build a track
 			 */
-			if( tempHitCollection.size() < trackSegmentMinimumSize ) {
-				tempHitCollection.clear();
+
+			if( aTrackHits.size() < trackSegmentMinimumSize ) {
+
+				aTrackHits.clear();
 				continue;
 			}
 
 			// Build the track and tag the hits inside as "track hits"
 			Track *track = new Track();
-			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
-				track->AddHit( tempHitCollection.at(j) );
+			for(unsigned int j=0 ; j<aTrackHits.size() ; j++) {
+				track->AddHit( aTrackHits.at(j) );
 
 			}
-
-
-//			trackCollection->push_back( track );
 			track->SortHits();
 
-			if( abs(track->GetHitCollection()->at(0)->GetIJK().at(2) - track->GetHitCollection()->at( track->Size() -1 )->GetIJK().at(2) ) < 4 ) {
-
+			if( abs( track->GetHitCollection()->GetFirstLayer() - track->GetHitCollection()->GetLastLayer() ) < minimumNumberOfLayersForTrack ) {
 				delete track;
 				continue;
 			}
 
-			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
-				tempHitCollection.at(j)->SetHitTag( fTrack );
+			for(unsigned int j=0 ; j<aTrackHits.size() ; j++) {
+				aTrackHits.at(j)->SetHitTag( fTrack );
 			}
 
 			track->GetExtremities().first->SetHitTag( fTrackExtremity );
 			track->GetExtremities().second->SetHitTag( fTrackExtremity );
 
-//			vector<ThreeVector> positions = track->GetPositions();
-//			vector<ThreeVector> weigths( track->Size() , ThreeVector(1,1,1) );
-
-//			Linear3DFit fitter(positions,weigths);
-//			fitter.Fit();
-//			double chi2 = fitter.GetChi2();
-//			cout << "chi2 : " << chi2 << endl;
-
 			TrackManager::GetInstance()->AddTrack( track );
 		}
 
-		houghClusterTemp.clear();
 
-		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ )
-			delete houghClusterCollection->at( i );
+		// deletion for hough space in x direction
+		for( unsigned int k=0 ; k<houghPointsX->size() ; k++ )
+			delete houghPointsX->at(k);
+		houghPointsX->clear();
+		delete houghPointsX;
 
-		houghClusterCollection->clear();
-		delete houghClusterCollection;
+		TCanvas *cc = new TCanvas("cc");
+		cc->Divide(2,2);
+
+		cc->cd(1);
+		houghSpaceXHisto->Draw("colz");
+		cc->cd(2);
+		houghSpaceXClustersHisto->Draw("colz");
+		cc->cd(3);
+		houghSpaceYHisto->Draw("colz");
+		cc->cd(4);
+		houghSpaceYClustersHisto->Draw("colz");
+
+		cc->Update();
+		cc->WaitPrimitive();
+
+		delete cc;
+
+
+
+		delete houghSpaceXGraph;
+		delete houghSpaceXClustersGraph;
+
+		delete houghSpaceXHisto;
+		delete houghSpaceXClustersHisto;
+		delete houghSpaceYHisto;
+		delete houghSpaceYClustersHisto;
 
 		return BABOON_SUCCESS();
 	}
 
+
+//	Return HoughTransformAlgorithm::Execute() {
+//
+//		ClusterCollection *clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
+//
+//		if( clusterCollection->empty() )
+//			return BABOON_SUCCESS();
+//
+//		HoughClusterCollection *houghClusterCollection = new HoughClusterCollection();
+//
+//		for( unsigned int i=0 ; i<clusterCollection->size() ; i++ ) {
+//
+//			Cluster *cluster = clusterCollection->at(i);
+//			if( cluster->Size() > clusterSizeLimit ) continue;
+//
+//			HoughCluster *houghCluster = new HoughCluster();
+//
+//			for( int t=0 ; t<thetaMax ; t++ ) {
+//
+//				houghCluster->rhox.push_back( (int) abs( cluster->GetPosition().z() * cos(-M_PI/2.0 + t*M_PI/thetaMax)
+//								+ cluster->GetPosition().x() * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
+//				houghCluster->rhoy.push_back( (int) abs( cluster->GetPosition().z() * cos(-M_PI/2.0 + t*M_PI/thetaMax)
+//								+ cluster->GetPosition().y() * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
+//				houghSpaceX[ t ][ houghCluster->rhox.at( t ) ]++;
+//
+//			}
+//			houghCluster->cluster = cluster;
+//			houghClusterCollection->push_back( houghCluster );
+//		}
+//
+//		for( int t=0 ; t<thetaMax ; t++ ) {
+//			for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
+//
+//				HoughCluster *houghCluster = houghClusterCollection->at(i);
+//				if( houghSpaceX [ t ][ houghCluster->rhox.at(t) ] < minimumBinning ) continue;
+//
+//				houghCluster->tagx = fGood;
+//				int inc = 0;
+//
+//				for( unsigned int j=0 ; j<houghClusterCollection->size() ; j++ ) {
+//
+//					HoughCluster *houghCluster2 = houghClusterCollection->at(j);
+//					if( houghCluster->cluster->GetPosition().z() == houghCluster2->cluster->GetPosition().z()
+//					 || houghCluster->rhox.at(t) - houghCluster2->rhox.at(t) != 0 )
+//						continue;
+//
+//					if( abs( houghCluster2->cluster->GetPosition().x() - houghCluster->cluster->GetPosition().x() ) < deltaPosMax
+//					 && abs( houghCluster2->cluster->GetPosition().y() - houghCluster->cluster->GetPosition().y() ) < deltaPosMax
+//					 && abs( houghCluster2->cluster->GetPosition().z() - houghCluster->cluster->GetPosition().z() ) < deltaPosMax )
+//						inc++;
+//				}
+//
+//				if( inc < 2 ) continue;
+//
+//				for( int t2=0 ; t2<thetaMax ; t2++ )
+//					houghSpaceY[ t2 ][ houghCluster->rhoy.at(t2) ] ++;
+//
+//			}
+//		}
+//
+//		for( int t=0 ; t<thetaMax ; t++ ) {
+//			for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
+//
+//				HoughCluster *houghCluster = houghClusterCollection->at(i);
+//				if( houghSpaceY [ t ][ houghCluster->rhoy.at(t) ] < minimumBinning ) continue;
+//				houghCluster->tagy = fGood;
+//			}
+//		}
+//
+//		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
+//			HoughCluster *houghCluster = houghClusterCollection->at(i);
+//			if( houghCluster->tagx == fGood && houghCluster->tagy == fGood ) {
+//				houghCluster->finalTag = fGood;
+//			}
+//		}
+//
+////		TrackCollection *trackCollection = new TrackCollection();
+//		HoughClusterCollection houghClusterTemp;
+//
+//		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ ) {
+//
+//			HoughCluster *houghCluster = houghClusterCollection->at( i );
+//			if( houghCluster->finalTag != fGood ) continue;
+//
+//			if( find(houghClusterTemp.begin()
+//									,houghClusterTemp.end()
+//									,houghCluster )
+//									!= houghClusterTemp.end() )
+//								continue;
+//
+//			houghClusterTemp.push_back( houghClusterCollection->at( i ) );
+//
+//			HoughClusterCollection tracks;
+//			tracks.push_back( houghClusterCollection->at( i ) );
+//
+//			for(unsigned int j=0 ; j<houghClusterCollection->size() ; j++) {
+//
+//				HoughCluster *houghCluster2 = houghClusterCollection->at( j );
+//
+//				if( houghCluster2->finalTag != fGood ) continue;
+//
+//				if( find(houghClusterTemp.begin()
+//						,houghClusterTemp.end()
+//						,houghCluster2 )
+//						!= houghClusterTemp.end() )
+//					continue;
+//
+//				for( unsigned int k=0 ; k<tracks.size() ; k++ ) {
+//
+//					HoughCluster *track = tracks.at(k);
+//
+//					if( abs(track->cluster->GetPosition().z() - houghCluster2->cluster->GetPosition().z()) <= maximumDistanceBetweenHitsForLayers
+//					 && abs(track->cluster->GetPosition().y() - houghCluster2->cluster->GetPosition().y()) <= maximumDistanceBetweenHitsInPlane
+//					 && abs(track->cluster->GetPosition().x() - houghCluster2->cluster->GetPosition().x()) <= maximumDistanceBetweenHitsInPlane ) {
+//
+//						tracks.push_back( houghClusterCollection->at( j ) );
+//						houghClusterTemp.push_back( houghClusterCollection->at( j ) );
+//						break;
+//					}
+//				}
+//			}
+//
+//
+//			HitCollection tempHitCollection;
+//
+//			// Copy all the clusters hits in a hit collection.
+//			for(unsigned int j=0 ; j<tracks.size() ; j++) {
+//				HitCollection *hitColTemp = tracks.at(j)->cluster->GetHitCollection();
+//				for(unsigned int k=0 ; k<hitColTemp->size() ; k++ ) {
+//					tempHitCollection.push_back( hitColTemp->at(k) );
+//				}
+//			}
+//
+//			// Check for hits in track which are too far from the other hits in the track and remove them.
+//			for( unsigned int k=0 ; k<tempHitCollection.size() ; k++ ) {
+//
+//				Hit *hit1 = tempHitCollection.at(k);
+//				IntVector ijk1 = hit1->GetIJK();
+//				double minimumDistance = 10000;
+//
+//				for( unsigned int j=0 ; j<tempHitCollection.size() ; j++ ) {
+//
+//					if( k == j ) continue;
+//					Hit *hit2 = tempHitCollection.at(j);
+//					IntVector ijk2 = hit2->GetIJK();
+//
+//					double distance = sqrt( (ijk2.at(0)-ijk1.at(0)) * (ijk2.at(0)-ijk1.at(0))
+//								  + (ijk2.at(1)-ijk1.at(1)) * (ijk2.at(1)-ijk1.at(1))
+//								  + (ijk2.at(2)-ijk1.at(2)) * (ijk2.at(2)-ijk1.at(2)) );
+//
+//					if( distance < minimumDistance )
+//						minimumDistance = distance;
+//				}
+//				if( minimumDistance > maximumDistanceAllowedForHitsInTrack ) {
+//					tempHitCollection.erase( tempHitCollection.begin() + k );
+//					k--;
+//				}
+//			}
+//
+//			// Un-tag all the clusters of the track. No need anymore.
+//			for( unsigned int k=0 ; k<tracks.size() ; k++ )
+//				tracks.at(k)->cluster->SetClusterTag( fUndefined );
+//
+//			/*
+//			 * Check if the number of remaining hits in the hit track
+//			 * collection is enough to build a track
+//			 */
+//			if( tempHitCollection.size() < trackSegmentMinimumSize ) {
+//				tempHitCollection.clear();
+//				continue;
+//			}
+//
+//			// Build the track and tag the hits inside as "track hits"
+//			Track *track = new Track();
+//			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
+//				track->AddHit( tempHitCollection.at(j) );
+//
+//			}
+//
+//
+////			trackCollection->push_back( track );
+//			track->SortHits();
+//
+//			if( abs(track->GetHitCollection()->at(0)->GetIJK().at(2) - track->GetHitCollection()->at( track->Size() -1 )->GetIJK().at(2) ) < 4 ) {
+//
+//				delete track;
+//				continue;
+//			}
+//
+//			if( abs( track->GetHitCollection()->GetFirstLayer() - track->GetHitCollection()->GetLastLayer() ) < minimumNumberOfLayersForTrack ) {
+//				delete track;
+//				continue;
+//			}
+//
+//			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
+//				tempHitCollection.at(j)->SetHitTag( fTrack );
+//			}
+//
+//			track->GetExtremities().first->SetHitTag( fTrackExtremity );
+//			track->GetExtremities().second->SetHitTag( fTrackExtremity );
+//
+//			TrackManager::GetInstance()->AddTrack( track );
+//		}
+//
+//		houghClusterTemp.clear();
+//
+//		for( unsigned int i=0 ; i<houghClusterCollection->size() ; i++ )
+//			delete houghClusterCollection->at( i );
+//
+//		houghClusterCollection->clear();
+//		delete houghClusterCollection;
+//
+//		return BABOON_SUCCESS();
+//	}
+
+
+//	Return HoughTransformAlgorithm::Execute() {
+//
+////		ClusterCollection *clusterCollection = ClusteringManager::GetInstance()->GetCluster2D();
+//		HitCollection *hitCollection = HitManager::GetInstance()->GetHitCollection();
+//
+//		if( hitCollection->empty() )
+//			return BABOON_SUCCESS();
+//
+//		HoughHitCollection *houghHitCollection = new HoughHitCollection();
+////		HoughClusterCollection *houghClusterCollection = new HoughClusterCollection();
+//
+//		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+//
+//			Hit *hit = hitCollection->at(i);
+////			if( hit->GetClusterSize() > clusterSizeLimit ) continue;
+//			if( hit->GetHitTag() == fIsolated ) {
+//
+//				HoughHit *houghHit = new HoughHit();
+//
+//				for( int t=0 ; t<thetaMax ; t++ ) {
+//
+//					houghHit->rhox.push_back( (int) abs( hit->GetIJK().at(2) * cos(-M_PI/2.0 + t*M_PI/thetaMax)
+//									+ hit->GetIJK().at(0) * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
+//					houghHit->rhoy.push_back( (int) abs( hit->GetIJK().at(2) * cos(-M_PI/2.0 + t*M_PI/thetaMax)
+//									+ hit->GetIJK().at(1) * sin(-M_PI/2.0 + t*M_PI/thetaMax) ) );
+//					houghSpaceX[ t ][ houghHit->rhox.at( t ) ]++;
+//
+//				}
+//				houghHit->hit = hit;
+//				houghHitCollection->push_back( houghHit );
+//			}
+//		}
+//
+//		for( int t=0 ; t<thetaMax ; t++ ) {
+//			for( unsigned int i=0 ; i<houghHitCollection->size() ; i++ ) {
+//
+//				HoughHit *houghHit = houghHitCollection->at(i);
+//				if( houghSpaceX [ t ][ houghHit->rhox.at(t) ] < minimumBinning ) continue;
+//
+//				houghHit->tagx = fGood;
+//				int inc = 0;
+//
+//				for( unsigned int j=0 ; j<houghHitCollection->size() ; j++ ) {
+//
+//					HoughHit *houghHit2 = houghHitCollection->at(j);
+//					if( houghHit->hit->GetIJK().at(2) == houghHit2->hit->GetIJK().at(2)
+//					 || houghHit->rhox.at(t) - houghHit2->rhox.at(t) != 0 )
+//						continue;
+//
+//					if( abs( houghHit2->hit->GetIJK().at(0) - houghHit->hit->GetIJK().at(0) ) < deltaPosMax
+//					 && abs( houghHit2->hit->GetIJK().at(1) - houghHit->hit->GetIJK().at(1) ) < deltaPosMax
+//					 && abs( houghHit2->hit->GetIJK().at(2) - houghHit->hit->GetIJK().at(2) ) < deltaPosMax )
+//						inc++;
+//				}
+//
+//				if( inc < 2 ) continue;
+//
+//				for( int t2=0 ; t2<thetaMax ; t2++ )
+//					houghSpaceY[ t2 ][ houghHit->rhoy.at(t2) ] ++;
+//
+//			}
+//		}
+//
+//		for( int t=0 ; t<thetaMax ; t++ ) {
+//			for( unsigned int i=0 ; i<houghHitCollection->size() ; i++ ) {
+//
+//				HoughHit *houghHit = houghHitCollection->at(i);
+//				if( houghSpaceY [ t ][ houghHit->rhoy.at(t) ] < minimumBinning ) continue;
+//				houghHit->tagy = fGood;
+//			}
+//		}
+//
+//		for( unsigned int i=0 ; i<houghHitCollection->size() ; i++ ) {
+//			HoughHit *houghHit = houghHitCollection->at(i);
+//			if( houghHit->tagx == fGood && houghHit->tagy == fGood ) {
+//				houghHit->finalTag = fGood;
+//			}
+//		}
+//
+//		TrackCollection *trackCollection = new TrackCollection();
+//		HoughHitCollection houghHitTemp;
+//
+//		for( unsigned int i=0 ; i<houghHitCollection->size() ; i++ ) {
+//
+//			HoughHit *houghHit = houghHitCollection->at( i );
+//			if( houghHit->finalTag != fGood ) continue;
+//
+//			if( find(houghHitTemp.begin()
+//									,houghHitTemp.end()
+//									,houghHit )
+//									!= houghHitTemp.end() )
+//								continue;
+//
+//			houghHitTemp.push_back( houghHitCollection->at( i ) );
+//
+//			HoughHitCollection tracks;
+//			tracks.push_back( houghHitCollection->at( i ) );
+//
+//			for(unsigned int j=0 ; j<houghHitCollection->size() ; j++) {
+//
+//				HoughHit *houghHit2 = houghHitCollection->at( j );
+//
+//				if( houghHit2->finalTag != fGood ) continue;
+//
+//				if( find(houghHitTemp.begin()
+//						,houghHitTemp.end()
+//						,houghHit2 )
+//						!= houghHitTemp.end() )
+//					continue;
+//
+//				for( unsigned int k=0 ; k<tracks.size() ; k++ ) {
+//
+//					HoughHit *track = tracks.at(k);
+//
+//					if( abs(track->hit->GetIJK().at(0)- houghHit2->hit->GetIJK().at(0)) <= maximumDistanceBetweenHitsInPlane
+//					 && abs(track->hit->GetIJK().at(1) - houghHit2->hit->GetIJK().at(1)) <= maximumDistanceBetweenHitsInPlane
+//					 && abs(track->hit->GetIJK().at(2) - houghHit2->hit->GetIJK().at(2)) <= maximumDistanceBetweenHitsForLayers ) {
+//
+//						tracks.push_back( houghHitCollection->at( j ) );
+//						houghHitTemp.push_back( houghHitCollection->at( j ) );
+//						break;
+//					}
+//				}
+//			}
+//
+//
+//			HitCollection tempHitCollection;
+//
+//			// Copy all the clusters hits in a hit collection.
+//			for(unsigned int j=0 ; j<tracks.size() ; j++) {
+////				HitCollection *hitColTemp = tracks.at(j)->cluster->GetHitCollection();
+////				for(unsigned int k=0 ; k<hitColTemp->size() ; k++ ) {
+//					tempHitCollection.push_back( tracks.at(j)->hit );
+////				}
+//			}
+//
+//			// Check for hits in track which are too far from the other hits in the track and remove them.
+//			for( unsigned int k=0 ; k<tempHitCollection.size() ; k++ ) {
+//
+//				Hit *hit1 = tempHitCollection.at(k);
+//				IntVector ijk1 = hit1->GetIJK();
+//				double minimumDistance = 10000;
+//
+//				for( unsigned int j=0 ; j<tempHitCollection.size() ; j++ ) {
+//
+//					if( k == j ) continue;
+//					Hit *hit2 = tempHitCollection.at(j);
+//					IntVector ijk2 = hit2->GetIJK();
+//
+//					double distance = sqrt( (ijk2.at(0)-ijk1.at(0)) * (ijk2.at(0)-ijk1.at(0))
+//								  + (ijk2.at(1)-ijk1.at(1)) * (ijk2.at(1)-ijk1.at(1))
+//								  + (ijk2.at(2)-ijk1.at(2)) * (ijk2.at(2)-ijk1.at(2)) );
+//
+//					if( distance < minimumDistance )
+//						minimumDistance = distance;
+//				}
+//				if( minimumDistance > maximumDistanceAllowedForHitsInTrack ) {
+//					tempHitCollection.erase( tempHitCollection.begin() + k );
+//					k--;
+//				}
+//			}
+//
+//			// Un-tag all the hit of the track. No need anymore.
+//			for( unsigned int k=0 ; k<tracks.size() ; k++ )
+//				tracks.at(k)->hit->SetHitTag( fIsolated );
+//
+//			/*
+//			 * Check if the number of remaining hits in the hit track
+//			 * collection is enough to build a track
+//			 */
+//			if( tempHitCollection.size() < trackSegmentMinimumSize ) {
+//				tempHitCollection.clear();
+//				continue;
+//			}
+//
+//			// Build the track and tag the hits inside as "track hits"
+//			Track *track = new Track();
+//			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
+//				track->AddHit( tempHitCollection.at(j) );
+//
+//			}
+//
+//
+////			trackCollection->push_back( track );
+//			track->SortHits();
+//
+//			if( abs(track->GetHitCollection()->at(0)->GetIJK().at(2) - track->GetHitCollection()->at( track->Size() -1 )->GetIJK().at(2) ) < 4 ) {
+//
+//				delete track;
+//				continue;
+//			}
+//
+//			if( abs( track->GetHitCollection()->GetFirstLayer() - track->GetHitCollection()->GetLastLayer() ) < minimumNumberOfLayersForTrack ) {
+//				delete track;
+//				continue;
+//			}
+//
+//			for(unsigned int j=0 ; j<tempHitCollection.size() ; j++) {
+//				tempHitCollection.at(j)->SetHitTag( fTrack );
+//			}
+//
+//			track->GetExtremities().first->SetHitTag( fTrackExtremity );
+//			track->GetExtremities().second->SetHitTag( fTrackExtremity );
+//
+//			vector<ThreeVector> positions = track->GetPositions();
+//			vector<ThreeVector> weigths( track->Size() , ThreeVector(1,1,1) );
+//
+//			Linear3DFit fitter(positions,weigths);
+//			fitter.Fit();
+//			double normalizedChi2 = fitter.GetChi2()/(double)track->Size();
+//
+//			if( normalizedChi2 > normalizedChi2Limit ) {
+//				delete track;
+//				continue;
+//			}
+//
+////			cout << "chi2 : " << chi2 << endl;
+//
+//			TrackManager::GetInstance()->AddTrack( track );
+//		}
+//
+//		houghHitTemp.clear();
+//
+//		for( unsigned int i=0 ; i<houghHitCollection->size() ; i++ )
+//			delete houghHitCollection->at( i );
+//
+//		houghHitCollection->clear();
+//		delete houghHitCollection;
+//
+//		return BABOON_SUCCESS();
+//	}
 
 
 	Return HoughTransformAlgorithm::End() {
