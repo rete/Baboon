@@ -69,10 +69,10 @@ namespace baboon {
 
 			this->FindCluster( hit , cluster );
 
-			if( fClusteringMode == fClustering2D ) cluster->SetType( fCluster2D );
-			else if( fClusteringMode == fClustering3D ) cluster->SetType( fCluster3D );
+			if( fClusteringMode == fClustering2D ) cluster->SetClusterType( fCluster2D );
+			else if( fClusteringMode == fClustering3D ) cluster->SetClusterType( fCluster3D );
 
-			if( cluster->GetClusterSize() < clusterSizeLowerLimit ) {
+			if( cluster->Size() < clusterSizeLowerLimit ) {
 				delete cluster;
 				continue;
 			}
@@ -195,7 +195,7 @@ namespace baboon {
 
 		if( fTaggingMode == fAvoidTagMode ) {
 			if( hitTagToAvoid.empty() ) return true;
-			else return AvoidTag( fTag );
+			else return !AvoidTag( fTag );
 		}
 		else if( fTaggingMode == fClusterTagMode ) {
 			if( hitTagToCluster.empty() ) return true;
