@@ -34,8 +34,9 @@ namespace baboon {
 	Return TrackToShowerAssociationAlgorithm::Init() {
 
 		data.GetValue("Chi2LimitForTrack",&Chi2LimitForTrack);
-		data.GetValue("cylinderRadius",&cylinderRadius);
-		data.GetValue("cylinderLength",&cylinderLength);
+		data.GetValue("stepLength",&stepLength);
+//		data.GetValue("cylinderRadius",&cylinderRadius);
+//		data.GetValue("cylinderLength",&cylinderLength);
 
 		return BABOON_SUCCESS();
 	}
@@ -58,6 +59,7 @@ namespace baboon {
 
 		TrackCollection *trackCollection = TrackManager::GetInstance()->GetTrackCollection();
 		ShowerCollection *showerCollection = ShowerManager::GetInstance()->GetShowerCollection();
+		HitManager *hitManager = HitManager::GetInstance();
 
 		for( unsigned int i=0 ; i<trackCollection->size() ; i++ ) {
 
@@ -79,19 +81,66 @@ namespace baboon {
 
 
 			double normalizedChi2 = fitter->GetChi2()/track->Size();
+
 			cout << "chi2 (normalized) : " << normalizedChi2 << endl;
 			cout << "trackDirection : " << trackDirection << endl;
 
 			ThreeVector translation = -trackDirection.unit();
-			translation.setMag( cylinderLength );
-			ThreeVector x1;
-			ThreeVector x2;
-			if( firstPoint.z() < secondPoint.z() )
-				x1 = firstPoint;
-			else
-				x1 = secondPoint;
-			x2 = x1 - translation;
 
+			ThreeVector startingPoint;
+
+			if( firstPoint.z() < secondPoint.z() )
+				startingPoint = firstPoint;
+			else
+				startingPoint = secondPoint;
+
+			bool found = false;
+			Shower *showerFound = 0;
+
+			ThreeVector pointedDirection = startingPoint;
+
+			while( true ) {
+
+				pointedDirection += stepLength*translation;
+
+				int I = round( pointedDirection.x() );
+				int J = round( pointedDirection.y() );
+				int K = round( pointedDirection.z() );
+
+				//  if the point doesn't match to any hit in the calo, it is outside.
+				if( !hitManager->PadExists( I , J , K ) )
+					break;
+
+				if( !hitManager->PadIsTouched( I , J , K ) )
+					continue;
+
+				Hit *hit = hitManager->GetHitAt( I , J , K );
+
+				for( unsigned int s=0 ; s<trackCollection->size() ; s++ ) {
+
+					if( showerCollection->at(s)->Contains( hit ) ) {
+						found = true;
+						showerFound = showerCollection->at(s);
+
+						cout << "Track association made for shower " << s << endl;
+						break;
+					}
+				}
+
+				if( found ) break;
+			}
+
+
+//			translation.setMag( cylinderLength );
+//			ThreeVector x1;
+//			ThreeVector x2;
+
+//			if( firstPoint.z() < secondPoint.z() )
+//				x1 = firstPoint;
+//			else
+//				x1 = secondPoint;
+//			x2 = x1 - translation;
+/*
 			if( normalizedChi2 < Chi2LimitForTrack ) {
 
 				Cylinder *cylinder = new Cylinder( x1 , x2 , cylinderRadius );
@@ -113,36 +162,13 @@ namespace baboon {
 						continue;
 					}
 
-					else if( shower->Contains( track ) )
+					else if( shower->Contains( track ) ) {
 						BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , shower->RemoveTrack( track ) );
-
-				}
-
-				/*
-				HitCollection *trackHits = track->GetHitCollection();
-				for( unsigned int j=0 ; j<trackHits->size() ; j++ ) {
-
-					Hit *hit = trackHits->at(j);
-
-					for( unsigned int s=0 ; s<showerCollection->size() ; s++ ) {
-
-						Shower *shower = showerCollection->at(s);
-						if( shower == predominantShower) {
-
-							if( !shower->Contains( hit ) )
-								BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , shower->AddHit( hit ));
-
-							continue;
-						}
-
-						else if( shower->Contains( hit ) )
-							BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , shower->RemoveHit( hit ));
 					}
 				}
-				//*/
 			}
 
-
+*/
 
 			delete fitter;
 		}
@@ -237,7 +263,7 @@ namespace baboon {
 		if( trackToAssociate == 0 )
 			return BABOON_NOT_INITIALIZED("Assertion trackToAssociate != 0 failed");
 
-		if( showerToEnlarge->Contains( trackToAssociate ) )
+		if( showerToEnlarge->IsConnectedTo( trackToAssociate ) )
 			return BABOON_SUCCESS();
 
 		TrackCollection *trackCollection = TrackManager::GetInstance()->GetTrackCollection();
