@@ -23,13 +23,14 @@ using namespace std;
 
 namespace baboon {
 
-	Track::Track() {
+	Track::Track()
+	: HitCompositeObject(),
+	  TypedObject("Track") {
 
-		hitCollection = new HitCollection;
 	}
 
 	Track::~Track() {
-		delete hitCollection;
+
 	}
 
 	TrackExtremities Track::GetExtremities() {
@@ -68,12 +69,6 @@ namespace baboon {
 	}
 
 
-	double Track::GetTrackLength() {
-		ThreeVector vec( extremities.first->GetPosition() - extremities.second->GetPosition() );
-		return vec.mag();
-	}
-
-
 	std::vector<ThreeVector> Track::GetPositions() const {
 
 		std::vector<ThreeVector> vecCol;
@@ -92,37 +87,6 @@ namespace baboon {
 		}
 		return ijks;
 	}
-
-	Return Track::AddHit( Hit *hit ) {
-
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
-
-		if( find( hitCollection->begin() , hitCollection->end() , hit ) == hitCollection->end() )
-			hitCollection->push_back(hit);
-		return BABOON_SUCCESS();
-	}
-
-	Return Track::RemoveHit( Hit *hit ) {
-
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
-
-		HitCollection::iterator pos = find( hitCollection->begin() , hitCollection->end() , hit );
-		if( pos == hitCollection->end() )
-			return BABOON_NOT_FOUND("Hit was not in track");
-		else {
-			hitCollection->erase(pos);
-			return BABOON_SUCCESS("Hit removed from a track");
-		}
-	}
-
-
-	bool Track::Contains( Hit *hit ) {
-
-		return ( std::find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
-	}
-
 
 	Return Track::SortHits() {
 
@@ -145,7 +109,6 @@ namespace baboon {
 				if( i<0 ) break;
 			}
 		}
-
 		return BABOON_SUCCESS();
 	}
 

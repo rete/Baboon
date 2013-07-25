@@ -25,7 +25,7 @@
 
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
-#include "Objects/HitCollection.hh"
+#include "Objects/HitCompositeObject.hh"
 #include "Config/SdhcalConfig.hh"
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
@@ -44,61 +44,48 @@ namespace baboon {
 	 * Class SDHCALCluster.
 	 */
 
-	class Cluster {
+	class Cluster : public HitCompositeObject , public TypedObject {
 
 
-	protected :
+		protected :
 
-		ThreeVector position;
+			ThreeVector position;
+			Tag fClusterTag;
+			ClusterType fType;
 
-		HitCollection *hitCollection;
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void ComputePosition();
 
-		Tag fClusterTag;
+		public :
+			/*! Default Constructor */
+			Cluster();
 
-		ClusterType fType;
+			/*! Default Destructor */
+			virtual ~Cluster();
 
-		void ComputePosition();
+			const ThreeVector& GetPosition() {
+				this->ComputePosition();
+				return position;
+			}
 
-	public :
-		/*! Default Constructor */
-		Cluster();
+			bool IsIsolatedFromClusters(const std::vector<Cluster*>* clusters);
 
-		/*! Default Destructor */
-		virtual ~Cluster();
+			void SetClusterTagRecursive( const Tag &clustTag );
 
-		void SetHitCollection(HitCollection *hitCol);
+			inline void SetClusterTag(Tag clustTag)
+				{ fClusterTag = clustTag; }
 
-		const ThreeVector& GetPosition() {
-			this->ComputePosition();
-			return position;
-		}
+			inline Tag GetClusterTag() const
+				{ return fClusterTag; }
 
-		inline HitCollection *GetHitCollection() const
-			{ return hitCollection; }
+			Return SetClusterType( const ClusterType &type );
 
-		bool IsIsolatedFromClusters(const std::vector<Cluster*>* clusters);
-
-		inline int GetClusterSize() const
-			{ return hitCollection->size(); }
-
-		void SetClusterTagRecursive( const Tag &clustTag );
-
-		inline void SetClusterTag(Tag clustTag)
-			{ fClusterTag = clustTag; }
-
-		inline Tag GetClusterTag() const
-			{ return fClusterTag; }
-
-		Return SetType( const ClusterType &type );
-
-		inline ClusterType GetType() const
-			{ return fType; }
-
-		bool Contains( Hit *hit );
-
-		Return AddHit( Hit *hit );
-
-		Return RemoveHit( Hit *hit );
+			inline ClusterType GetClusterType() const
+				{ return fType; }
 
 	};
 

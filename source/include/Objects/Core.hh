@@ -24,7 +24,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "Objects/HitCollection.hh"
+#include "Objects/HitCompositeObject.hh"
 #include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Geometry/Cone.hh"
@@ -42,7 +42,7 @@ namespace baboon {
 	 * @brief Class Core
 	 *
 	 */
-	class Core {
+	class Core : public HitCompositeObject , public TypedObject {
 
 		public:
 
@@ -62,43 +62,24 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief Add a hit to the hit collection of the core
+			 *
 			 *
 			 */
-			Return AddHit( Hit *hit );
+			Return SetBuildConcentration( const double c );
 
 			/*!
 			 *
-			 * @brief Remove a hit from the hit collection of the core
+			 *
 			 *
 			 */
-			Return RemoveHit( Hit *hit );
-
-			bool Contains( Hit *hit );
-
-			Return SetStartingCone( Cone *cone );
-
-			ThreeVector CenterOfGravity();
-
-			int GetFirstHitLayer();
-
-			int GetLastHitLayer();
+			inline const double GetBuildConcentration()
+				{ return buildConcentration; }
 
 		protected:
 
-			HitCollection *hitCollection;
-			Cone *startingCone;
+			double buildConcentration;
 
-		public:
 
-			inline unsigned int Size()
-				{ return hitCollection->size(); }
-
-			inline HitCollection *GetHitCollection()
-				{ return hitCollection; }
-
-			inline Cone *GetStartingCone()
-				{ return startingCone; }
 
 
 	};  // class

@@ -26,6 +26,7 @@
 
 
 #include "Utilities/ReturnValues.hh"
+#include "Objects/HitCompositeObject.hh"
 #include "Objects/HitCollection.hh"
 #include "Geometry/ThreeVector.hh"
 
@@ -41,7 +42,7 @@ namespace baboon {
 	 * Class Track
 	 */
 
-	class Track {
+	class Track : public HitCompositeObject , public TypedObject {
 
 		public:
 
@@ -55,32 +56,12 @@ namespace baboon {
 			 */
 			virtual ~Track();
 
-			/*!
-			 *
-			 * @brief : Return the hit collection which define the track segment
-			 *
-			 */
-			inline HitCollection *GetHitCollection()
-				{ return hitCollection; }
-
-
 			TrackExtremities GetExtremities();
-
-			double GetTrackLength();
 
 			void SetTrackAjustementVector( const ThreeVector& trackVec)
 				{ trackAjustementVector = trackVec; }
 
 			std::vector<ThreeVector> GetPositions() const;
-
-			Return AddHit( Hit *hit );
-
-			Return RemoveHit( Hit *hit );
-
-			inline unsigned int Size()
-				{ return hitCollection->size(); }
-
-			bool Contains( Hit *hit );
 
 			Return SortHits();
 
@@ -88,7 +69,6 @@ namespace baboon {
 
 		protected:
 
-			HitCollection *hitCollection;
 			TrackExtremities extremities;
 			ThreeVector trackAjustementVector;
 

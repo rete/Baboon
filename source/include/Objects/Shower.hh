@@ -26,6 +26,7 @@
 #include <algorithm>
 
 #include "Objects/HitCollection.hh"
+#include "Objects/HitCompositeObject.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 #include "Geometry/ThreeVector.hh"
@@ -37,13 +38,13 @@
 
 namespace baboon {
 
-	typedef std::map<Hit*,double> HitToWeightsMap;
+//	typedef std::map<Hit*,double> HitToWeightsMap;
 
 	/*
 	 * Class Shower
 	 */
 
-	class Shower {
+	class Shower : public HitCompositeObject , public TypedObject {
 
 		public:
 
@@ -60,63 +61,53 @@ namespace baboon {
 
 			Return RemoveHit( Hit *hit );
 
-			bool Contains( Hit *hit );
-
 			Return SetStartingPoint( const ThreeVector &startingVec );
-
-			Return SetStartingCone( Cone *cone );
-
-			Return SetThrust( Track *th );
-
-			bool HasThrust();
-
-			Return AddCore( Core *core );
-
-			Return RemoveCore( Core *core );
-
-			bool Contains( Core *core );
-
-			Return AddTrack( Track *track );
-
-			Return RemoveTrack( Track *track );
-
-			bool Contains( Track *track );
 
 
 
 
 		protected:
 
-			HitToWeightsMap *hitToWeightsMap;
-			CoreCollection *coreCollection;
-			TrackCollection *trackCollection;
+			DoubleVector *hitWeights;
+//			CoreCollection *coreCollection;
+//			TrackCollection *trackCollection;
 			ThreeVector startingPoint;
-			Track *thrust;
-			Cone *startingCone;
+//			Track *thrust;
+//			Cone *startingCone;
 
 
 		public:
 
-			inline HitToWeightsMap *GetHitToWeightsMap()
-				{ return hitToWeightsMap; }
+//			inline HitToWeightsMap *GetHitToWeightsMap()
+//				{ return hitToWeightsMap; }
+
+			inline DoubleVector *GetHitWeights()
+				{ return hitWeights; }
 
 			inline ThreeVector GetStartingPoint()
 				{ return startingPoint; }
 
-			inline Cone *GetStartingCone()
-				{ return startingCone; }
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return GetHitWeight( Hit *hit , double &w );
 
-			inline int Size()
-				{ return hitToWeightsMap->size(); }
+//			inline Cone *GetStartingCone()
+//				{ return startingCone; }
 
-			inline Track *GetThrust()
-				{ return thrust; }
+//			inline int Size()
+//				{ return hitToWeightsMap->size(); }
 
-			inline CoreCollection *GetCoreCollection()
-				{ return coreCollection; }
-
-			inline TrackCollection *GetTrackCollection()
-				{ return trackCollection; }
+//			inline Track *GetThrust()
+//				{ return thrust; }
+//
+//			inline CoreCollection *GetCoreCollection()
+//				{ return coreCollection; }
+//
+//			inline TrackCollection *GetTrackCollection()
+//				{ return trackCollection; }
 
 
 	};  // class

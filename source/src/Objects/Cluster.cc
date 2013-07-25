@@ -19,28 +19,14 @@ using namespace std ;
 
 namespace baboon {
 
-	Cluster::Cluster() {
-
-		hitCollection = new HitCollection();
-	}
-
-
-	void Cluster::SetHitCollection( HitCollection *hitCol ) {
-
-		if( hitCollection != 0 ) {
-			hitCollection->clear();
-			delete hitCollection;
-		}
-		hitCollection = hitCol;
+	Cluster::Cluster()
+		: HitCompositeObject(),
+		  TypedObject("Cluster") {
 
 	}
 
 	Cluster::~Cluster() {
 
-		if( hitCollection != 0 ) {
-			hitCollection->clear();
-			delete hitCollection;
-		}
 	}
 
 
@@ -68,7 +54,7 @@ namespace baboon {
 		int neighbour=0;
 		int neighbourbis=0;
 		int neighbourbisbis=0;
-//		cout << "position : " << position << endl;
+
 		ComputePosition();
 		for(int clustID=0 ; clustID<clusters->size() ; clustID++) {
 
@@ -91,7 +77,7 @@ namespace baboon {
 			&& abs(position.z()-pos.z())<3
 			&& abs(position.x()-pos.x())<5
 			&& abs(position.y()-pos.y())<5
-			&& clusters->at(clustID)->GetClusterSize()>8 )
+			&& clusters->at(clustID)->Size()>8 )
 				{ neighbourbisbis++; }
 		}
 
@@ -99,7 +85,7 @@ namespace baboon {
 		&& neighbourbis>0
 		&& neighbourbis<6
 		&& neighbourbisbis<2 ) {
-//			this->SetClusterTag(fIsolated);
+
 			isol=true;
 			}
 
@@ -118,75 +104,12 @@ namespace baboon {
 	}
 
 
-//	void Cluster::AssociateCluster( Cluster* cl ) {
-//
-//		if( find( associatedClusters->begin(), associatedClusters->end(), cl  ) != associatedClusters->end() )
-//			return;
-//		else
-//			associatedClusters->push_back(cl);
-//
-//		unsigned int nbOfClusters = cl->GetAssociatedClusters()->size();
-//
-//		for(unsigned int clID=0 ; clID<nbOfClusters ; clID++ ) {
-//
-//			Cluster *cluster = cl->GetAssociatedClusters()->at(clID);
-//			cluster->AssociateCluster(this);
-//		}
-//	}
-
-
-//	bool Cluster::IsAssociatedToCluster( Cluster* cl ) {
-//
-//		ClusterCollection *clusters = cl->GetAssociatedClusters();
-//		if( find( clusters->begin() , clusters->end() , this ) != clusters->end() )
-//			return true;
-//		else return false;
-//	}
-
-
-	Return Cluster::SetType( const ClusterType &type ) {
+	Return Cluster::SetClusterType( const ClusterType &type ) {
 
 		fType = type;
 		return BABOON_SUCCESS();
 	}
 
-
-	Return Cluster::AddHit( Hit *hit ) {
-
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
-
-		if( !this->Contains(hit) ) {
-			hitCollection->push_back(hit);
-			return BABOON_SUCCESS();
-		}
-		return BABOON_ALREADY_PRESENT("Hit was already present in the cluster") ;
-	}
-
-
-	Return Cluster::RemoveHit( Hit *hit ) {
-
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
-
-		if ( hitCollection->empty() )
-			return BABOON_INVALID_PARAMETER("Cluster was empty");
-
-		HitCollection::iterator hitIterator;
-
-		hitIterator = find( hitCollection->begin() , hitCollection->end() , hit );
-		if( hitIterator != hitCollection->end() ) {
-			hitCollection->erase( hitIterator );
-			return BABOON_SUCCESS();
-		}
-		return BABOON_NOT_FOUND("Hit was not found in the cluster");
-	}
-
-
-	bool Cluster::Contains( Hit *hit ) {
-
-		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
-	}
 
 
 }
