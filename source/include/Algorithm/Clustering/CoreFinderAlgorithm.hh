@@ -23,10 +23,13 @@
 #include <vector>
 
 #include "Algorithm/AbstractAlgorithm.hh"
+#include "Algorithm/Clustering/ClusteringAlgorithm.hh"
 #include "Managers/ClusteringManager.hh"
 #include "Exception.hh"
 #include "Managers/HitManager.hh"
+#include "Managers/CoreManager.hh"
 #include "Objects/HitCollection.hh"
+#include "Objects/Core.hh"
 
 
 namespace baboon {

@@ -51,6 +51,8 @@ namespace baboon {
 	Return CoreFinderAlgorithm::Execute() {
 
 		HitManager *hitManager = HitManager::GetInstance();
+		CoreManager *coreManager = CoreManager::GetInstance();
+
 		int nbOfCoreHits = 0;
 		for( unsigned int l=0 ; l<hitCollection->size() ; l++ ) {
 
@@ -82,6 +84,32 @@ namespace baboon {
 				nbOfCoreHits++;
 			}
 		}
+
+
+		ClusterCollection *clustCol = new ClusterCollection();
+		ClusteringAlgorithm* clusteringAlgo = new ClusteringAlgorithm();
+
+		clusteringAlgo->SetClusteringMode( fClustering3D );
+		clusteringAlgo->SetTaggingMode( fClusterTagMode );
+		clusteringAlgo->AddHitTagToCluster( fCore );
+		clusteringAlgo->SetClusterCollection( clustCol );
+		clusteringAlgo->Process();
+
+		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
+
+			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
+			Core *core = new Core();
+			for( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
+				core->AddHit( hitCol->at(j) );
+			}
+			core->SetBuildConcentration( minimumThresholdConcentration );
+			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->AddCore( core ) );
+		}
+		clustCol->clear();
+
+		delete clusteringAlgo;
+		delete clustCol;
+
 		return BABOON_SUCCESS();
 	}
 
