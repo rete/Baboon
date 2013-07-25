@@ -201,7 +201,7 @@ namespace baboon {
 			if( hitTagToCluster.empty() ) return true;
 			else return KeepTag( fTag );
 		}
-
+		else return true;
 	}
 
 	Return ClusteringAlgorithm::SetClusterSizeLowerLimit( unsigned int limit ) {
