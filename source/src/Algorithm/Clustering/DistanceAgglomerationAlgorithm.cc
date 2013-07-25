@@ -45,7 +45,7 @@ namespace baboon {
 		if (hitCollection == 0 || startingHit == 0)
 			return BABOON_ERROR("DistanceAgglomerationAlgorithm bad init. Please check your inputs!");
 		if( aggregate != 0 )
-			if( aggregate->GetClusterSize() != 0 )
+			if( aggregate->Size() != 0 )
 				return BABOON_ERROR("DistanceAgglomerationAlgorithm bad check on cluster size (!= 0). Bad init of aggregate pointer!");
 
 		return BABOON_SUCCESS();
