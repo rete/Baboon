@@ -100,8 +100,7 @@ namespace baboon {
 			Return MergeTrackInShower( Shower *ShowerToEnlarge , Track *trackToAssociate );
 
 			double Chi2LimitForTrack;
-			double cylinderLength;
-			double cylinderRadius;
+			double stepLength;
 
 
 	};  // class
