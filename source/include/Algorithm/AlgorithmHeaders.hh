@@ -35,6 +35,8 @@
 #include "Algorithm/PrincipalComponentAnalysis.hh"
 #include "Algorithm/Association/TrackToShowerAssociationAlgorithm.hh"
 #include "Algorithm/Association/CoreToCoreAssociationAlgorithm.hh"
+#include "Algorithm/CoreAgglomerationAlgorithm.hh"
+#include "Algorithm/ShowerAgglomerationAlgorithm.hh"
 
 
 
