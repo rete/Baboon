@@ -31,7 +31,6 @@ namespace baboon {
 		fTrack,
 		fTrackExtremity,
 		fCore,
-		fCoreEdge,
 		fNoise,
 		fUndefined
 	};
@@ -40,6 +39,55 @@ namespace baboon {
 	Tag StringToTag( const std::string tagString );
 
 	std::string TagToString( Tag tag );
+
+
+
+	class BaseTag {
+
+		public:
+
+			BaseTag( const std::string &name )
+				: tagName(name) {}
+
+			virtual const std::string GetTag() { return tagName; }
+
+			static const std::string Tag() { return "UndefinedTag"; }
+
+		protected:
+			const std::string tagName;
+
+	};
+
+	class CoreTag : public BaseTag {
+
+		public:
+			CoreTag() : BaseTag("CoreTag") {}
+			static const std::string Tag() { return "CoreTag"; }
+	};
+
+
+	class IsolatedTag : public BaseTag {
+
+		public:
+			IsolatedTag() : BaseTag("IsolatedTag") {}
+			static const std::string Tag() { return "IsolatedTag"; }
+	};
+
+
+	class TrackTag : public BaseTag {
+
+		public:
+			TrackTag() : BaseTag("TrackTag") {}
+			static const std::string Tag() { return "TrackTag"; }
+	};
+
+
+	class TrackExtremityTag : public BaseTag {
+
+		public:
+			TrackExtremityTag() : BaseTag("TrackExtremityTag") {}
+			static const std::string Tag() { return "TrackExtremityTag"; }
+	};
 
 
 }  // namespace 
