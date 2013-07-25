@@ -49,6 +49,7 @@ namespace baboon {
 		if( showerCollection->size() <=1 )
 			return BABOON_SUCCESS();
 
+		/*
 
 		for( unsigned int sh1=0 ; sh1<showerCollection->size() ; sh1++) {
 
@@ -81,7 +82,7 @@ namespace baboon {
 				}
 			}
 		}
-
+*/
 
 		return BABOON_SUCCESS();
 	}
