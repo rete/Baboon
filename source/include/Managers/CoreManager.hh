@@ -56,9 +56,9 @@ namespace baboon {
 
 			Return ClearAllContent();
 
-			bool CoreContainsHit( Core *core , Hit *hit );
+			bool CoreContainsHit( Core *core , CaloHit *caloHhit );
 
-			Return FindCoreContainingHit( Hit *hit , Core *coreToFind );
+			Return FindCoreContainingHit( CaloHit *caloHit , Core *coreToFind );
 
 		protected:
 
