@@ -59,11 +59,12 @@ namespace baboon {
 		if( shower == 0 )
 			return BABOON_NOT_INITIALIZED("Can't compute energy without setting a shower before.");
 
-		HitToWeightsMap *hitMap = shower->GetHitToWeightsMap();
+		DoubleVector *hitWeights = shower->GetHitWeights();
+		CaloHitCollection *caloHitCollection = shower->GetCaloHitCollection();
 
 		energy = 0;
 
-		if( hitMap->empty() )
+		if( caloHitCollection->empty() )
 			return BABOON_SUCCESS();
 
 		double nbOfHits = 0;
@@ -71,14 +72,13 @@ namespace baboon {
 		double nbThreshold2 = 0;
 		double nbThreshold3 = 0;
 
-		HitToWeightsMap::iterator mapIt;
-		for( mapIt=hitMap->begin() ; mapIt!=hitMap->end() ; mapIt++ ) {
+		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
 
-			nbOfHits += mapIt->second;
-			Hit* hit = mapIt->first;
-			if( hit->GetThreshold() == fThreshold1 ) nbThreshold1 += mapIt->second;
-			else if( hit->GetThreshold() == fThreshold2 ) nbThreshold2 += mapIt->second;
-			else if( hit->GetThreshold() == fThreshold3 ) nbThreshold3 += mapIt->second;
+			nbOfHits += hitWeights->at(h);
+			CaloHit* caloHit = caloHitCollection->at(h);
+			if( caloHit->GetThreshold() == fCaloHitThr1 ) nbThreshold1 += hitWeights->at(h);
+			else if( caloHit->GetThreshold() == fCaloHitThr2 ) nbThreshold2 += hitWeights->at(h);
+			else if( caloHit->GetThreshold() == fCaloHitThr3 ) nbThreshold3 += hitWeights->at(h);
 
 		}
 
