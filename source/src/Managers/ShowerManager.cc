@@ -101,50 +101,9 @@ namespace baboon {
 	}
 
 
-	bool ShowerManager::ShowerContainsHit( Shower *shower , Hit *hit ) {
+	bool ShowerManager::ShowerContainsHit( Shower *shower , CaloHit *caloHit ) {
 
-		return shower->Contains( hit );
-	}
-
-	Return ShowerManager::BuildShowerFromHitCollection( HitCollection *hitCollection ) {
-
-		if( hitCollection == 0 )
-			return BABOON_NOT_INITIALIZED("Assertion hitCollection != 0 failed");
-
-		if( hitCollection->empty() )
-			return BABOON_SUCCESS();
-
-		TrackManager *trackManager = TrackManager::GetInstance();
-		CoreManager *coreManager = CoreManager::GetInstance();
-
-		Shower *newShower = new Shower();
-
-		for( unsigned int h=0 ; h<hitCollection->size() ; h++ ) {
-
-			Hit *hit = hitCollection->at(h);
-
-			if( !newShower->Contains( hit ) )
-				newShower->AddHit( hit );
-
-			if( hit->GetHitTag() == fTrack ) {
-
-				Track *track = 0;
-				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , trackManager->FindTrackContainingHit( hit , track ) );
-				if( !newShower->Contains( track ) )
-					newShower->AddTrack( track );
-			}
-			else if( hit->GetHitTag() == fCore ) {
-
-				Core *core = 0;
-				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->FindCoreContainingHit( hit , core ) );
-				if( !newShower->Contains( core ) )
-					newShower->AddCore( core );
-			}
-
-		}
-
-		this->AddShower( newShower );
-
+		return shower->Contains( caloHit );
 	}
 
 
