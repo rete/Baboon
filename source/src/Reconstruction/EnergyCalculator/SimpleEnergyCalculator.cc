@@ -44,15 +44,15 @@ namespace baboon {
 
 	Return SimpleEnergyCalculator::CalculateEnergy() {
 
-		if( hitCollection == 0 )
+		if( caloHitCollection == 0 )
 			return BABOON_NOT_INITIALIZED("Can't compute energy without setting a hit collection before.");
 
 		energy = 0;
 
-		if( hitCollection->empty() )
+		if( caloHitCollection->empty() )
 			return BABOON_SUCCESS();
 
-		unsigned int nbOfHits = hitCollection->size();
+		unsigned int nbOfHits = caloHitCollection->size();
 
 		double alpha = params[0] + params[1]*( nbOfHits ) + params[2]*( nbOfHits*nbOfHits );
 		double beta = params[3] + params[4]*( nbOfHits ) + params[5]*( nbOfHits*nbOfHits );
@@ -64,10 +64,10 @@ namespace baboon {
 
 		for( unsigned int i=0 ; i<nbOfHits ; i++ ) {
 
-			Hit* hit = hitCollection->at(i);
-			if( hit->GetThreshold() == fThreshold1 ) nbThreshold1++;
-			else if( hit->GetThreshold() == fThreshold2 ) nbThreshold2++;
-			else if( hit->GetThreshold() == fThreshold3 ) nbThreshold3++;
+			CaloHit* caloHit = caloHitCollection->at(i);
+			if( caloHit->GetThreshold() == fCaloHitThr1) nbThreshold1++;
+			else if( caloHit->GetThreshold() == fCaloHitThr2 ) nbThreshold2++;
+			else if( caloHit->GetThreshold() == fCaloHitThr3 ) nbThreshold3++;
 		}
 
 		energy = alpha*nbThreshold1 + beta*nbThreshold2 + gamma*nbThreshold3;
