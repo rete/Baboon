@@ -21,15 +21,15 @@
 #include <string> 
 #include <cstdlib> 
 #include <cmath> 
-#include <vector> 
+#include <vector>
+#include <algorithm>
 
 
-#include "Objects/HitCollection.hh"
-#include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Internal.hh"
 #include "Utilities/Globals.hh"
 #include "Objects/ObjectConnector.hh"
+#include "Objects/CaloHit.hh"
 
 namespace baboon {
 
@@ -86,28 +86,28 @@ namespace baboon {
 			 *
 			 *
 			 */
-			virtual Return AddHit( Hit* hit );
+			virtual Return AddCaloHit( CaloHit* caloHit );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			virtual Return RemoveHit( Hit* hit );
+			virtual Return RemoveCaloHit( CaloHit* caloHit );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			virtual bool Contains( Hit* hit );
+			virtual bool Contains( CaloHit* caloHit );
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			Return SetHitCollection( HitCollection *hitCol );
+			Return SetCaloHitCollection( CaloHitCollection * );
 
 			/*!
 			 *
@@ -132,16 +132,19 @@ namespace baboon {
 
 		protected:
 
-			HitCollection *hitCollection;
+			CaloHitCollection *caloHitCollection;
 			ObjectConnectorCollection *objectConnectors;
 
 		public:
 
 			inline unsigned int Size()
-				{ return hitCollection->size(); }
+				{ return caloHitCollection->size(); }
 
-			inline HitCollection *GetHitCollection()
-				{ return hitCollection; }
+			inline CaloHitCollection *GetCaloHitCollection()
+				{ return caloHitCollection; }
+
+			inline ObjectConnectorCollection *GetObjectConnectorCollection()
+				{ return objectConnectors; }
 
 
 	};  // class
