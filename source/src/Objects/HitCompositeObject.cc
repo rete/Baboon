@@ -24,61 +24,63 @@ namespace baboon {
 
 	HitCompositeObject::HitCompositeObject() {
 
-		hitCollection = new HitCollection();
+		caloHitCollection = new CaloHitCollection();
 		objectConnectors = new ObjectConnectorCollection();
 	}
 
 	HitCompositeObject::~HitCompositeObject() {
 
-		hitCollection->clear();
+
 		objectConnectors->clear();
 		delete objectConnectors;
-		if( hitCollection != 0 ) {
-			delete hitCollection;
-			hitCollection = 0;
+
+		if( caloHitCollection != 0 ) {
+
+			caloHitCollection->clear();
+			delete caloHitCollection;
+			caloHitCollection = 0;
 		}
 	}
 
 
-	Return HitCompositeObject::SetHitCollection( HitCollection *hitCol ) {
+	Return HitCompositeObject::SetCaloHitCollection( CaloHitCollection *caloHitCol ) {
 
-		if( hitCollection != 0 ) {
-			hitCollection->clear();
-			delete hitCollection;
+		if( caloHitCollection != 0 ) {
+			caloHitCollection->clear();
+			delete caloHitCollection;
 		}
-		hitCollection = hitCol;
+		caloHitCollection = caloHitCol;
 		return BABOON_SUCCESS();
 	}
 
 
-	Return HitCompositeObject::AddHit( Hit *hit ) {
+	Return HitCompositeObject::AddCaloHit( CaloHit *caloHit ) {
 
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed");
+		BABOON_CHECK_POINTER( caloHit );
 
-		if( hitCollection->empty() ) {
-			hitCollection->push_back( hit );
+		if( caloHitCollection->empty() ) {
+			caloHitCollection->push_back( caloHit );
 			return BABOON_SUCCESS();
 		}
 
-		if( this->Contains( hit ) )
+		if( this->Contains( caloHit ) )
 			return BABOON_ALREADY_PRESENT("Hit was already in the collection");
 		else {
-			hitCollection->push_back( hit );
+			caloHitCollection->push_back( caloHit );
 			return BABOON_SUCCESS();
 		}
 	}
 
 
-	Return HitCompositeObject::RemoveHit( Hit *hit ) {
+	Return HitCompositeObject::RemoveCaloHit( CaloHit *caloHit ) {
 
-		if( hitCollection->empty() )
+		if( caloHitCollection->empty() )
 			return BABOON_ALREADY_PRESENT("Try to remove a hit from an empty hit collection.");
 
-		HitCollection::iterator it = std::find( hitCollection->begin() , hitCollection->end() , hit );
+		CaloHitCollection::iterator it = std::find( caloHitCollection->begin() , caloHitCollection->end() , caloHit );
 
-		if( it != hitCollection->end() ) {
-			hitCollection->erase( it );
+		if( it != caloHitCollection->end() ) {
+			caloHitCollection->erase( it );
 			return BABOON_SUCCESS();
 		}
 		else {
@@ -86,9 +88,9 @@ namespace baboon {
 		}
 	}
 
-	bool HitCompositeObject::Contains( Hit *hit ) {
+	bool HitCompositeObject::Contains( CaloHit *caloHit ) {
 
-		return ( find( hitCollection->begin() , hitCollection->end() , hit ) != hitCollection->end() );
+		return ( find( caloHitCollection->begin() , caloHitCollection->end() , caloHit ) != caloHitCollection->end() );
 	}
 
 //---------------------------------------------------------------------------------------------------------------------------
