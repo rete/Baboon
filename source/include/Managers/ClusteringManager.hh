@@ -26,10 +26,9 @@
 
 
 #include "Objects/Cluster.hh"
-#include "Objects/HitCollection.hh"
-#include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Internal.hh"
+#include "Objects/CaloHit.hh"
 
 namespace baboon {
 
@@ -79,12 +78,16 @@ namespace baboon {
 		Return ClearAllContent();
 
 
-		bool ClusterContainsHit( Cluster *cluster , Hit *hit );
+		bool ClusterContainsHit( Cluster *cluster , CaloHit *caloHit );
 
 
 		Return MergeAndDeleteClusters( Cluster *clusterToEnlarge , Cluster *clusterToDelete );
 
+
 		Cluster *GetClusterAt( ClusterType clusterType , unsigned int I , unsigned int J , unsigned int K );
+
+
+		Cluster *GetClusterContainingCaloHit( ClusterType clusterType , CaloHit *caloHit );
 
 	};
 
