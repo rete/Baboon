@@ -49,14 +49,9 @@ namespace baboon {
 
 			Return RemoveShower( Shower *shower );
 
-			bool ShowerContainsHit( Shower *shower , Hit *hit );
+			bool ShowerContainsHit( Shower *shower , CaloHit *caloHit );
 
 			Return ClearAllContent();
-
-			Return BuildShowerFromHitCollection( HitCollection *hitCollection );
-
-			// To be implemented...
-			Return MergeShowersAndDelete( Shower *showerToBeEnlarged , Shower *showerToBeDeleted );
 
 		protected:
 
