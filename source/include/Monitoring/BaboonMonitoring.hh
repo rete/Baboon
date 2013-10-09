@@ -34,24 +34,12 @@
 #include "Xml/XmlHelper.h"
 
 #include "Reconstruction/Tag.hh"
-#include "Objects/HitCollection.hh"
+#include "Objects/CaloHit.hh"
 #include "Managers/ShowerManager.hh"
 #include "Managers/DetectorManager.hh"
 #include "Detector/Calorimeter.hh"
 
 namespace baboon {
-
-//	/*!
-//	 * @brief Display mode enum
-//	 */
-//	enum HitDisplayMode {
-//
-//		kDisplayThresholds,
-//		kDisplayShowers,
-//		kDisplayTags,
-//		kDisplayUniform
-//	};
-
 
 	/*
 	* Class BaboonMonitoring
@@ -89,6 +77,44 @@ namespace baboon {
 			 */
 			void ViewEvent();
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			int GetCaloHitColor( CaloHit *caloHit , const HitDisplayMode displayMode );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static void SetEnable( bool enable )
+				{ isEnable = enable; }
+
+			/*!
+			 *
+			 *
+			 *
+			 *
+			 */
+			static bool IsEnable()
+				{ return isEnable; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void AddElement( TEveElement *element , TEveElement *parent = 0 );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static int GetColorBetweenMinAndMax( double min , double max , double value );
+
 
 		protected:
 
@@ -125,23 +151,21 @@ namespace baboon {
 			 *
 			 *
 			 */
-//			TEveElement *VisualizeHitCollection(const HitCollection *hitCollection, TEveElement *parent, const DisplayMode displayMode );
+			void ViewDetectorsContent();
 
-			/*!
-			 *
-			 *
-			 *
-			 */
-			int GetHitColor( Hit *hit , const HitDisplayMode displayMode );
+
+
 
 			static BaboonMonitoring *instance;
 
 			TApplication *rootApplication;
-			static std::map<Tag,int> tagToColorMap;
+			TEveManager *eveManager;
+			static std::map<std::string,int> tagToColorMap;
 
 			static bool openEveEvent;
 			static int eventDisplayCounter;
 			static bool isTEveInitialized;
+			static bool isEnable;
 
 	};  // class
 
