@@ -28,19 +28,54 @@
 
 
 #include "Objects/CaloHit.hh"
+#include "Utilities/Internal.hh"
+#include "Utilities/ReturnValues.hh"
+#include "Utilities/CaloHitCellHelper.hh"
+
+// gear includes
+#include "gear/LayerLayout.h"
+
+// root includes
+#include "TEveElement.h"
+#include "TEveBoxSet.h"
+#include "TEveManager.h"
+
+
 
 namespace baboon {
 
 
 	enum CalorimeterType {
-
-		fHCAL,
-		fECAL,
-		fLumiCAL,
-		fBCAL,
-		fLHCAL,
-		fCustomCAL
+		kHcalBarrel,
+		kHcalEndcap,
+		kHcalRing,
+		kEcalBarrel,
+		kEcalEndcap,
+		kEcalPlug,
+		kLcal,
+		kLHcal,
+		kBeamCal
 	};
+
+	/*!
+	 * @brief Hit display mode enum
+	 */
+	enum HitDisplayMode {
+
+		kDisplayThresholds,
+		kDisplayShowers,
+		kDisplayTags,
+		kDisplayUniform,
+		kCustom
+	};
+
+
+}
+
+#include "Monitoring/BaboonMonitoring.hh"
+
+namespace baboon {
+
 	/*!
 	 * Class Calorimeter
 	 * Inherits from base class Detector
@@ -55,7 +90,7 @@ namespace baboon {
 			 * Default Constructor
 			 *
 			 */
-			Calorimeter( const CalorimeterType &calType );
+			Calorimeter( const std::string &detectorName , const CalorimeterType &calType );
 
 			/*!
 			 *
@@ -78,20 +113,154 @@ namespace baboon {
 			 */
 			virtual Return RemoveCaloHit( CaloHit *caloHit );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline bool Contains( CaloHit *caloHit )
+				{ return (std::find( caloHitCollection->begin() , caloHitCollection->end() , caloHit  ) != caloHitCollection->end() );  }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return ClearContent();
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			CaloHit *GetCaloHitAt( unsigned int I , unsigned int J , unsigned int K );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			bool IsPadFired( unsigned int I , unsigned int J , unsigned int K );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			HitDisplayMode GetHitDisplayMode()
+				{ return hitDisplayMode; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetHitDisplayMode( const HitDisplayMode &display )
+				{ hitDisplayMode = display; }
 
 
 		protected:
 
-			CalorimeterType calorimeterType;
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return ReadSettings( const gear::GearParameters *parameters );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return ReadSettings( const gear::CalorimeterParameters *caloParameters ) = 0;
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return BuildGeometry( TGeoManager *geoManager , TGeoVolume *topVolume ) = 0;
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return ViewCalorimeterContent( TEveElement *parent , const HitDisplayMode displayMode ) = 0;
+
+			const CalorimeterType calorimeterType;
 			CaloHitCollection *caloHitCollection;
+			CaloHitCellHelper caloHitCellHelper;
+			bool viewContent;
+			HitDisplayMode hitDisplayMode;
+
+			double cellSize0;
+			double cellSize1;
+			int repeatX;
+			int repeatY;
+			double absorberThickness;
+			double layerThickness;
+			int numberOfLayers;
+
+			int globalShiftX;
+			int globalShiftY;
+			int globalShiftZ;
+			double radiationLength;
+			double interactionLength;
 
 		public:
 
-			inline CalorimeterType GetType()
+			inline const CalorimeterType GetCalorimeterType()
 				{ return calorimeterType; }
 
+			inline CaloHitCollection *GetCaloHitCollection()
+				{ return caloHitCollection; }
 
+			inline double GetCellSize0()
+				{ return cellSize0; }
 
+			inline double GetCellSize1()
+				{ return cellSize1; }
+
+			inline int GetRepeatX()
+				{ return repeatX; }
+
+			inline int GetRepeatY()
+				{ return repeatY; }
+
+			inline double GetAbsorberThickness()
+				{ return absorberThickness; }
+
+			inline double GetLayerThickness()
+				{ return layerThickness; }
+
+			inline int GetNbOfLayers()
+				{ return numberOfLayers; }
+
+			inline double GetRadiationLength()
+				{ return radiationLength; }
+
+			inline double GetInteractionLength()
+				{ return interactionLength; }
+
+			inline double GetGlobalShiftX()
+				{ return globalShiftX; }
+
+			inline double GetGlobalShiftY()
+				{ return globalShiftY; }
+
+			inline double GetGlobalShiftZ()
+				{ return globalShiftZ; }
+
+			inline bool IsViewContentSet()
+				{ return viewContent; }
+
+			inline void SetViewContent( const bool b )
+				{ viewContent = b; }
+
+		friend class DetectorManager;
+		friend class BaboonMonitoring;
 
 	};  // class
 
