@@ -27,7 +27,6 @@
 
 #include "Utilities/ReturnValues.hh"
 #include "Objects/HitCompositeObject.hh"
-#include "Objects/HitCollection.hh"
 #include "Geometry/ThreeVector.hh"
 
 namespace baboon {
@@ -35,7 +34,7 @@ namespace baboon {
 
 
 
-	typedef std::pair<Hit*,Hit*> TrackExtremities;
+	typedef std::pair<CaloHit*,CaloHit*> TrackExtremities;
 
 
 	/*
@@ -47,30 +46,50 @@ namespace baboon {
 		public:
 
 			/*!
-			 * @brief : Default Constructor
+			 *
+			 * @brief  Default Constructor
+			 *
 			 */
 			Track();
 
 			/*!
-			 * @brief : Default Destructor
+			 *
+			 * @brief  Default Destructor
+			 *
 			 */
 			virtual ~Track();
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			TrackExtremities GetExtremities();
 
-			void SetTrackAjustementVector( const ThreeVector& trackVec)
-				{ trackAjustementVector = trackVec; }
-
+			/*!
+			 *
+			 *
+			 *
+			 */
 			std::vector<ThreeVector> GetPositions() const;
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			Return SortHits();
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			std::vector<ThreeVector> GetIJKs() const;
 
 		protected:
 
 			TrackExtremities extremities;
-			ThreeVector trackAjustementVector;
 
 
 	};  // class

@@ -38,32 +38,40 @@ namespace baboon {
 		TrackExtremities extrem;
 
 		bool firstIt = true;
-		Hit *hitFirst = 0;
-		Hit *hitSecond = 0;
-		for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
-			Hit *hit1 = hitCollection->at(i);
-			ThreeVector vec1 = hit1->GetPosition();
-			for(unsigned int j=0 ; j<hitCollection->size() ; j++) {
-				if(i == j) continue;
-				Hit *hit2 = hitCollection->at(j);
-				ThreeVector vec2 = hit2->GetPosition();
+		CaloHit *caloHitFirst = 0;
+		CaloHit *caloHitSecond = 0;
+
+		for(unsigned int i=0 ; i<caloHitCollection->size() ; i++) {
+
+			CaloHit *caloHit1 = caloHitCollection->at(i);
+			ThreeVector vec1 = caloHit1->GetPosition();
+
+			for(unsigned int j=0 ; j<caloHitCollection->size() ; j++) {
+
+				if( i == j ) continue;
+				CaloHit *caloHit2 = caloHitCollection->at(j);
+				ThreeVector vec2 = caloHit2->GetPosition();
+
 				if(firstIt) {
-					hitFirst = hit1;
-					hitSecond = hit2;
+					caloHitFirst = caloHit1;
+					caloHitSecond = caloHit2;
 //					extrem = make_pair( hit1 , hit2 );
 					firstIt = false;
 					continue;
 				}
 				// compare the distance between the two hits with the current minimum distance (in extrem)
-				if( (hit1->GetPosition() - hit2->GetPosition()).mag()
-						> (hitFirst->GetPosition() - hitSecond->GetPosition()).mag() ) {
-					hitFirst = hit1;
-					hitSecond = hit2;
+				if( (caloHit1->GetPosition() - caloHit2->GetPosition()).mag()
+						> (caloHitFirst->GetPosition() - caloHitSecond->GetPosition()).mag() ) {
+
+					caloHitFirst = caloHit1;
+					caloHitSecond = caloHit2;
 				}
+
 			}
+
 		}
 
-		extrem = make_pair( hitFirst , hitSecond );
+		extrem = make_pair( caloHitFirst , caloHitSecond );
 
 		return extrem;
 	}
@@ -72,8 +80,8 @@ namespace baboon {
 	std::vector<ThreeVector> Track::GetPositions() const {
 
 		std::vector<ThreeVector> vecCol;
-		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
-			vecCol.push_back( hitCollection->at(i)->GetPosition() );
+		for( unsigned int i=0 ; i<caloHitCollection->size() ; i++ ) {
+			vecCol.push_back( caloHitCollection->at(i)->GetPosition() );
 		}
 		return vecCol;
 	}
@@ -81,8 +89,8 @@ namespace baboon {
 	std::vector<ThreeVector> Track::GetIJKs() const {
 
 		std::vector<ThreeVector> ijks;
-		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
-			ThreeVector ijk( hitCollection->at(i)->GetIJK().at(0) , hitCollection->at(i)->GetIJK().at(1) , hitCollection->at(i)->GetIJK().at(2) );
+		for( unsigned int i=0 ; i<caloHitCollection->size() ; i++ ) {
+			ThreeVector ijk( caloHitCollection->at(i)->GetIJK().at(0) , caloHitCollection->at(i)->GetIJK().at(1) , caloHitCollection->at(i)->GetIJK().at(2) );
 			ijks.push_back( ijk );
 		}
 		return ijks;
@@ -90,20 +98,20 @@ namespace baboon {
 
 	Return Track::SortHits() {
 
-		if( hitCollection->size() <= 1 )
+		if( caloHitCollection->size() <= 1 )
 			return BABOON_SUCCESS("Sort one element or an empty list is easy...");
 
 		int i = 0;
 		int j = 0;
-		Hit *hit = 0;
+		CaloHit *caloHit = 0;
 
-		for( j=1 ; j<hitCollection->size() ; j++ ) {
+		for( j=1 ; j<caloHitCollection->size() ; j++ ) {
 
 			i = j-1;
-			while( hitCollection->at(j)->GetIJK().at(2) < hitCollection->at(i)->GetIJK().at(2) ) {
-				hit = hitCollection->at(i);
-				hitCollection->at(i) = hitCollection->at(j);
-				hitCollection->at(j) = hit;
+			while( caloHitCollection->at(j)->GetIJK().at(2) < caloHitCollection->at(i)->GetIJK().at(2) ) {
+				caloHit = caloHitCollection->at(i);
+				caloHitCollection->at(i) = caloHitCollection->at(j);
+				caloHitCollection->at(j) = caloHit;
 				i=i-1;
 				j=j-1;
 				if( i<0 ) break;
