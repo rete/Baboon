@@ -225,8 +225,6 @@ namespace baboon {
 		if( clusters2D->empty() )
 			return BABOON_SUCCESS();
 
-		cout << "debug begin" << endl;
-
 		unsigned int nbOfLayers = calorimeter->GetNbOfLayers();
 		double cellSize0 = calorimeter->GetCellSize0();
 		double cellSize1 = calorimeter->GetCellSize1();
