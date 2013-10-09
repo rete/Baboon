@@ -135,17 +135,6 @@ namespace baboon {
 				{ return needParams; }
 
 
-			/*!
-			 *
-			 * @brief Add a new tag to be avoided while running
-			 *
-			 */
-			inline void AddAvoidedTag( Tag fTag ) {
-
-				if( std::find( avoidedTags.begin(),avoidedTags.end(),fTag) == avoidedTags.end() )
-					avoidedTags.push_back(fTag);
-			}
-
 		protected :
 
 			/*!
@@ -192,7 +181,6 @@ namespace baboon {
 			cfgparser::Data data;
 			bool needData;
 			bool needParams;
-			std::vector<Tag> avoidedTags;
 
 	};
 
