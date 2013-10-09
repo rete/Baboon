@@ -47,11 +47,11 @@ namespace baboon {
 
 			Return RemoveTrack( Track *track );
 
-			bool TrackContainsHit( Track *track , Hit *hit );
+			bool TrackContainsHit( Track *track , CaloHit *caloHit );
 
 			Return ClearAllContent();
 
-			Return FindTrackContainingHit( Hit *hit , Track *trackToFind );
+			Return FindTrackContainingHit( CaloHit *caloHit , Track *trackToFind );
 
 
 		protected:
