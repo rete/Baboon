@@ -57,7 +57,7 @@ namespace baboon {
 		if( cluster == 0 )
 			return BABOON_INVALID_PARAMETER("While adding a cluster : assertion cluster != 0 failed");
 
-		if( cluster->GetType() == fCluster2D ) {
+		if( cluster->GetClusterType() == fCluster2D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
 			if( clusterIt != clusters2D->end() )
 				return BABOON_ALREADY_PRESENT("Cluster already exists in cluster collection");
@@ -66,7 +66,7 @@ namespace baboon {
 				return BABOON_SUCCESS();
 			}
 		}
-		else if( cluster->GetType() == fCluster3D ) {
+		else if( cluster->GetClusterType() == fCluster3D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
 			if( clusterIt != clusters3D->end() )
 				return BABOON_ALREADY_PRESENT("Cluster already exists in cluster collection");
@@ -84,7 +84,7 @@ namespace baboon {
 		if( cluster == 0 )
 			return BABOON_INVALID_PARAMETER("While removing a cluster : assertion cluster != 0 failed");
 
-		if( cluster->GetType() == fCluster2D ) {
+		if( cluster->GetClusterType() == fCluster2D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters2D->begin() ,clusters2D->end() , cluster );
 			if( clusterIt != clusters2D->end() ) {
 				delete cluster;
@@ -92,7 +92,7 @@ namespace baboon {
 			}
 			else return BABOON_NOT_FOUND("While removing cluster : cluster was not registered in the cluster collection 2D");
 		}
-		else if( cluster->GetType() == fCluster3D ) {
+		else if( cluster->GetClusterType() == fCluster3D ) {
 			ClusterCollection::iterator clusterIt = std::find( clusters3D->begin() ,clusters3D->end() , cluster );
 			if( clusterIt != clusters3D->end() ) {
 				delete cluster;
@@ -126,9 +126,9 @@ namespace baboon {
 	}
 
 
-	bool ClusteringManager::ClusterContainsHit( Cluster *cluster , Hit *hit ) {
+	bool ClusteringManager::ClusterContainsHit( Cluster *cluster , CaloHit *caloHit ) {
 
-		return cluster->Contains( hit );
+		return cluster->Contains( caloHit );
 	}
 
 
@@ -140,12 +140,12 @@ namespace baboon {
 		if( clusterToEnlarge == clusterToDelete )
 			return BABOON_INVALID_PARAMETER("Cluster are the same. Can't merge the same clusters!");
 
-		HitCollection *hitCollection = clusterToDelete->GetHitCollection();
+		CaloHitCollection *caloHitCollection = clusterToDelete->GetCaloHitCollection();
 
-		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+		for( unsigned int i=0 ; i<caloHitCollection->size() ; i++ ) {
 
-			clusterToEnlarge->AddHit( hitCollection->at(i) );
-			clusterToDelete->RemoveHit( hitCollection->at(i) );
+			clusterToEnlarge->AddCaloHit( caloHitCollection->at(i) );
+			clusterToDelete->RemoveCaloHit( caloHitCollection->at(i) );
 		}
 
 		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , this->RemoveCluster( clusterToDelete ) );
@@ -158,19 +158,36 @@ namespace baboon {
 
 	Cluster *ClusteringManager::GetClusterAt( ClusterType clusterType , unsigned int I , unsigned int J , unsigned int K ) {
 
-		if( !HitManager::GetInstance()->PadIsTouched(I,J,K) )
-			return 0;
+		CaloHit *CaloHit = 0;
+//
+//		if( clusterType == fCluster2D ) {
+//			for( unsigned int i=0 ; i<clusters2D->size() ; i++ )
+//				if( clusters2D->at(i)->Contains( hitAtIJK ) )
+//					return clusters2D->at(i);
+//		}
+//		else {
+//			for( unsigned int i=0 ; i<clusters3D->size() ; i++ )
+//				if( clusters3D->at(i)->Contains( hitAtIJK ) )
+//					return clusters3D->at(i);
+//		}
 
-		Hit *hitAtIJK = HitManager::GetInstance()->GetHitAt(I,J,K);
+		return 0;
+	}
+
+
+	Cluster *ClusteringManager::GetClusterContainingCaloHit( ClusterType clusterType , CaloHit *caloHit ) {
+
+		if( caloHit == 0 )
+			return 0;
 
 		if( clusterType == fCluster2D ) {
 			for( unsigned int i=0 ; i<clusters2D->size() ; i++ )
-				if( clusters2D->at(i)->Contains( hitAtIJK ) )
+				if( clusters2D->at(i)->Contains( caloHit ) )
 					return clusters2D->at(i);
 		}
 		else {
 			for( unsigned int i=0 ; i<clusters3D->size() ; i++ )
-				if( clusters3D->at(i)->Contains( hitAtIJK ) )
+				if( clusters3D->at(i)->Contains( caloHit ) )
 					return clusters3D->at(i);
 		}
 
