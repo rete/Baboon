@@ -27,10 +27,11 @@
 #include <algorithm>
 
 
-#include "Objects/HitCollection.hh"
-#include "Managers/HitManager.hh"
+#include "Objects/CaloHit.hh"
 #include "Objects/Cluster.hh"
 #include "Utilities/Globals.hh"
+
+#include "Detector/Calorimeter.hh"
 
 namespace baboon {
 
@@ -76,12 +77,13 @@ namespace baboon {
 
 			ClusteringMode fClusteringMode;
 			TaggingMode fTaggingMode;
-			std::vector<Tag> hitTagToCluster;
-			std::vector<Tag> hitTagToAvoid;
+			TagCollection hitTagToCluster;
+			TagCollection hitTagToAvoid;
 			ClusterCollection *clusterCollection;
 			unsigned int clusterSizeLowerLimit;
 			unsigned int neighborDistance;
-			HitCollection treatedHits;
+			CaloHitCollection treatedHits;
+			Calorimeter *calorimeter;
 
 			/*!
 			 *
@@ -119,21 +121,21 @@ namespace baboon {
 			 * @brief Return true if the given tag is to be avoided while clustering
 			 *
 			 */
-			bool AvoidTag( const Tag &fTag );
+			bool AvoidTag( const BaseTag &tag );
 
 			/*!
 			 *
 			 * @brief Return true if the given tag has to be kept while clustering
 			 *
 			 */
-			bool KeepTag( const Tag &fTag );
+			bool KeepTag( const BaseTag &tag );
 
 			/*!
 			 *
 			 * @brief Check the tag information to continue the algorithm or not
 			 *
 			 */
-			bool CheckTag( const Tag &fTag );
+			bool CheckTag( const BaseTag &tag );
 
 			/*
 			 *
@@ -141,7 +143,7 @@ namespace baboon {
 			 * This is repeated for the added hit, etc...
 			 *
 			 */
-			Return FindCluster( Hit *hit , Cluster *cluster );
+			Return FindCluster( CaloHit *hit , Cluster *cluster );
 
 
 		public:
@@ -175,14 +177,14 @@ namespace baboon {
 			 * @brief Set the hit tag to cluster hits
 			 *
 			 */
-			Return AddHitTagToCluster( const Tag &fTag );
+			Return AddHitTagToCluster( const BaseTag &tag );
 
 			/*!
 			 *
 			 * @brief Set the hit tag to be avoided while clustering
 			 *
 			 */
-			Return AddHitTagToAvoid( const Tag &fTag );
+			Return AddHitTagToAvoid( const BaseTag &tag );
 
 			/*!
 			 *
@@ -197,6 +199,13 @@ namespace baboon {
 			 *
 			 */
 			Return SetNeighborDistance( unsigned int );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetCalorimeter( Calorimeter *calo );
 
 
 

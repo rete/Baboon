@@ -13,7 +13,7 @@
  */
 
 
-#include "Algorithm/Tracking/HoughTransformAlgorithm.hh"
+#include "Algorithm/Calorimetry/HoughTransformAlgorithm.hh"
 
 
 using namespace std;
@@ -207,7 +207,7 @@ namespace baboon {
 
 
 	Return HoughTransformAlgorithm::Execute() {
-
+/*
 		HitCollection *hitCollection = HitManager::GetInstance()->GetHitCollection();
 		ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 
@@ -327,9 +327,6 @@ namespace baboon {
 			}
 		}
 
-		/*
-		 * End of hough hit tagging
-		 */
 
 
 		HitCollection treatedHits;
@@ -403,10 +400,6 @@ namespace baboon {
 				}
 			}
 
-			/*
-			 * Check if the number of remaining hits in the hit track
-			 * collection is enough to build a track
-			 */
 
 			if( aTrackHits.size() < trackSegmentMinimumSize ) {
 
@@ -470,7 +463,7 @@ namespace baboon {
 		delete houghSpaceXClustersHisto;
 		delete houghSpaceYHisto;
 		delete houghSpaceYClustersHisto;
-
+*/
 		return BABOON_SUCCESS();
 	}
 

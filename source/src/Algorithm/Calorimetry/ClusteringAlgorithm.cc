@@ -14,7 +14,7 @@
  */
 
 
-#include "Algorithm/Clustering/ClusteringAlgorithm.hh"
+#include "Algorithm/Calorimetry/ClusteringAlgorithm.hh"
 
 using namespace std;
 
@@ -32,6 +32,7 @@ namespace baboon {
 		clusterCollection = 0;
 		clusterSizeLowerLimit = 1;
 		neighborDistance = 1;
+		calorimeter = 0;
 
 	}
 
@@ -48,26 +49,29 @@ namespace baboon {
 
 	Return ClusteringAlgorithm::Execute() {
 
-		HitManager *hitManager = HitManager::GetInstance();
-		HitCollection *hitCollection = hitManager->GetHitCollection();
 
-		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
+		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
 
-			Hit *hit = hitCollection->at(i);
-			IntVector ijk = hit->GetIJK();
+		if( caloHitCollection->empty() )
+			return BABOON_SUCCESS();
 
-			if( find( treatedHits.begin() , treatedHits.end() , hit ) != treatedHits.end() )
+		for( unsigned int i=0 ; i<caloHitCollection->size() ; i++ ) {
+
+			CaloHit *caloHit = caloHitCollection->at(i);
+			IntVector ijk = caloHit->GetIJK();
+
+			if( find( treatedHits.begin() , treatedHits.end() , caloHit ) != treatedHits.end() )
 				continue;
 
-			treatedHits.push_back( hit );
+			treatedHits.push_back( caloHit );
 
-			if ( !CheckTag( hitCollection->at( i )->GetHitTag() ) )
+			if ( !CheckTag( caloHitCollection->at( i )->GetTag() ) )
 				continue;
 
 			Cluster *cluster = new Cluster();
-			cluster->AddHit( hit );
+			cluster->AddCaloHit( caloHit );
 
-			this->FindCluster( hit , cluster );
+			this->FindCluster( caloHit , cluster );
 
 			if( fClusteringMode == fClustering2D ) cluster->SetClusterType( fCluster2D );
 			else if( fClusteringMode == fClustering3D ) cluster->SetClusterType( fCluster3D );
@@ -89,13 +93,13 @@ namespace baboon {
 		hitTagToAvoid.clear();
 		neighborDistance = 1;
 		clusterSizeLowerLimit = 1;
+		calorimeter = 0;
 		return BABOON_SUCCESS();
 	}
 
-	Return ClusteringAlgorithm::FindCluster( Hit *hit , Cluster *cluster ) {
+	Return ClusteringAlgorithm::FindCluster( CaloHit *caloHit , Cluster *cluster ) {
 
-		HitManager *hitManager = HitManager::GetInstance();
-		IntVector ijk = hit->GetIJK();
+		IntVector ijk = caloHit->GetIJK();
 
 		int distance = neighborDistance;
 
@@ -107,13 +111,10 @@ namespace baboon {
 						if( k != 0 )
 							continue;
 
-					if( !hitManager->PadExists( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
+					if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
 						continue;
 
-					if( !hitManager->PadIsTouched( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
-						continue;
-
-					Hit *otherHit = hitManager->GetHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
+					CaloHit *otherHit = calorimeter->GetCaloHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
 
 					if( find( treatedHits.begin() , treatedHits.end() , otherHit ) != treatedHits.end() )
 						continue;
@@ -123,10 +124,10 @@ namespace baboon {
 
 					treatedHits.push_back( otherHit );
 
-					if ( !CheckTag( otherHit->GetHitTag() ) )
+					if ( !CheckTag( otherHit->GetTag() ) )
 						continue;
 
-					cluster->AddHit( otherHit );
+					cluster->AddCaloHit( otherHit );
 					this->FindCluster( otherHit , cluster );
 				}
 			}
@@ -136,70 +137,66 @@ namespace baboon {
 
 	Return ClusteringAlgorithm::CheckConsistency() {
 
-		Return ret = BABOON_SUCCESS();
-		if( clusterCollection == 0 || clusterCollection == NULL )
-			return BABOON_ERROR("While checking consistency : Cluster collection not set or set to 0 in ClusteringAlgorithm. ");
-		if( !clusterCollection->empty() ) {
-			for( unsigned int i=0 ; i<clusterCollection->size() ; i++ )
-				delete clusterCollection->at(i);
-			clusterCollection->clear();
-			ret = BABOON_SUCCESS("Warning : ClusterCollection has been cleared while checking consistency");
-		}
+		BABOON_CHECK_POINTER( calorimeter );
+
+		BABOON_CHECK_POINTER( clusterCollection );
+
 		for( unsigned int i=0 ; i<hitTagToCluster.size() ; i++ ) {
 			if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , hitTagToCluster.at(i) ) != hitTagToAvoid.end() ) {
 				return BABOON_ERROR("Tag to be avoided also set to be clustered ... Check your inputs!");
 			}
 		}
-		return ret;
+
+		return BABOON_SUCCESS();
 	}
 
 
-	Return ClusteringAlgorithm::AddHitTagToCluster( const Tag &fTag ) {
+	Return ClusteringAlgorithm::AddHitTagToCluster( const BaseTag &tag ) {
 
-		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , fTag ) == hitTagToCluster.end() ) {
-			hitTagToCluster.push_back( fTag );
+		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , tag ) == hitTagToCluster.end() ) {
+			hitTagToCluster.push_back( tag );
 			return BABOON_SUCCESS();
 		}
 		return BABOON_ALREADY_PRESENT("Warning : hit tag was already added");
 	}
 
 
-	Return ClusteringAlgorithm::AddHitTagToAvoid( const Tag &fTag ) {
+	Return ClusteringAlgorithm::AddHitTagToAvoid( const BaseTag &tag ) {
 
-		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , fTag ) == hitTagToAvoid.end() ) {
-			hitTagToAvoid.push_back( fTag );
+		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , tag ) == hitTagToAvoid.end() ) {
+			hitTagToAvoid.push_back( tag );
 			return BABOON_SUCCESS();
 		}
 		else return BABOON_ALREADY_PRESENT("Warning : hit tag was already added");
 	}
 
 
-	bool ClusteringAlgorithm::AvoidTag( const Tag &fTag ) {
+	bool ClusteringAlgorithm::AvoidTag( const BaseTag &tag ) {
 
-		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , fTag ) != hitTagToAvoid.end() ) {
+		if( std::find( hitTagToAvoid.begin() , hitTagToAvoid.end() , tag ) != hitTagToAvoid.end() ) {
 			return true;
 		}
 		return false;
 	}
 
 
-	bool ClusteringAlgorithm::KeepTag( const Tag &fTag ) {
+	bool ClusteringAlgorithm::KeepTag( const BaseTag &tag ) {
 
-		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , fTag ) != hitTagToCluster.end() ) {
+		if( std::find( hitTagToCluster.begin() , hitTagToCluster.end() , tag ) != hitTagToCluster.end() ) {
 			return true;
 		}
 		return false;
 	}
 
-	bool ClusteringAlgorithm::CheckTag( const Tag &fTag ) {
+	bool ClusteringAlgorithm::CheckTag( const BaseTag &tag ) {
 
 		if( fTaggingMode == fAvoidTagMode ) {
 			if( hitTagToAvoid.empty() ) return true;
-			else return !AvoidTag( fTag );
+			else return !AvoidTag( tag );
 		}
 		else if( fTaggingMode == fClusterTagMode ) {
 			if( hitTagToCluster.empty() ) return true;
-			else return KeepTag( fTag );
+			else return KeepTag( tag );
 		}
 		else return true;
 	}
@@ -225,6 +222,14 @@ namespace baboon {
 	Return ClusteringAlgorithm::SetTaggingMode( TaggingMode mode ) {
 
 		fTaggingMode = mode;
+		return BABOON_SUCCESS();
+	}
+
+	Return ClusteringAlgorithm::SetCalorimeter( Calorimeter *calo ) {
+
+		BABOON_CHECK_POINTER( calo );
+
+		calorimeter = calo;
 		return BABOON_SUCCESS();
 	}
 

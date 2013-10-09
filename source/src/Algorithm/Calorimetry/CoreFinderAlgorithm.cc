@@ -13,19 +13,21 @@
  */
 
 
-#include "Algorithm/Clustering/CoreFinderAlgorithm.hh"
+#include "Algorithm/Calorimetry/CoreFinderAlgorithm.hh"
 
 
-using namespace std ;
+using namespace std;
 
 namespace baboon {
 
 
 	CoreFinderAlgorithm::CoreFinderAlgorithm()
 		: AbstractAlgorithm("CoreFinderAlgorithm") {
-		hitCollection = 0;
+		caloHitCollection = 0;
 		distance = 1;
 		needData = true;
+		calorimeter = 0;
+		minimumThresholdConcentration = 0;
 	}
 
 	CoreFinderAlgorithm::~CoreFinderAlgorithm() {}
@@ -33,32 +35,32 @@ namespace baboon {
 
 	Return CoreFinderAlgorithm::Init() {
 
-		hitCollection = HitManager::GetInstance()->GetHitCollection();
 		threshCountVec.clear();
-		data.GetValue("coreCountThreshold",&coreCountThreshold);
 		data.GetValue("minimumThresholdConcentration",&minimumThresholdConcentration);
 		return BABOON_SUCCESS();
 	}
 
 	Return CoreFinderAlgorithm::CheckConsistency() {
 
-		if(hitCollection == 0)
-			return BABOON_ERROR("CoreFinderAlgorithm bad init. Please check your inputs!");
-		return BABOON_SUCCESS();
+		BABOON_CHECK_POINTER( calorimeter );
 
+		if( minimumThresholdConcentration <= 0 )
+			return BABOON_NOT_INITIALIZED("minimumThresholdConcentration bad init ( <= 0)");
+
+		return BABOON_SUCCESS();
 	}
 
 	Return CoreFinderAlgorithm::Execute() {
 
-		HitManager *hitManager = HitManager::GetInstance();
+
+		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
 		CoreManager *coreManager = CoreManager::GetInstance();
 
-		int nbOfCoreHits = 0;
-		for( unsigned int l=0 ; l<hitCollection->size() ; l++ ) {
+		for( unsigned int l=0 ; l<caloHitCollection->size() ; l++ ) {
 
-			Hit *hit = hitCollection->at(l);
-			IntVector ijk = hit->GetIJK();
-			HitThreshold thresh = hit->GetThreshold();
+			CaloHit *caloHit = caloHitCollection->at(l);
+			IntVector ijk = caloHit->GetIJK();
+			CaloHitThreshold thresh = caloHit->GetThreshold();
 
 
 			int count = 0;
@@ -67,22 +69,23 @@ namespace baboon {
 				for(int j=-1 ; j<=1 ; j++) {
 					for(int k=-1 ; k<=1 ; k++) {
 
-						if( !hitManager->PadExists( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) ) continue;
-						if( hitManager->PadIsTouched( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) ) {
-							Hit* touchedHit = hitManager->GetHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
-							int factor = 1;
-							factor *= (1+touchedHit->GetThreshold());
-							count += factor;
-						}
+						if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
+							continue;
+
+						CaloHit* touchedHit = calorimeter->GetCaloHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
+
+						int factor = 1;
+						factor *= touchedHit->GetThreshold();
+						count += factor;
 
 					}
 				}
 			}
+			caloHit->SetDensity( double(count) / 27.0 );
 
-			if(count / 27.0 >= minimumThresholdConcentration ) {
-				hit->SetHitTag( fCore );
-				nbOfCoreHits++;
-			}
+			if(count / 27.0 >= minimumThresholdConcentration )
+				caloHit->SetTag( CoreTag() );
+
 		}
 
 
@@ -91,16 +94,17 @@ namespace baboon {
 
 		clusteringAlgo->SetClusteringMode( fClustering3D );
 		clusteringAlgo->SetTaggingMode( fClusterTagMode );
-		clusteringAlgo->AddHitTagToCluster( fCore );
+		clusteringAlgo->AddHitTagToCluster( CoreTag() );
 		clusteringAlgo->SetClusterCollection( clustCol );
+		clusteringAlgo->SetCalorimeter( calorimeter );
 		clusteringAlgo->Process();
 
 		for( unsigned int i=0 ; i<clustCol->size() ; i++ ) {
 
-			HitCollection *hitCol = clustCol->at(i)->GetHitCollection();
+			CaloHitCollection *caloHitCol = clustCol->at(i)->GetCaloHitCollection();
 			Core *core = new Core();
-			for( unsigned int j=0 ; j<hitCol->size() ; j++ ) {
-				core->AddHit( hitCol->at(j) );
+			for( unsigned int j=0 ; j<caloHitCol->size() ; j++ ) {
+				core->AddCaloHit( caloHitCol->at(j) );
 			}
 			core->SetBuildConcentration( minimumThresholdConcentration );
 			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , coreManager->AddCore( core ) );
@@ -117,5 +121,13 @@ namespace baboon {
 
 		return BABOON_SUCCESS();
 	}
+
+	Return CoreFinderAlgorithm::SetCalorimeter( Calorimeter *calo ) {
+
+		BABOON_CHECK_POINTER( calo );
+		calorimeter = calo;
+		return BABOON_SUCCESS();
+	}
+
 
 }

@@ -16,7 +16,7 @@
 
 
 
-#include "Algorithm/Tagging/IsolationTaggingAlgorithm.hh"
+#include "Algorithm/Calorimetry/IsolationTaggingAlgorithm.hh"
 
 
 
@@ -30,9 +30,10 @@ namespace baboon {
 	IsolationTaggingAlgorithm::IsolationTaggingAlgorithm()
 		: AbstractAlgorithm("IsolationTaggingAlgorithm") {
 		needData = false;
-		hitCollection = 0;
+		calorimeter = 0;
+
 		// default values
-		distance = 2;
+		distance = 1;
 		concentrationLimit = 0.2;
 	}
 
@@ -46,50 +47,58 @@ namespace baboon {
 
 		data.GetValue("distance",&distance);
 		data.GetValue("concentrationLimit",&concentrationLimit);
-		hitCollection = HitManager::GetInstance()->GetHitCollection();
+
 		isolationWeights.clear();
+
 		return BABOON_SUCCESS();
 	}
 
 	Return IsolationTaggingAlgorithm::CheckConsistency() {
 
-		if( hitCollection == 0 )
-			return BABOON_ERROR("Isolation Tagging Algorithm bad init. Please check your inputs!");
+		BABOON_CHECK_POINTER( calorimeter );
+
 		return BABOON_SUCCESS();
 	}
 
 	Return IsolationTaggingAlgorithm::Execute() {
 
-		HitManager *hitManager = HitManager::GetInstance();
+//		HitManager *hitManager = HitManager::GetInstance();
+		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
 
 		unsigned int hitID = 0;
-		unsigned int size = hitCollection->size();
-		unsigned int volume = (2*distance+1)*(2*distance+1)*(2*distance+1);
+		unsigned int size = caloHitCollection->size();
 
 		for( hitID=0 ; hitID<size ; hitID++ ) {
 
-			Hit *hit = hitCollection->at(hitID);
-			IntVector ijk1 = hit->GetIJK();
+			CaloHit *caloHit = caloHitCollection->at(hitID);
+			IntVector ijk1 = caloHit->GetIJK();
 
-			int hitCount = 0;
+			int count = 0;
+			int volume = 0;
 
 			for( int i=-distance ; i<=distance ; i++ ) {
 				for( int j=-distance ; j<=distance ; j++ ) {
 					for( int k=-distance ; k<=distance ; k++ ) {
 
-						if( !hitManager->PadExists( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k ) ) continue;
-						if( !hitManager->PadIsTouched( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k ) ) continue;
+						volume++;
 
-						hitCount++;
-						Hit *hit2 = hitManager->GetHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
+						if( !calorimeter->IsPadFired( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k ) )
+							continue;
 
+						CaloHit *caloHit2 = calorimeter->GetCaloHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
+						int factor = 1;
+						factor *= caloHit2->GetThreshold();
+						count += factor;
 					}
 				}
 			}
-			isolationWeights.push_back( double(hitCount) / volume );
 
-			if( double(hitCount) / volume < concentrationLimit ) {
-				hit->SetHitTag( fIsolated );
+			caloHit->SetDensity( double(count) / volume );
+
+			isolationWeights.push_back( double(count) / volume );
+//			cout << "density : " << double(count) / volume << endl;
+			if( double(count) / volume < concentrationLimit ) {
+				caloHit->SetTag( IsolatedTag() );
 			}
 		}
 		return BABOON_SUCCESS();
@@ -97,11 +106,15 @@ namespace baboon {
 
 	Return IsolationTaggingAlgorithm::End() {
 
-		hitCollection = 0;
+		calorimeter = 0;
 		return BABOON_SUCCESS();
 	}
 
+	Return IsolationTaggingAlgorithm::SetCalorimeter( Calorimeter *calo ) {
 
+		calorimeter = calo;
+		return BABOON_SUCCESS();
+	}
 
 
 

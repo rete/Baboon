@@ -27,11 +27,11 @@
 #include <vector> 
 
 #include "Objects/Cluster.hh"
-#include "Objects/HitCollection.hh"
-#include "Managers/HitManager.hh"
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Internal.hh"
+
+#include "Detector/Calorimeter.hh"
 
 namespace baboon {
 
@@ -60,19 +60,18 @@ namespace baboon {
 
 			/*!
 			 *
-			 * @brief Set the hit collection for the algorithm
-			 *
-			 */
-			void SetHitCollection( HitCollection *hitCol )
-				{ hitCollection = hitCol; }
-
-			/*!
-			 *
 			 * @brief Return the isolation weights
 			 *
 			 */
 			inline std::vector<double> GetIsolationWeights()
 				{ return isolationWeights; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetCalorimeter( Calorimeter *calo );
 
 
 		protected:
@@ -106,7 +105,7 @@ namespace baboon {
 			virtual Return CheckConsistency();
 
 
-			HitCollection *hitCollection;
+			Calorimeter *calorimeter;
 
 			// Algorithm parameters
 			int distance;

@@ -30,9 +30,7 @@
 // sdhcal includes
 #include "Algorithm/AbstractAlgorithm.hh"
 #include "Objects/Cluster.hh"
-#include "Objects/HitCollection.hh"
 #include "Managers/ClusteringManager.hh"
-#include "Managers/HitManager.hh"
 #include "Managers/TrackManager.hh"
 #include "Reconstruction/Tag.hh"
 #include "Utilities/ReturnValues.hh"
@@ -88,7 +86,7 @@ namespace baboon {
 		typedef struct {
 
 			public :
-				Hit *hit;
+				CaloHit *caloHit;
 				std::vector<int> rhox;
 				std::vector<int> rhoy;
 				HoughTag tagx;
@@ -107,7 +105,7 @@ namespace baboon {
 		 */
 		typedef struct {
 
-			Hit* hit;
+			CaloHit* caloHit;
 			double theta;
 			double rho;
 			int pointID;
@@ -194,9 +192,6 @@ namespace baboon {
 			int minimumNumberOfLayersForTrack;
 			double normalizedChi2Limit;
 			double chi2DifferenceLimit;
-
-//		    pathfinder::FinderParameter* _myFinderParameter;
-//		    pathfinder::HoughTrafoTrackFinder* _trackFinder;
 
 		    int trackModel;
 		    int minHitOnTrack;

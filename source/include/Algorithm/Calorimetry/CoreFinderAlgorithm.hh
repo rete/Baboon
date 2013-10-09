@@ -23,13 +23,12 @@
 #include <vector>
 
 #include "Algorithm/AbstractAlgorithm.hh"
-#include "Algorithm/Clustering/ClusteringAlgorithm.hh"
+#include "Algorithm/Calorimetry/ClusteringAlgorithm.hh"
 #include "Managers/ClusteringManager.hh"
 #include "Exception.hh"
-#include "Managers/HitManager.hh"
 #include "Managers/CoreManager.hh"
-#include "Objects/HitCollection.hh"
 #include "Objects/Core.hh"
+#include "Detector/Calorimeter.hh"
 
 
 namespace baboon {
@@ -89,10 +88,6 @@ namespace baboon {
 			 */
 			virtual Return CheckConsistency();
 
-			/*! Set the hit collection needed for the algorithm */
-//			inline void SetHitCollection( HitCollection *hitCol )
-//				{ hitCollection = hitCol; }
-
 			/*!
 			 *
 			 * @brief Set the distance between two pads to clusterize core hits
@@ -101,14 +96,21 @@ namespace baboon {
 			inline void SetDistance( int d )
 				{ distance = d; }
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetCalorimeter( Calorimeter *calo );
+
 
 		protected :
 
-			HitCollection *hitCollection;
+			CaloHitCollection *caloHitCollection;
 			std::vector<int> threshCountVec;
+			Calorimeter *calorimeter;
 
 			// Algorithm parameters
-			int coreCountThreshold;
 			int distance;
 			double minimumThresholdConcentration;
 
