@@ -23,6 +23,7 @@ namespace baboon {
 		: HitCompositeObject(),
 		  TypedObject("Cluster") {
 
+		fClusterTag = UndefinedTag();
 	}
 
 	Cluster::~Cluster() {
@@ -32,18 +33,18 @@ namespace baboon {
 
 	void Cluster::ComputePosition() {
 
-		if( hitCollection->empty() ) return;
+		if( caloHitCollection->empty() ) return;
 		ThreeVector pos(0,0,0);
 		if(position == pos) {
-			for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
-				Hit *hit = hitCollection->at(i);
-				IntVector hitIJK = hit->GetIJK();
+			for(unsigned int i=0 ; i<caloHitCollection->size() ; i++) {
+				CaloHit *caloHit = caloHitCollection->at(i);
+				IntVector hitIJK = caloHit->GetIJK();
 
 				pos.set( pos.x() + hitIJK.at(0)
 				        ,pos.y() + hitIJK.at(1)
 				        ,pos.z() + hitIJK.at(2) );
 			}
-			pos *= double(1.0/hitCollection->size());
+			pos *= double(1.0/caloHitCollection->size());
 			position = pos;
 		}
 	}
@@ -92,15 +93,18 @@ namespace baboon {
 		return isol;
 	}
 
+	void Cluster::SetClusterTag( const BaseTag &clustTag ) {
 
-	void Cluster::SetClusterTagRecursive( const Tag &clustTag ) {
+		fClusterTag.CopyTag( clustTag );
+	}
 
-		for(unsigned int i=0 ; i<hitCollection->size() ; i++) {
-			Hit *hit = hitCollection->at(i);
-			if(hit->GetHitTag() != clustTag)
-				hit->SetHitTag(clustTag);
+
+	void Cluster::SetClusterTagRecursive( const BaseTag &clustTag ) {
+
+		for(unsigned int i=0 ; i<caloHitCollection->size() ; i++) {
+			caloHitCollection->at(i)->SetTag( clustTag );
 		}
-		fClusterTag = clustTag;
+		this->SetClusterTag( clustTag );
 	}
 
 

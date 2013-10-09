@@ -22,6 +22,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <algorithm>
+#include <map>
 
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
@@ -50,7 +51,7 @@ namespace baboon {
 		protected :
 
 			ThreeVector position;
-			Tag fClusterTag;
+			BaseTag fClusterTag;
 			ClusterType fType;
 
 			/*!
@@ -61,35 +62,79 @@ namespace baboon {
 			void ComputePosition();
 
 		public :
-			/*! Default Constructor */
+
+			/*!
+			 *
+			 * Default Constructor
+			 *
+			 */
 			Cluster();
 
-			/*! Default Destructor */
+			/*!
+			 *
+			 * Default Destructor
+			 *
+			 */
 			virtual ~Cluster();
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			const ThreeVector& GetPosition() {
 				this->ComputePosition();
 				return position;
 			}
 
-			bool IsIsolatedFromClusters(const std::vector<Cluster*>* clusters);
+			/*!
+			 *
+			 *
+			 *
+			 */
+			bool IsIsolatedFromClusters( const std::vector<Cluster*>* clusters );
 
-			void SetClusterTagRecursive( const Tag &clustTag );
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetClusterTagRecursive( const BaseTag &clustTag );
 
-			inline void SetClusterTag(Tag clustTag)
-				{ fClusterTag = clustTag; }
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline void SetClusterTag( const BaseTag &clustTag );
 
-			inline Tag GetClusterTag() const
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline BaseTag GetClusterTag() const
 				{ return fClusterTag; }
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			Return SetClusterType( const ClusterType &type );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			inline ClusterType GetClusterType() const
 				{ return fType; }
 
 	};
 
 	typedef std::vector<Cluster*> ClusterCollection;
+	typedef std::map<unsigned int,ClusterCollection*> OrderedClusterCollection;
 
 
 }  //  end namespace sdhcal
