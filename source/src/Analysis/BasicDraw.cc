@@ -90,7 +90,7 @@ namespace baboon {
 	TLegend *NewTLegend( double x1 , double y1 , double x2 , double y2 ) {
 
 		TLegend *legend = new TLegend(x1,y1,x2,y2);
-		legend->SetMargin(0.5);
+		legend->SetMargin(0.3);
 		legend->SetLineColor(0);
 		legend->SetLineWidth(0);
 		legend->SetFillColor(0);
