@@ -23,7 +23,7 @@
 #include <cmath> 
 #include <vector> 
 
-#include "Objects/HitCollection.hh"
+#include "Objects/CaloHit.hh"
 
 
 namespace baboon {
@@ -66,7 +66,7 @@ namespace baboon {
 
 		protected:
 
-			HitCollection *hitCollection;
+			CaloHitCollection *caloHitCollection;
 			double *params;
 			double energy;
 
@@ -77,8 +77,8 @@ namespace baboon {
 			 * @brief Set the hit collection for the energy computation;
 			 *
 			 */
-			inline void SetHitCollection( HitCollection *hitCol )
-				{ hitCollection = hitCol; }
+			inline void SetCaloHitCollection( CaloHitCollection *caloHitCol )
+				{ caloHitCollection = caloHitCol; }
 
 			/*!
 			 *

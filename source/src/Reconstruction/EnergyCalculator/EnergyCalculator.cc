@@ -23,7 +23,7 @@ namespace baboon {
 	EnergyCalculator::EnergyCalculator() {
 
 		energy = 0.0;
-		hitCollection = 0;
+		caloHitCollection = 0;
 		params = 0;
 	}
 
