@@ -23,7 +23,7 @@ using namespace std ;
 
 namespace baboon {
 
-	Overlayer::Overlayer( HitCollection *col1 , HitCollection *col2) {
+	Overlayer::Overlayer( CaloHitCollection *col1 , CaloHitCollection *col2) {
 
 		collection1 = col1;
 		collection2 = col2;
@@ -33,9 +33,9 @@ namespace baboon {
 		SdhcalConfig::GetInstance()->GetData("pads").GetValue("size",&padsSize);
 		SdhcalConfig::GetInstance()->GetData("pads").GetValue("interpadSize",&interpadSize);
 		SdhcalConfig::GetInstance()->GetData("layers").GetValue("thickness",&layerThickness);
-		overlaidCollection = new HitCollection();
+		overlaidCollection = new CaloHitCollection();
 		collectionsTranslated = false;
-		lostHitCollection = new HitCollection();
+		lostHitCollection = new CaloHitCollection();
 	}
 
 	Overlayer::~Overlayer() {
@@ -59,8 +59,8 @@ namespace baboon {
 
 			for(int eltID=0 ; eltID<collection1->size() ; eltID++) {
 
-				Hit *hit = collection1->at( eltID );
-				IntVector ijk = hit->GetIJK();
+				CaloHit *caloHit = collection1->at( eltID );
+				IntVector ijk = caloHit->GetIJK();
 
 				// if the hit is outside of the sdhcal remove it from the collection!
 				if( ( ijk.at(0) + round( collectionTranslation1->x()) ) < 0
@@ -72,10 +72,10 @@ namespace baboon {
 
 					collection1->erase( collection1->begin() + eltID );
 					lostHits++;
-					lostHitCollection->push_back( hit );
+					lostHitCollection->push_back( caloHit );
 				}
 				else {
-					hit->SetIJK( ijk.at(0) + round( collectionTranslation1->x() )
+					caloHit->SetIJK( ijk.at(0) + round( collectionTranslation1->x() )
 										,ijk.at(1) + round( collectionTranslation1->y() )
 										,ijk.at(2) + round( collectionTranslation1->z() ) );
 
@@ -83,17 +83,17 @@ namespace baboon {
 					double xShift = padsSize.at(0) + interpadSize.at(0);
 					double yShift = padsSize.at(1) + interpadSize.at(1);
 					double zShift = layerThickness;
-					pos.setX( hit->GetPosition().x() + xShift*round(collectionTranslation1->x()) );
-					pos.setY( hit->GetPosition().y() + yShift*round(collectionTranslation1->y()) );
-					pos.setZ( hit->GetPosition().z() + zShift*round(collectionTranslation1->z()) );
-					hit->SetPosition(pos);
+					pos.setX( caloHit->GetPosition().x() + xShift*round(collectionTranslation1->x()) );
+					pos.setY( caloHit->GetPosition().y() + yShift*round(collectionTranslation1->y()) );
+					pos.setZ( caloHit->GetPosition().z() + zShift*round(collectionTranslation1->z()) );
+					caloHit->SetPosition(pos);
 				}
 			}
 
 			for(int eltID=0 ; eltID<collection2->size() ; eltID++) {
 
-				Hit *hit = collection2->at( eltID );
-				IntVector ijk = hit->GetIJK();
+				CaloHit *caloHit = collection2->at( eltID );
+				IntVector ijk = caloHit->GetIJK();
 
 				// if the hit is outside of the sdhcal remove it from the collection!
 				if( ( ijk.at(0) + round( collectionTranslation2->x()) ) < 0
@@ -105,10 +105,10 @@ namespace baboon {
 
 					collection2->erase( collection2->begin() + eltID );
 					lostHits++;
-					lostHitCollection->push_back( hit );
+					lostHitCollection->push_back( caloHit );
 				}
 				else {
-					hit->SetIJK( ijk.at(0) + round( collectionTranslation2->x() )
+					caloHit->SetIJK( ijk.at(0) + round( collectionTranslation2->x() )
 								,ijk.at(1) + round( collectionTranslation2->y() )
 								,ijk.at(2) + round( collectionTranslation2->z() ) );
 
@@ -116,10 +116,10 @@ namespace baboon {
 					double xShift = padsSize.at(0) + interpadSize.at(0);
 					double yShift = padsSize.at(1) + interpadSize.at(1);
 					double zShift = layerThickness;
-					pos.setX( hit->GetPosition().x() + xShift*round(collectionTranslation2->x()) );
-					pos.setY( hit->GetPosition().y() + yShift*round(collectionTranslation2->y()) );
-					pos.setZ( hit->GetPosition().z() + zShift*round(collectionTranslation2->z()) );
-					hit->SetPosition(pos);
+					pos.setX( caloHit->GetPosition().x() + xShift*round(collectionTranslation2->x()) );
+					pos.setY( caloHit->GetPosition().y() + yShift*round(collectionTranslation2->y()) );
+					pos.setZ( caloHit->GetPosition().z() + zShift*round(collectionTranslation2->z()) );
+					caloHit->SetPosition(pos);
 				}
 			}
 			collectionsTranslated = true;
@@ -140,15 +140,15 @@ namespace baboon {
 
 		for( unsigned int j=0 ; j<collection2->size() ; j++ ) {
 
-			Hit *hit2 = collection2->at(j);
-			IntVector ijk2 = hit2->GetIJK();
+			CaloHit *caloHit2 = collection2->at(j);
+			IntVector ijk2 = caloHit2->GetIJK();
 
 			bool hitIsOverlaid = false;
 
 			for( int i=0 ; i<collection1->size() ; i++ ) {
 
-				Hit *hit1 = collection1->at(i);
-				IntVector ijk1 = hit1->GetIJK();
+				CaloHit *caloHit1 = collection1->at(i);
+				IntVector ijk1 = caloHit1->GetIJK();
 
 				if( ijk1.at(0) == ijk2.at(0)
 				 && ijk1.at(1) == ijk2.at(1)
@@ -156,35 +156,35 @@ namespace baboon {
 
 					hitIsOverlaid = true;
 					count ++;
-					hit1->SetType(3);    // Overlaid hit type
-					HitThreshold thresholdTable[3][3] = { fThreshold1 , fThreshold2 , fThreshold3 ,
-														  fThreshold2 , fThreshold2 , fThreshold3 ,
-														  fThreshold3 , fThreshold3 , fThreshold3 };
-					HitThreshold fThr1 = hit1->GetThreshold();
-					HitThreshold fThr2 = hit2->GetThreshold();
-					HitThreshold newThr = thresholdTable [ThresholdToInt(fThr1)][ThresholdToInt(fThr2)];
+					caloHit1->SetTypeID(3);    // Overlaid hit type
+					CaloHitThreshold thresholdTable[3][3] = { fCaloHitThr1 , fCaloHitThr2 , fCaloHitThr3 ,
+															  fCaloHitThr2 , fCaloHitThr2 , fCaloHitThr3 ,
+															  fCaloHitThr3 , fCaloHitThr3 , fCaloHitThr3 };
+					CaloHitThreshold fThr1 = caloHit1->GetThreshold();
+					CaloHitThreshold fThr2 = caloHit2->GetThreshold();
+					CaloHitThreshold newThr = thresholdTable [ThresholdToInt(fThr1)][ThresholdToInt(fThr2)];
 
 					if( newThr == fThr1 ) continue;
 					else {
-						hit1->SetThreshold( newThr );
+						caloHit1->SetThreshold( newThr );
 					}
 
 				}
 				if( hitIsOverlaid ) break;
 			}
 
-			if( !hitIsOverlaid ) overlaidCollection->push_back( hit2 );
+			if( !hitIsOverlaid ) overlaidCollection->push_back( caloHit2 );
 		}
 		return BABOON_SUCCESS();
 	}
 
 
 
-	int Overlayer::ThresholdToInt( HitThreshold fThr ) {
+	int Overlayer::ThresholdToInt( CaloHitThreshold fThr ) {
 
-		if( fThr == fThreshold1 ) return 0;
-		if( fThr == fThreshold2 ) return 1;
-		if( fThr == fThreshold3 ) return 2;
+		if( fThr == fCaloHitThr1 ) return 0;
+		else if( fThr == fCaloHitThr2 ) return 1;
+		else return 2;
 	}
 
 

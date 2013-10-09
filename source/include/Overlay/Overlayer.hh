@@ -24,7 +24,7 @@
 // baboon includes
 #include "Geometry/ThreeVector.hh"
 #include "Config/SdhcalConfig.hh"
-#include "Objects/HitCollection.hh"
+#include "Objects/CaloHit.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Internal.hh"
 
@@ -43,10 +43,10 @@ namespace baboon {
 
 			std::vector<int> nbOfPadsXYZ;
 			int lostHits;
-			HitCollection* collection1;
-			HitCollection* collection2;
-			HitCollection* overlaidCollection;
-			HitCollection* lostHitCollection;
+			CaloHitCollection* collection1;
+			CaloHitCollection* collection2;
+			CaloHitCollection* overlaidCollection;
+			CaloHitCollection* lostHitCollection;
 			ThreeVector *collectionTranslation1;
 			ThreeVector *collectionTranslation2;
 			std::vector<double> padsSize;
@@ -57,7 +57,7 @@ namespace baboon {
 
 			Return TranslateCollections();
 
-			int ThresholdToInt( HitThreshold fThr );
+			int ThresholdToInt( CaloHitThreshold fThr );
 
 		public :
 
@@ -66,7 +66,7 @@ namespace baboon {
 			 * Default Constructor with two collections
 			 *
 			 */
-			Overlayer( HitCollection *col1 , HitCollection *col2) ;
+			Overlayer( CaloHitCollection *col1 , CaloHitCollection *col2) ;
 
 			/*!
 			 *
@@ -82,10 +82,10 @@ namespace baboon {
 			 */
 			Return OverlayCollections();
 
-			inline HitCollection* GetOverlaidCollection()
+			inline CaloHitCollection* GetOverlaidCollection()
 				{ return overlaidCollection; }
 
-			inline void SetTranslations(ThreeVector* trans1 , ThreeVector* trans2) {
+			inline void SetTranslations( ThreeVector* trans1 , ThreeVector* trans2 ) {
 				collectionTranslation1 = trans1;
 				collectionTranslation2 = trans2;
 			}
@@ -93,7 +93,7 @@ namespace baboon {
 			inline int GetNumberOfLostHits()
 				{ return lostHits; }
 
-			inline HitCollection *GetLostHitCollection()
+			inline CaloHitCollection *GetLostHitCollection()
 				{ return lostHitCollection; }
 
 
