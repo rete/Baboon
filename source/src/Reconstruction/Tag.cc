@@ -20,29 +20,54 @@ namespace baboon {
 
 
 
-	Tag StringToTag( const std::string tagString ) {
+//	Tag StringToTag( const std::string tagString ) {
+//
+//		if( tagString == "fIsolated" )             return fIsolated;
+//		else if( tagString == "fTrack" )           return fTrack;
+//		else if( tagString == "fTrackExtremity" )  return fTrackExtremity;
+//		else if( tagString == "fCore" )            return fCore;
+//		else if( tagString == "fNoise" )           return fNoise;
+//		else                                       return fUndefined;
+//	}
+//
+//	std::string TagToString( Tag tag ) {
+//
+//		      if( tag == fIsolated )       return std::string("fIsolated");
+//		else if( tag == fTrack )          return std::string("fTrack");
+//		else if( tag == fTrackExtremity ) return std::string("fTrackExtremity");
+//		else if( tag == fCore )           return std::string("fCore");
+//		else if( tag == fNoise )       return std::string("fNoise");
+//		else                               return std::string("fUndefined");
+//	}
 
-		if( tagString == "fIsolated" )             return fIsolated;
-		else if( tagString == "fTrack" )           return fTrack;
-		else if( tagString == "fTrackExtremity" )  return fTrackExtremity;
-		else if( tagString == "fCore" )            return fCore;
-		else if( tagString == "fNoise" )           return fNoise;
-		else                                       return fUndefined;
+
+	bool operator ==( const BaseTag &tag1 , const BaseTag &tag2 ) {
+
+		if( tag1.GetTag() == tag2.GetTag() )
+			return true;
+		return false;
 	}
 
-	std::string TagToString( Tag tag ) {
+	bool operator !=( const BaseTag &tag1 , const BaseTag &tag2 ) {
 
-		      if( tag == fIsolated )       return std::string("fIsolated");
-		else if( tag == fTrack )          return std::string("fTrack");
-		else if( tag == fTrackExtremity ) return std::string("fTrackExtremity");
-		else if( tag == fCore )           return std::string("fCore");
-		else if( tag == fNoise )       return std::string("fNoise");
-		else                               return std::string("fUndefined");
+		if( tag1.GetTag() != tag2.GetTag() )
+			return true;
+		return false;
 	}
 
-
-//	BaseTag::BaseTag( const std::string &name )
-
+//	bool operator ==( const BaseTag *tag1 , const BaseTag *tag2 ) {
+//
+//		if( tag1->GetTag() == tag2->GetTag() )
+//			return true;
+//		return false;
+//	}
+//
+//	bool operator !=( const BaseTag *tag1 , const BaseTag *tag2 ) {
+//
+//		if( tag1->GetTag() != tag2->GetTag() )
+//			return true;
+//		return false;
+//	}
 
 }  // namespace
 

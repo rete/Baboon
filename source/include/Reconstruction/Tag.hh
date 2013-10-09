@@ -19,26 +19,29 @@
 
 
 #include <string>
+#include <vector>
+
+#include "TColor.h"
 
 
 namespace baboon {
-
-	/*!
-	 * Enumerator for hit tagging. Allow to classify hits in SDHCAL.
-	 */
-	enum Tag {
-		fIsolated,
-		fTrack,
-		fTrackExtremity,
-		fCore,
-		fNoise,
-		fUndefined
-	};
-
-
-	Tag StringToTag( const std::string tagString );
-
-	std::string TagToString( Tag tag );
+//
+//	/*!
+//	 * Enumerator for hit tagging. Allow to classify hits in SDHCAL.
+//	 */
+//	enum Tag {
+//		fIsolated,
+//		fTrack,
+//		fTrackExtremity,
+//		fCore,
+//		fNoise,
+//		fUndefined
+//	};
+//
+//
+//	Tag StringToTag( const std::string tagString );
+//
+//	std::string TagToString( Tag tag );
 
 
 
@@ -46,49 +49,200 @@ namespace baboon {
 
 		public:
 
-			BaseTag( const std::string &name )
-				: tagName(name) {}
+			/*!
+			 *
+			 *
+			 *
+			 */
+			BaseTag( const std::string &name = "" , int color = kWhite )
+				: tagName( name ) , color( color ) {}
 
-			virtual const std::string GetTag() { return tagName; }
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual const std::string GetTag() const
+				{ return tagName; }
 
-			static const std::string Tag() { return "UndefinedTag"; }
+			/*!
+			 *
+			 *
+			 *
+			 */
+			BaseTag &operator =( const BaseTag &tag ) {
+				this->CopyTag( tag );
+				return *this;
+			}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual int GetColor() const
+				{ return color; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual void CopyTag( const BaseTag &tag ) {
+
+				this->tagName = tag.GetTag();
+				this->color = tag.GetColor();
+			}
 
 		protected:
-			const std::string tagName;
+
+			std::string tagName;
+			int color;
 
 	};
+
+	bool operator ==( const BaseTag &tag1 , const BaseTag &tag2 );
+
+	bool operator !=( const BaseTag &tag1 , const BaseTag &tag2 );
+
 
 	class CoreTag : public BaseTag {
 
 		public:
-			CoreTag() : BaseTag("CoreTag") {}
-			static const std::string Tag() { return "CoreTag"; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			CoreTag() : BaseTag( "CoreTag" , kMagenta)
+				{}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static const std::string Tag()
+				{ return "CoreTag"; }
+
 	};
 
 
 	class IsolatedTag : public BaseTag {
 
 		public:
-			IsolatedTag() : BaseTag("IsolatedTag") {}
-			static const std::string Tag() { return "IsolatedTag"; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			IsolatedTag() : BaseTag( "IsolatedTag" , kBlue )
+				{}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static const std::string Tag()
+				{ return "IsolatedTag"; }
+
 	};
 
 
 	class TrackTag : public BaseTag {
 
 		public:
-			TrackTag() : BaseTag("TrackTag") {}
-			static const std::string Tag() { return "TrackTag"; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			TrackTag() : BaseTag( "TrackTag" , kRed )
+				{}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static const std::string Tag()
+				{ return "TrackTag"; }
+
 	};
 
 
 	class TrackExtremityTag : public BaseTag {
 
 		public:
-			TrackExtremityTag() : BaseTag("TrackExtremityTag") {}
-			static const std::string Tag() { return "TrackExtremityTag"; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			TrackExtremityTag() : BaseTag( "TrackExtremityTag" , kGreen )
+				{}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static const std::string Tag()
+				{ return "TrackExtremityTag"; }
+
 	};
 
+	class NoiseTag : public BaseTag {
+
+		public:
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			NoiseTag() : BaseTag( "NoiseTag" , kYellow )
+				{}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static const std::string Tag()
+				{ return "NoiseTag"; }
+
+	};
+
+	class UndefinedTag : public BaseTag {
+
+		public:
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			UndefinedTag() : BaseTag( "UndefinedTag" , kGray+1 )
+				{}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			static const std::string Tag()
+				{ return "UndefinedTag"; }
+
+	};
+
+
+	typedef std::vector<BaseTag> TagCollection;
 
 }  // namespace 
 
