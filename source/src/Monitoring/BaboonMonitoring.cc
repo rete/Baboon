@@ -31,6 +31,7 @@
 #include <TEveArrow.h>
 #include <TEveRGBAPalette.h>
 #include <TGLViewer.h>
+#include <TEveBrowser.h>
 
 #include <TGeoXtru.h>
 #include <TEveGeoShapeExtract.h>
@@ -50,6 +51,7 @@
 #include <TEveBoxSet.h>
 #include <TGeoCompositeShape.h>
 #include <TEveScene.h>
+#include <TGLLightSet.h>
 
 #include <vector>
 #include <assert.h>
@@ -60,6 +62,10 @@
 #include <limits>
 #include <algorithm>
 
+
+using namespace std;
+
+
 namespace baboon {
 
 
@@ -67,7 +73,8 @@ namespace baboon {
 	bool BaboonMonitoring::openEveEvent = false;
 	int  BaboonMonitoring::eventDisplayCounter = 0;
 	bool BaboonMonitoring::isTEveInitialized = false;
-	std::map<Tag,int> BaboonMonitoring::tagToColorMap;
+	bool BaboonMonitoring::isEnable = false;
+	std::map<string,int> BaboonMonitoring::tagToColorMap;
 
 
 
@@ -75,8 +82,9 @@ namespace baboon {
 
 		rootApplication = new TApplication("BaboonMonitoring", 0, 0);
 	    rootApplication->SetReturnFromRun(kTRUE);
-	}
 
+	    eveManager = TEveManager::Create( false );
+	}
 
 	BaboonMonitoring::~BaboonMonitoring() {
 
@@ -86,6 +94,7 @@ namespace baboon {
 
 			TEveManager::Terminate();
 			gSystem->ProcessEvents();
+			eveManager = 0;
 		}
 	    rootApplication->Terminate(0);
 	}
@@ -99,12 +108,12 @@ namespace baboon {
 	        TColor::CreateColorWheel();
 
 	        // Build the tag to color map
-	        tagToColorMap[fUndefined] = kWhite;
-	        tagToColorMap[fTrack] = kRed;
-	        tagToColorMap[fTrackExtremity] = kGreen;
-	        tagToColorMap[fIsolated] = kBlue;
-	        tagToColorMap[fCore] = kMagenta;
-	        tagToColorMap[fNoise] = kYellow;
+	        tagToColorMap[ UndefinedTag::Tag() ] = kWhite;
+	        tagToColorMap[ TrackTag::Tag() ] = kRed;
+	        tagToColorMap[ TrackExtremityTag::Tag() ] = kGreen;
+	        tagToColorMap[ IsolatedTag::Tag() ] = kBlue;
+	        tagToColorMap[ CoreTag::Tag() ] = kMagenta;
+	        tagToColorMap[ NoiseTag::Tag() ] = kYellow;
 
 	        gStyle->SetPalette(1);
 	        gStyle->SetNumberContours(99);
@@ -115,9 +124,21 @@ namespace baboon {
 
 	void BaboonMonitoring::Kill() {
 
+		delete GetInstance();
+	}
+
+	void BaboonMonitoring::AddElement( TEveElement *element , TEveElement *parent ) {
+
+		InitializeEve();
+		if( eveManager && isEnable ) {
+			eveManager->AddElement( element , parent );
+		}
 	}
 
 	void BaboonMonitoring::Pause() const {
+
+		if( !isEnable )
+			return;
 
 	#ifdef __unix__
 	    std::cout << "Press return to continue ..." << std::endl;
@@ -138,29 +159,33 @@ namespace baboon {
 
 	    fcntl(1, F_SETFL, flag);
 	#else
-	    std::cout << "BabonnMonitoring::Pause() is only implemented for unix operating systems." << std::endl;
+	    std::cout << "BaboonMonitoring::Pause() is only implemented for unix operating systems." << std::endl;
 	#endif
 	}
 
 
 
-	void BaboonMonitoring::InitializeEve(Char_t transparency) {
+	void BaboonMonitoring::InitializeEve( Char_t transparency ) {
+
+		if( !isEnable )
+			return;
 
 	    std::stringstream sstr;
 	    sstr << "Event Display " << eventDisplayCounter;
 
+	    // If Eve instantiated
 	    if ( isTEveInitialized )
 	    {
 	        TEveEventManager *currentEvent = gEve->GetCurrentEvent();
 
 	        if (currentEvent)
-	        {
-	            currentEvent->SetElementNameTitle(sstr.str().c_str(),sstr.str().c_str());
-	        }
+	            currentEvent->SetElementNameTitle( sstr.str().c_str() , sstr.str().c_str() );
+
 
 	        if (!openEveEvent)
 	        {
-	            gEve->AddEvent(new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()));
+	        	cout << "Event created" << endl;
+	            gEve->AddEvent( new TEveEventManager( sstr.str().c_str(),sstr.str().c_str() ) );
 	            openEveEvent = true;
 	            eventDisplayCounter++;
 	        }
@@ -168,37 +193,15 @@ namespace baboon {
 	        return;
 	    }
 
-//	    gSystem->Load("libGeom");
-//	    TGeoManager *geoManager = new TGeoManager("DetectorGeometry", "detector geometry");
-//
-//	    //--- define some materials
-//	    TGeoMaterial *vacuumMaterial = new TGeoMaterial("Vacuum", 0, 0, 0); // dummy material
-//	    TGeoMaterial *aluminiumMaterial = new TGeoMaterial("Aluminium", 26.98, 13, 2.7); // dummy material
-//
-//	    //--- define some media
-//	    TGeoMedium *vacuum = new TGeoMedium("Vacuum",1, vacuumMaterial);
-//	    TGeoMedium *aluminium = new TGeoMedium("Aluminium",2, aluminiumMaterial);
-//
-//	    //--- make the top container volume
-//	    TGeoVolume *mainDetectorVolume = geoManager->MakeBox("Detector", vacuum, 1000., 1000., 100.);
 
-	    gSystem->Load("libGeom");
+	    // If Eve is not instantiated
+//	    gSystem->Load("libGeom");
 
 	    DetectorManager *man = DetectorManager::GetInstance();
 
 	    if( !man->geometryBuilt )
 	    	BABOON_THROW_RESULT( BABOON_NOT_INITIALIZED("Detector geometry is not built! Couldn't display event!") );
 
-
-
-//	    geoManager->SetTopVolume( man->topVolume );
-
-	    // Here, build the SDHCAL geometry !
-//	    this->InitializeSubDetectors(pMainDetectorVolume, pAluminium, transparency);
-//	    this->InitializeGaps(pMainDetectorVolume, pVacuum, transparency);
-
-	    //--- close the geometry
-//	    geoManager->CloseGeometry();
 
 	    try
 	    {
@@ -238,34 +241,65 @@ namespace baboon {
 	    }
 
 	    TGeoNode *geoNode = man->geoManager->GetTopNode();
-	    TEveGeoTopNode *eveGeoTopNode = new TEveGeoTopNode( man->geoManager, geoNode);
+	    TEveGeoTopNode *eveGeoTopNode = new TEveGeoTopNode( man->geoManager, geoNode );
 	    eveGeoTopNode->SetVisLevel(1);
 	    eveGeoTopNode->GetNode()->GetVolume()->SetVisibility(kFALSE);
 
-	    gEve->AddGlobalElement(eveGeoTopNode);
+	    gEve->AddGlobalElement( eveGeoTopNode );
+	    gEve->GetBrowser()->MapWindow();
 
 	    TGLViewer *viewerGL = gEve->GetDefaultGLViewer();
 	    viewerGL->ColorSet().Background().SetColor(kBlack);
+	    viewerGL->GetLightSet()->SetUseSpecular(kFALSE);
 
-	    gEve->Redraw3D(kTRUE);
+	    gEve->GetBrowser()->GetMainFrame()->SetWindowName("Baboon Monitoring");
+	    gEve->AddEvent(new TEveEventManager(sstr.str().c_str(),sstr.str().c_str()));
+	    eventDisplayCounter++;
 
 	    isTEveInitialized = true;
 	    openEveEvent = true;
+	}
+
+
+	int BaboonMonitoring::GetColorBetweenMinAndMax( double min , double max , double value ) {
+
+		return (51 + ( (value - min)*( 100 - 51 ) )/( max - min ) );
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
-//	void BaboonMonitoring::InitializeDetectors(TGeoVolume *pMainDetectorVolume, TGeoMedium *pSubDetectorMedium, Char_t transparency) {
-//
-//	}
+	void BaboonMonitoring::ViewDetectorsContent() {
+
+		DetectorManager *man = DetectorManager::GetInstance();
+
+		StringVector detectorList = man->GetDetectorList();
+
+		for( unsigned int d=0 ; d<detectorList.size() ; d++ ) {
+
+			Detector *det = man->GetDetector( detectorList.at(d) );
+			if( det->GetDetectorType() == kCalorimeter ) {
+				Calorimeter *calo = (Calorimeter *)det;
+				if( calo->IsViewContentSet() ) {
+					HitDisplayMode hitDisplayMode = calo->GetHitDisplayMode();
+					calo->ViewCalorimeterContent( 0 , hitDisplayMode );
+				}
+			}
+		}
+	}
+
 
 	void BaboonMonitoring::ViewEvent() {
 
+		if( !isEnable )
+			return;
+
 	    InitializeEve();
 
-	    gEve->Redraw3D();
+	    this->ViewDetectorsContent();
+
+	    gEve->Redraw3D( true );
 	    this->Pause();
 
 	    TEveEventManager* current = gEve->GetCurrentEvent();
@@ -276,68 +310,29 @@ namespace baboon {
 	    std::cout << "View done" << std::endl;
 	}
 
-/*
-	TEveElement *BaboonMonitoring::VisualizeHitCollection(const HitCollection *hitCollection, TEveElement *parent, const DisplayMode displayMode ) {
 
-		InitializeEve();
-
-		TEveBoxSet *hits = new TEveBoxSet("SDHCAL_Hits");
-		hits->Reset(TEveBoxSet::kBT_FreeBox, kTRUE, 64);
-		hits->SetOwnIds(kTRUE);
-		hits->SetPickable(kTRUE);
-		hits->SetMainTransparency(5);
-
-		hits->SetAntiFlick(kTRUE);
-
-		float cellSize = 10.408;
-		float activeMediumThickness = 6.73;
-		float boxSizeFactor = 70.0/100.0;
-
-		for( unsigned int i=0 ; i<hitCollection->size() ; i++ ) {
-
-			Hit *hit = hitCollection->at(i);
-			IntVector ijk = hit->GetIJK();
-
-			hits->AddBox( ijk.at(0) , ijk.at(1) , ijk.at(2) , cellSize*boxSizeFactor , cellSize*boxSizeFactor , activeMediumThickness*boxSizeFactor );
-		}
-
-
-		hits->SetElementName("SDHCAL_hits");
-	    hits->SetElementTitle("SDHCAL_hits");
-
-
-		if( parent ) {
-			parent->AddElement( hits );
-		}
-		else {
-			gEve->AddElement( hits );
-			gEve->Redraw3D();
-		}
-		return hits;
-	}
-*/
-
-	int BaboonMonitoring::GetHitColor( Hit *hit , const HitDisplayMode displayMode ) {
+	int BaboonMonitoring::GetCaloHitColor( CaloHit *caloHit , const HitDisplayMode displayMode ) {
 
 		if( displayMode == kDisplayUniform ) {
-			return kWhite;
+			return kGray+1;
 		}
 		else if( displayMode == kDisplayThresholds ) {
 
-			HitThreshold thr = hit->GetThreshold();
-			if( thr == fThreshold1 ) {
+			CaloHitThreshold thr = caloHit->GetThreshold();
+			if( thr == fCaloHitThr1 ) {
 				return kGreen;
 			}
-			else if( thr == fThreshold2 ) {
+			else if( thr == fCaloHitThr2 ) {
 				return kBlue;
 			}
-			else if( thr == fThreshold3 ) {
+			else if( thr == fCaloHitThr3 ) {
 				return kRed;
 			}
 			else return kWhite;
 		}
 		else if( displayMode == kDisplayTags ) {
-			return tagToColorMap[ hit->GetHitTag() ];
+
+			return caloHit->GetTag().GetColor();
 		}
 		else if( displayMode ==  kDisplayShowers ) {
 
@@ -348,7 +343,7 @@ namespace baboon {
 
 			for( unsigned int sh=0 ; sh<showers->size() ; sh++ ) {
 
-				if( showers->at(sh)->Contains( hit ) ) {
+				if( showers->at(sh)->Contains( caloHit ) ) {
 					return sh+2;
 				}
 			}
@@ -356,7 +351,10 @@ namespace baboon {
 			// if not found return kWhite
 			return kWhite;
 		}
-		else return kWhite;
+		// kCustom case
+		else {
+			return caloHit->GetColor();
+		}
 
 	}
 
