@@ -15,10 +15,13 @@ IF( OPENMP_FOUND )
 	ADD_DEFINITIONS("-fopenmp")
 ENDIF()
 
+
+
 # create library
 FOREACH( module
 	Algorithm 
-	Analysis 
+	Analysis
+	Detector
 	Geometry 
 	Managers 
 	Objects 
@@ -26,9 +29,9 @@ FOREACH( module
 	Reconstruction 
 	Config 
 	CfgParser  
-	Utilities 
-	Xml 
-	GraphicalProcessor )
+	Utilities
+	Monitoring
+	Xml )
 	
 	FILE (
 		GLOB_RECURSE
@@ -39,148 +42,16 @@ FOREACH( module
 	)
 ENDFOREACH()
 
-SET( 
-	BABOON_LIBRARY_FILES 
-	${BABOON_LIBRARY_FILES} 
-	src/MarlinProcessor/CaloHitCreator.cc
-	include/MarlinProcessor/CaloHitCreator.hh
-	src/MarlinProcessor/BaboonProcessor.cc
-	include/MarlinProcessor/BaboonProcessor.hh
-)
-
 ADD_SHARED_LIBRARY( Baboon ${BABOON_LIBRARY_FILES} )
-ADD_LIBRARY( Baboon_STATIC STATIC ${BABOON_LIBRARY_FILES} )
 
 TARGET_LINK_LIBRARIES( 
 	Baboon
 	${ROOT_COMPONENT_LIBRARIES} 
 )
-TARGET_LINK_LIBRARIES( 
-	Baboon_STATIC
-	${ROOT_COMPONENT_LIBRARIES} 
-)
 
-
-SET_TARGET_PROPERTIES( Baboon_STATIC PROPERTIES OUTPUT_NAME Baboon )
 INSTALL(
-	TARGETS Baboon_STATIC Baboon
-	ARCHIVE DESTINATION lib 
+	TARGETS Baboon
 	LIBRARY DESTINATION lib 
-)
-
-# --------------------- Shower Splitter lib -------------------------------
-
-FILE (
-	GLOB_RECURSE
-	ShowerSplitterProcessor_FILES
-	include/MarlinProcessor/ShowerSplitterProcessor.hh
-	src/MarlinProcessor/ShowerSplitterProcessor.cc
-)
-ADD_LIBRARY( ShowerSpliter_lib SHARED ${ShowerSplitterProcessor_FILES} )
-SET_TARGET_PROPERTIES( ShowerSpliter_lib PROPERTIES OUTPUT_NAME ShowerSplitter )
-INSTALL(
-	TARGETS ShowerSpliter_lib
-	LIBRARY DESTINATION lib 
-)
-
-TARGET_LINK_LIBRARIES( 
-	ShowerSpliter_lib 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon 
-)
-
-
-# --------------------- Shower PDF lib -------------------------------
-
-FILE (
-	GLOB_RECURSE
-	ShowerPDFProcessor_FILES
-	include/MarlinProcessor/ShowerPDFProcessor.hh
-	src/MarlinProcessor/ShowerPDFProcessor.cc
-)
-ADD_LIBRARY( ShowerPDFProcessor_lib SHARED ${ShowerPDFProcessor_FILES} )
-SET_TARGET_PROPERTIES( ShowerPDFProcessor_lib PROPERTIES OUTPUT_NAME ShowerPDFProcessor )
-INSTALL(
-	TARGETS ShowerPDFProcessor_lib
-	LIBRARY DESTINATION lib 
-)
-
-TARGET_LINK_LIBRARIES( 
-	ShowerPDFProcessor_lib 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon 
-)
-
-
-FIND_LIBRARY( TSPECTRUM_LIB libSpectrum.so )
-
-
-
-# --------------------- Overlay Estimator lib processor -------------------------------
-
-FILE (
-	GLOB_RECURSE
-	OverlayEstimatorProcessor_FILES
-	include/MarlinProcessor/OverlayEstimatorProcessor.hh
-	src/MarlinProcessor/OverlayEstimatorProcessor.cc
-)
-ADD_LIBRARY( OverlayEstimator_lib SHARED ${OverlayEstimatorProcessor_FILES} )
-SET_TARGET_PROPERTIES( OverlayEstimator_lib PROPERTIES OUTPUT_NAME OverlayEstimator )
-INSTALL(
-	TARGETS OverlayEstimator_lib
-	LIBRARY DESTINATION lib 
-)
-
-TARGET_LINK_LIBRARIES( 
-	OverlayEstimator_lib 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon
-	${TSPECTRUM_LIB}
-)
-
-
-
-# --------------------- TestBeamCutsProcessor lib -------------------------------
-
-FILE (
-	GLOB_RECURSE
-	TestBeamCutsProcessor_FILES
-	include/MarlinProcessor/TestBeamCutsProcessor.hh
-	src/MarlinProcessor/TestBeamCutsProcessor.cc
-)
-ADD_LIBRARY( TestBeamCutsProcessor_lib SHARED ${TestBeamCutsProcessor_FILES} )
-SET_TARGET_PROPERTIES( TestBeamCutsProcessor_lib PROPERTIES OUTPUT_NAME TestBeamCutsProcessor )
-INSTALL(
-	TARGETS TestBeamCutsProcessor_lib
-	LIBRARY DESTINATION lib 
-)
-
-TARGET_LINK_LIBRARIES( 
-	TestBeamCutsProcessor_lib 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon 
-)
-
-
-# --------------------- Event Display lib processor -------------------------------
-
-FILE (
-	GLOB_RECURSE
-	EventDisplay_FILES
-	include/MarlinProcessor/EventDisplay.hh
-	src/MarlinProcessor/EventDisplay.cc
-)
-ADD_LIBRARY( EventDisplay_lib SHARED ${EventDisplay_FILES} )
-SET_TARGET_PROPERTIES( EventDisplay_lib PROPERTIES OUTPUT_NAME EventDisplay )
-INSTALL(
-	TARGETS EventDisplay_lib
-	LIBRARY DESTINATION lib 
-)
-
-TARGET_LINK_LIBRARIES( 
-	EventDisplay_lib 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon
 )
 
 
@@ -213,41 +84,6 @@ TARGET_LINK_LIBRARIES(
 ADD_EXECUTABLE( LcioToRoot main/LcioToRoot.cc )
 TARGET_LINK_LIBRARIES( LcioToRoot ${ROOT_COMPONENT_LIBRARIES} )
 
-
-
-# ------------------ Draw event --------------------
-SET( 
-	DRAW_EVENT_SRC_FILES 
-	main/DrawEvent.cc 
-)
-ADD_EXECUTABLE( DrawEvent ${DRAW_EVENT_SRC_FILES} )
-TARGET_LINK_LIBRARIES( DrawEvent ${ROOT_COMPONENT_LIBRARIES} Baboon )
-
-
-# ------------------ Overlay Estimator Analysis --------------------
-SET( 
-	OVERLAY_ESTIMATOR_ANALYSIS_SRC_FILES 
-	main/OverlayEstimatorAnalysis.cc 
-)
-ADD_EXECUTABLE( OverlayEstimatorAnalysis ${OVERLAY_ESTIMATOR_ANALYSIS_SRC_FILES} )
-TARGET_LINK_LIBRARIES( 
-	OverlayEstimatorAnalysis 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon
-)
-
-
-# ------------------ Overlay Reco Energy --------------------
-SET( 
-	OVERLAY_RECO_ENERGY_SRC_FILES 
-	main/OverlayRecoEnergy.cc 
-)
-ADD_EXECUTABLE( OverlayRecoEnergy ${OVERLAY_RECO_ENERGY_SRC_FILES} )
-TARGET_LINK_LIBRARIES( 
-	OverlayRecoEnergy 
-	${ROOT_COMPONENT_LIBRARIES} 
-	Baboon
-)
 
 
 IF( BABOON_GUI )
@@ -362,7 +198,7 @@ ENDIF()
 #-------------------- install ----------------------- 
 INSTALL( 
 	TARGETS 
-	OverlayEvent LcioToRoot DrawEvent OverlayEstimatorAnalysis OverlayRecoEnergy LcioSplitFile
+	OverlayEvent LcioToRoot LcioSplitFile
 	DESTINATION 
 	bin
 )
