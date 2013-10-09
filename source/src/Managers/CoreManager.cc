@@ -93,17 +93,17 @@ namespace baboon {
 	}
 
 
-	bool CoreManager::CoreContainsHit( Core *core , Hit *hit ) {
+	bool CoreManager::CoreContainsHit( Core *core , CaloHit *caloHit ) {
 
-		return core->Contains( hit );
+		return core->Contains( caloHit );
 	}
 
 
-	Return CoreManager::FindCoreContainingHit( Hit *hit , Core *coreToFind ) {
+	Return CoreManager::FindCoreContainingHit( CaloHit *caloHit , Core *coreToFind ) {
 
 		for( unsigned int c=0 ; c<coreCollection->size() ; c++ ) {
 
-			if( coreCollection->at(c)->Contains( hit ) ) {
+			if( coreCollection->at(c)->Contains( caloHit ) ) {
 				coreToFind = coreCollection->at(c);
 				return BABOON_SUCCESS("Core found");
 			}
