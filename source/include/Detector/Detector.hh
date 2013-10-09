@@ -23,12 +23,34 @@
 #include <cmath> 
 #include <vector>
 
+
+//#include "Managers/DetectorManager.hh"
 #include "Utilities/ReturnValues.hh"
+#include "Utilities/Internal.hh"
+
+// root includes
+#include "TGeoVolume.h"
+
+// gear includes
+#include "gear/CalorimeterParameters.h"
 
 namespace baboon {
 
+
+
 	/*!
-	 * Class Detector
+	 * @brief  Detector type enum
+	 */
+	enum DetectorType {
+		kCalorimeter,
+		kFTD,
+		kTPC,
+		kMuonChamber,
+		kVertexDetector
+	};
+
+	/*!
+	 * @brief  Detector class
 	 */
 
 	class Detector {
@@ -40,7 +62,7 @@ namespace baboon {
 			* Default Constructor
 			*
 			*/
-			Detector( const std::string &detName = "" );
+			Detector( const std::string &detName , const DetectorType type  );
 
 		   /*!
 			*
@@ -49,15 +71,59 @@ namespace baboon {
 			*/
 			virtual ~Detector();
 
-			virtual Return Build() = 0;
-
 		protected:
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return BuildGeometry( TGeoManager *goeManager , TGeoVolume *topVolume ) = 0;
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return ReadSettings( const gear::GearParameters *parameters ) = 0;
+
 			std::string detectorName;
+			std::vector<TGeoVolume *> detectorVolumes;
+			const DetectorType detectorType;
+			bool isBuilt;
+
+		public:
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline std::string GetName()
+				{ return detectorName; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline const DetectorType GetDetectorType()
+				{ return detectorType; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline bool IsBuilt()
+				{ return isBuilt; }
 
 
+		friend class DetectorManager;
 
 };  // class 
+
+	typedef std::vector<Detector*> DetectorCollection;
 
 }  // namespace 
 
