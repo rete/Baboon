@@ -24,7 +24,6 @@
 #include <vector> 
 
 
-#include "Objects/HitCollection.hh"
 #include "Reconstruction/EnergyCalculator/EnergyCalculator.hh"
 
 #include "Exception.hh"
