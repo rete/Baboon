@@ -14,7 +14,7 @@
  */
 
 
-#include "Algorithm/Association/TrackToShowerAssociationAlgorithm.hh"
+#include "Algorithm/Calorimetry/TrackToShowerAssociationAlgorithm.hh"
 
 using namespace std;
 
@@ -56,10 +56,10 @@ namespace baboon {
 
 	Return TrackToShowerAssociationAlgorithm::Execute() {
 
-
+/*
 		TrackCollection *trackCollection = TrackManager::GetInstance()->GetTrackCollection();
 		ShowerCollection *showerCollection = ShowerManager::GetInstance()->GetShowerCollection();
-		HitManager *hitManager = HitManager::GetInstance();
+//		HitManager *hitManager = HitManager::GetInstance();
 
 		for( unsigned int i=0 ; i<trackCollection->size() ; i++ ) {
 
@@ -140,7 +140,7 @@ namespace baboon {
 //			else
 //				x1 = secondPoint;
 //			x2 = x1 - translation;
-/*
+
 			if( normalizedChi2 < Chi2LimitForTrack ) {
 
 				Cylinder *cylinder = new Cylinder( x1 , x2 , cylinderRadius );
@@ -168,10 +168,9 @@ namespace baboon {
 				}
 			}
 
-*/
-
 			delete fitter;
 		}
+		*/
 		return BABOON_SUCCESS();
 	}
 
@@ -183,6 +182,7 @@ namespace baboon {
 
 	Return TrackToShowerAssociationAlgorithm::PredominantShowerInCylinder( Cylinder *cyl , Shower *predominantShower ) {
 
+		/*
 		if( cyl == 0 )
 			return BABOON_NOT_INITIALIZED("Assertion cylinder != 0 failed");
 
@@ -252,12 +252,15 @@ namespace baboon {
 		showerCounting.clear();
 
 		delete hitsInCylinder;
+
+		*/
 		return BABOON_SUCCESS();
 	}
 
 
 	Return TrackToShowerAssociationAlgorithm::MergeTrackInShower( Shower *showerToEnlarge , Track *trackToAssociate ) {
 
+		/*
 		if( showerToEnlarge == 0 )
 			return BABOON_NOT_INITIALIZED("Assertion showerToEnlarge != 0 failed");
 		if( trackToAssociate == 0 )
@@ -281,7 +284,7 @@ namespace baboon {
 
 		}
 
-
+*/
 		return BABOON_SUCCESS();
 	}
 

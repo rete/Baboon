@@ -29,8 +29,6 @@
 #include <numeric>
 
 #include "Geometry/Cone.hh"
-#include "Objects/HitCollection.hh"
-#include "Managers/HitManager.hh"
 #include "Managers/CoreManager.hh"
 #include "Managers/ShowerManager.hh"
 #include "Managers/ClusteringManager.hh"
@@ -38,8 +36,9 @@
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
 
-#include "Geometry/SDHCALPrototype.hh"
+//#include "Geometry/SDHCALPrototype.hh"
 #include "TGeoCone.h"
+#include "TGeoNode.h"
 
 namespace baboon {
 
@@ -107,7 +106,7 @@ namespace baboon {
 
 			int NbOfCoreHitsInCone( Cone *cone , Core *core );
 
-			HitCollection *hitCollection;
+			CaloHitCollection *caloHitCollection;
 			std::vector<TGeoNode*> nodeList;
 
 			// algorithm parameters

@@ -14,7 +14,7 @@
  */
 
 
-#include "Algorithm/ConeBeginningAlgorithm.hh"
+#include "Algorithm/Calorimetry/ConeBeginningAlgorithm.hh"
 
 using namespace std;
 
@@ -33,7 +33,7 @@ namespace baboon {
 
 	Return ConeBeginningAlgorithm::Init() {
 
-		hitCollection = HitManager::GetInstance()->GetHitCollection();
+		caloHitCollection = 0;//HitManager::GetInstance()->GetHitCollection();
 		data.GetValue("coneMinimumOpeningAngle",&coneMinimumOpeningAngle);
 		data.GetValue("coneMaximumOpeningAngle",&coneMaximumOpeningAngle);
 		data.GetValue("angleStep",&angleStep);
@@ -45,20 +45,21 @@ namespace baboon {
 		data.GetValue("coneBackwardDistance",&coneBackwardDistance);
 		data.GetValue("coneStepDistance",&coneStepDistance);
 		data.GetValue("clusterSizeAtPeakPositionUpperLimit",&clusterSizeAtPeakPositionUpperLimit);
-
+/*
 		if( !nodeList.empty() ) {
 			for( unsigned int i=0 ; i<nodeList.size() ; i++ ) {
 				SDHCALPrototype::GetGeoManager()->GetTopVolume()->RemoveNode( nodeList.at(i) );
 			}
 			nodeList.clear();
 		}
+		*/
 		return BABOON_SUCCESS();
 	}
 
 
 	Return ConeBeginningAlgorithm::CheckConsistency() {
 
-		if( hitCollection == 0 )
+		if( caloHitCollection == 0 )
 			return BABOON_ERROR("ConeBeginning Algorithm bad init. Please check your inputs!");
 		return BABOON_SUCCESS();
 	}
@@ -277,7 +278,7 @@ namespace baboon {
 
 
 	Return ConeBeginningAlgorithm::FindPadsInCone( Cone *cone , vector<IntVector> &existingPadsInCone, vector<IntVector> &touchedPadsInCone ) {
-
+/*
 		HitManager* hitManager = HitManager::GetInstance();
 		double r = cone->GetRadius();
 		double l = r / sin(cone->GetTheta());
@@ -317,12 +318,14 @@ namespace baboon {
 				}
 			}
 		}
+		*/
 		return BABOON_SUCCESS();
 	}
 
 	int ConeBeginningAlgorithm::NbOfCoreHitsInCone( Cone *cone , Core *core ) {
 
 		int nbOfCoreHitsInCone = 0;
+		/*
 		HitCollection *coreHitCollection = core->GetHitCollection();
 
 		for( unsigned int i=0 ; i<coreHitCollection->size() ; i++ ) {
@@ -332,7 +335,7 @@ namespace baboon {
 			if( cone->Contains( ijkVec ) )
 				nbOfCoreHitsInCone++;
 		}
-
+*/
 		return nbOfCoreHitsInCone;
 	}
 

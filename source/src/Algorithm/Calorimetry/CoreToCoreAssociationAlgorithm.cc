@@ -14,7 +14,7 @@
  */
 
 
-#include "Algorithm/Association/CoreToCoreAssociationAlgorithm.hh"
+#include "Algorithm/Calorimetry/CoreToCoreAssociationAlgorithm.hh"
 
 
 namespace baboon {
