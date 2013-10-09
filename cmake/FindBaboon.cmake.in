@@ -1,0 +1,66 @@
+#############################################################
+# cmake module for finding Baboon
+#
+# returns:
+#   Baboon_FOUND        : set to TRUE or FALSE
+#   Baboon_INCLUDE_DIRS : paths to Baboon includes
+#   Baboon_LIBRARY_DIRS : paths to Baboon libraries
+#   Baboon_LIBRARIES    : list of Baboon libraries
+#
+# @author Rémi Eté
+#############################################################
+
+
+
+# ---------- includes ---------------------------------------------------------
+SET( Baboon_INCLUDE_DIRS Baboon_INCLUDE_DIRS-NOTFOUND )
+MARK_AS_ADVANCED( Baboon_INCLUDE_DIRS )
+
+# Include dir
+FIND_PATH( Baboon_INCLUDE_DIRS
+  NAMES source/include/Baboon.hh
+  HINTS "@PROJECT_SOURCE_DIR@"
+  NO_DEFAULT_PATH
+)
+
+IF( NOT Baboon_INCLUDE_DIRS AND NOT Baboon_FIND_QUIETLY )
+    MESSAGE( STATUS "Check for Baboon: @PROJECT_SOURCE_DIR@"
+            " -- failed to find Baboon include directory!!" )
+ENDIF()
+
+SET( Baboon_LIBRARY Baboon_LIBRARY-NOTFOUND )
+MARK_AS_ADVANCED( Baboon_LIBRARY )
+
+
+FIND_LIBRARY( Baboon_LIBRARY
+    NAMES Baboon
+    PATHS "@PROJECT_SOURCE_DIR@"
+    PATH_SUFFIXES lib
+    NO_DEFAULT_PATH )
+
+IF( NOT Baboon_LIBRARY AND NOT Baboon_FIND_QUIETLY )
+    MESSAGE( STATUS "Check for Baboon: @PROJECT_SOURCE_DIR@ "
+            " -- failed to find Baboon library!!" )
+ENDIF()
+
+
+# set variables and display results
+IF( Baboon_INCLUDE_DIRS AND Baboon_LIBRARY )
+    SET( Baboon_FOUND TRUE )
+    SET( Baboon_LIBRARIES ${Baboon_LIBRARY} )
+    MARK_AS_ADVANCED( Baboon_LIBRARIES )
+    
+    # add definitions only for debug modus
+    IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+            CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+        MARK_AS_ADVANCED( Baboon_DEFINITIONS )
+    ENDIF()
+
+    MESSAGE( STATUS "Check for Baboon: @PROJECT_SOURCE_DIR@ -- works" )
+ELSE()
+    IF( Baboon_FIND_REQUIRED )
+        MESSAGE( FATAL_ERROR "Check for Baboon: @PROJECT_SOURCE_DIR@ -- failed!!" )
+    ENDIF()
+    MESSAGE( STATUS "Check for Baboon: @PROJECT_SOURCE_DIR@"
+            " -- failed!! will skip this package..." )
+ENDIF()
