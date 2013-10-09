@@ -50,6 +50,15 @@
 	}
 
 
+#define BABOON_CHECK_POINTER( Pointer )                                                            		\
+	{																										\
+		if( Pointer == 0 || Pointer == NULL ) 																\
+		{ 																									\
+			return BABOON_INVALID_PARAMETER("Assertion pointer != 0 failed!"); 				                \
+		}                                                                                                   \
+	}
+
+
 namespace baboon {
 
 	/*!
