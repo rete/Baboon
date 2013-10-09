@@ -10,6 +10,26 @@
  *
  * Written by : R. Eté
  *
+ *
+ *
+ *
+ *
+ *
+ * Split a lcio file into N files.
+ * The file is split according to the totalNbOfEvents/N.
+ * If totalNbOfEvents/N is not an integer, the last file
+ * will contains the remaining events. The files are renamed
+ * with an additionnal suffixe "*_Ii.slcio".
+ *
+ *
+ * Example :
+ *    Split a file myFile.slcio with 10 events into 3 files
+ *    leads to :
+ *    - file 1 : 3 evts (myFile_I0.slcio)
+ *    - file 2 : 3 evts (myFile_I1.slcio)
+ *    - file 3 : 4 evts (myFile_I2.slcio)
+ *
+ *
  */
 
 
@@ -18,22 +38,19 @@
 #include <cstdlib>
 #include <sstream>
 
-// CfgParser includes
-#include "CfgParser/CfgParser.hh"
-#include "CfgParser/Data.hh"
-
 // lcio includes
 #include "IO/LCReader.h"
 #include "IO/LCWriter.h"
 #include "IOIMPL/LCFactory.h"
+#include "EVENT/LCIO.h"
 #include "lcio.h"
 
 // tclap includes
 #include "tclap/CmdLine.h"
 
 using namespace std;
-using namespace cfgparser;
 using namespace EVENT;
+using namespace lcio;
 
 
 int main ( int argc , char *argv[] ) {
