@@ -20,13 +20,15 @@ using namespace std;
 
 namespace baboon {
 
-	Detector::Detector( const string &detName )
-		: detectorName(detName) {
+	Detector::Detector( const std::string &detName , const DetectorType type  )
+		: detectorName(detName),
+		 detectorType(type),
+		 isBuilt(false) {}
 
-	}
 
 	Detector::~Detector() {
 
+		detectorVolumes.clear();
 	}
 
 
