@@ -43,12 +43,13 @@
 
 // baboon includes
 #include "Overlay/Overlayer.hh"
-#include "Objects/Hit.hh"
+#include "Objects/CaloHit.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Managers/AnalysisManager.hh"
 #include "Reconstruction/EnergyCalculator/SimpleEnergyCalculator.hh"
 #include "Utilities/Internal.hh"
 #include "Utilities/ReturnValues.hh"
+#include "Utilities/CaloHitHelper.hh"
 
 // root includes
 #include "TCanvas.h"
@@ -265,8 +266,8 @@ int main (int argc ,char *argv[]) {
 		EVENT::LCCollection *lcCollection1 = evt1->getCollection(inputCollectionName1);
 		EVENT::LCCollection *lcCollection2 = evt2->getCollection(inputCollectionName2);
 
-		HitCollection *collection1 = new HitCollection();
-		HitCollection *collection2 = new HitCollection();
+		CaloHitCollection *collection1 = new CaloHitCollection();
+		CaloHitCollection *collection2 = new CaloHitCollection();
 
 		SimpleEnergyCalculator *calculator = new SimpleEnergyCalculator();
 
@@ -276,36 +277,35 @@ int main (int argc ,char *argv[]) {
 
 		for(int hitID=0 ; hitID<lcCollection1->getNumberOfElements() ; hitID++) {
 
-			EVENT::CalorimeterHit *caloHit = static_cast<EVENT::CalorimeterHit *> (lcCollection1->getElementAt(hitID) );
+			EVENT::CalorimeterHit *hit = static_cast<EVENT::CalorimeterHit *> (lcCollection1->getElementAt(hitID) );
 
-			HitParameters params;
+			CaloHit *caloHit = new CaloHit( fSemiDigitalCaloHit );
+
 			ThreeVector position;
-			position.setX( caloHit->getPosition()[0] );
-			position.setY( caloHit->getPosition()[1] );
-			position.setZ( caloHit->getPosition()[2] );
-			params.position = position;
-			int I = cellIdDecoder1( caloHit )["I"];
-			int J = cellIdDecoder1( caloHit )["J"];
-			int K = cellIdDecoder1( caloHit )["K-1"];
-			IntVector ijk1;
-			ijk1.push_back(I);
-			ijk1.push_back(J);
-			ijk1.push_back(K);
-			params.ijk = ijk1;
-			params.type = 1;
-			params.time = caloHit->getTime();
-			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold1;
-			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold2;
-			else if( caloHit->getEnergy() == 3.0 ) params.threshold = fThreshold3;
+			position.setX( hit->getPosition()[0] );
+			position.setY( hit->getPosition()[1] );
+			position.setZ( hit->getPosition()[2] );
+			caloHit->SetPosition( position );
+
+			int I = cellIdDecoder1( hit )["I"];
+			int J = cellIdDecoder1( hit )["J"];
+			int K = cellIdDecoder1( hit )["K-1"];
+
+			caloHit->SetIJK( I , J , K );
+			caloHit->SetTypeID(1);
+			caloHit->SetTime( hit->getTime() );
+
+			if( hit->getEnergy() == 1.0 ) caloHit->SetThreshold( fCaloHitThr1 );
+			else if( hit->getEnergy() == 2.0 ) caloHit->SetThreshold( fCaloHitThr2 );
+			else if( hit->getEnergy() == 3.0 ) caloHit->SetThreshold( fCaloHitThr3 );
 			else throw runtime_error("Calo hit energy is not 1.0 , 2.0 or 3.0 as expected for SDHCAL. Check your inputs!");
 
-			Hit *hit = new Hit( params );
-			collection1->push_back( hit );
+			collection1->push_back( caloHit );
 		}
 
-		calculator->SetHitCollection( collection1 );
-		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
-		double energyCollection1 = calculator->GetEnergy();
+//		calculator->SetHitCollection( collection1 );
+//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+//		double energyCollection1 = calculator->GetEnergy();
 
 		// Copy collection 2
 		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern2 );
@@ -313,42 +313,44 @@ int main (int argc ,char *argv[]) {
 
 		for(int hitID=0 ; hitID<lcCollection2->getNumberOfElements() ; hitID++) {
 
-			EVENT::CalorimeterHit *caloHit = static_cast<EVENT::CalorimeterHit *> (lcCollection2->getElementAt(hitID) );
+			EVENT::CalorimeterHit *hit = static_cast<EVENT::CalorimeterHit *> (lcCollection2->getElementAt(hitID) );
 
-			HitParameters params;
+			CaloHit *caloHit = new CaloHit( fSemiDigitalCaloHit );
+
 			ThreeVector position;
-			position.setX( caloHit->getPosition()[0] );
-			position.setY( caloHit->getPosition()[1] );
-			position.setZ( caloHit->getPosition()[2] );
-			params.position = position;
-			int I = cellIdDecoder2( caloHit )["I"];
-			int J = cellIdDecoder2( caloHit )["J"];
-			int K = cellIdDecoder2( caloHit )["K-1"];
-			IntVector ijk2;
-			ijk2.push_back(I);
-			ijk2.push_back(J);
-			ijk2.push_back(K);
-			params.ijk = ijk2;
-			params.type = 2;
-			params.time = caloHit->getTime();
-			if( caloHit->getEnergy() == 1.0 ) params.threshold = fThreshold1;
-			else if( caloHit->getEnergy() == 2.0 ) params.threshold = fThreshold2;
-			else if( caloHit->getEnergy() == 3.0 ) params.threshold = fThreshold3;
+			position.setX( hit->getPosition()[0] );
+			position.setY( hit->getPosition()[1] );
+			position.setZ( hit->getPosition()[2] );
+			caloHit->SetPosition( position );
+
+			int I = cellIdDecoder2( hit )["I"];
+			int J = cellIdDecoder2( hit )["J"];
+			int K = cellIdDecoder2( hit )["K-1"];
+
+			caloHit->SetIJK( I , J , K );
+			caloHit->SetTypeID(2);
+			caloHit->SetTime( hit->getTime() );
+
+			if( hit->getEnergy() == 1.0 ) caloHit->SetThreshold( fCaloHitThr1 );
+			else if( hit->getEnergy() == 2.0 ) caloHit->SetThreshold( fCaloHitThr2 );
+			else if( hit->getEnergy() == 3.0 ) caloHit->SetThreshold( fCaloHitThr3 );
 			else throw runtime_error("Calo hit energy is not 1.0 , 2.0 or 3.0 as expected for SDHCAL. Check your inputs!");
 
-			Hit *hit = new Hit( params );
-			collection2->push_back( hit );
+			collection2->push_back( caloHit );
 		}
-
-		calculator->SetHitCollection( collection2 );
-		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
-		double energyCollection2 = calculator->GetEnergy();
+//
+//		calculator->SetHitCollection( collection2 );
+//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
+//		double energyCollection2 = calculator->GetEnergy();
 
 		// Compute the centers of gravity
-		ThreeVector cog1 = collection1->GetBarycenter();
-		ThreeVector cog2 = collection2->GetBarycenter();
+		ThreeVector cog1(0,0,0);
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection1 , cog1 ) );
 
-		Overlayer overlayer(collection1,collection2);
+		ThreeVector cog2(0,0,0);
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection2 , cog2 ) );
+
+		Overlayer overlayer( collection1 , collection2 );
 
 		// Separate the two events by the given separation distance
 		// and center it at the center of the SDHCAL in the x direction
@@ -367,7 +369,7 @@ int main (int argc ,char *argv[]) {
 
 		// Grab the final overlaid collection and fill more
 		// information in the collection and in the event.
-		HitCollection *outputCollection = overlayer.GetOverlaidCollection();
+		CaloHitCollection *outputCollection = overlayer.GetOverlaidCollection();
 
 		// Fill the new LCIO collection
 		IMPL::LCCollectionVec *lcOutputCollection = new IMPL::LCCollectionVec( LCIO::CALORIMETERHIT );
@@ -375,21 +377,21 @@ int main (int argc ,char *argv[]) {
 
 		for( unsigned int i=0 ; i<outputCollection->size() ; i++ ) {
 
-			Hit *hit = outputCollection->at(i);
+			CaloHit *caloHit = outputCollection->at(i);
 			IMPL::CalorimeterHitImpl *hitImpl = new IMPL::CalorimeterHitImpl();
 
-			float pos[3] = { float(hit->GetPosition().x())
-							, float(hit->GetPosition().y())
-							, float(hit->GetPosition().z()) };
+			float pos[3] = { float(caloHit->GetPosition().x())
+							, float(caloHit->GetPosition().y())
+							, float(caloHit->GetPosition().z()) };
 			hitImpl->setPosition( pos );
-			hitImpl->setType( hit->GetType() );
-			hitImpl->setTime( float(hit->GetTime()) );
-			if( hit->GetThreshold() == fThreshold1 ) hitImpl->setEnergy(1.0);
-			if( hit->GetThreshold() == fThreshold2 ) hitImpl->setEnergy(2.0);
-			if( hit->GetThreshold() == fThreshold3 ) hitImpl->setEnergy(3.0);
-			idEncoder["I"] = hit->GetIJK().at(0);
-			idEncoder["J"] = hit->GetIJK().at(1);
-			idEncoder["K-1"] = hit->GetIJK().at(2);
+			hitImpl->setType( caloHit->GetTypeID() );
+			hitImpl->setTime( float(caloHit->GetTime()) );
+			if( caloHit->GetThreshold() == fCaloHitThr1 ) hitImpl->setEnergy(1.0);
+			if( caloHit->GetThreshold() == fCaloHitThr2 ) hitImpl->setEnergy(2.0);
+			if( caloHit->GetThreshold() == fCaloHitThr3 ) hitImpl->setEnergy(3.0);
+			idEncoder["I"] = caloHit->GetIJK().at(0);
+			idEncoder["J"] = caloHit->GetIJK().at(1);
+			idEncoder["K-1"] = caloHit->GetIJK().at(2);
 			idEncoder.setCellID( hitImpl );
 
 			lcOutputCollection->addElement( hitImpl );
@@ -428,8 +430,8 @@ int main (int argc ,char *argv[]) {
 	lcReader2->close();
 
 	SdhcalConfig::Kill();
-	analysisManager->End();
-	AnalysisManager::Kill();
+//	analysisManager->End();
+//	AnalysisManager::Kill();
 	delete parser;
 	delete lcReader1;
 	delete lcReader2;
