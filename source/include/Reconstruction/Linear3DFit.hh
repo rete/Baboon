@@ -42,39 +42,75 @@ namespace baboon {
 
 	class Linear3DFit {
 
-		protected :
-
-			std::vector<ThreeVector> positions;
-
-			std::vector<ThreeVector> weights;
-
-			double chi2;
-
-			double params[4];
-
-			Return ComputeChi2();
-
-
 		public :
-			/*! Default Constructor */
+
+			/*!
+			 *
+			 * Default Constructor
+			 *
+			 */
 			Linear3DFit( std::vector<ThreeVector> pos , std::vector<ThreeVector> w);
-			/*! Default Destructor */
+
+			/*!
+			 *
+			 * Default Destructor
+			 *
+			 */
 			virtual ~Linear3DFit();
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			Return Fit();
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			inline double GetChi2() {
 				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ComputeChi2() );
 				return chi2;
 			}
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			ThreeVector VectorFromRealLine( const ThreeVector& );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			ThreeVector GetNormaleProjection( const ThreeVector& );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			double* GetFitParameters()
 				{ return params; }
 
+
+		protected :
+
+			std::vector<ThreeVector> positions;
+			std::vector<ThreeVector> weights;
+			double chi2;
+			double params[4];
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return ComputeChi2();
 	};
 
 }
