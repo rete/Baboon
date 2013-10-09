@@ -97,16 +97,16 @@ namespace baboon {
 	}
 
 
-	bool TrackManager::TrackContainsHit( Track *track , Hit *hit ) {
+	bool TrackManager::TrackContainsHit( Track *track , CaloHit *caloHit ) {
 
-		return track->Contains( hit );
+		return track->Contains( caloHit );
 	}
 
-	Return TrackManager::FindTrackContainingHit( Hit *hit , Track *trackToFind ) {
+	Return TrackManager::FindTrackContainingHit( CaloHit *caloHit , Track *trackToFind ) {
 
 		for( unsigned int t=0 ; t<trackCollection->size() ; t++ ) {
 
-			if( trackCollection->at(t)->Contains( hit ) ) {
+			if( trackCollection->at(t)->Contains( caloHit ) ) {
 				trackToFind = trackCollection->at(t);
 				return BABOON_SUCCESS("Track found");
 			}
