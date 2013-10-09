@@ -40,23 +40,22 @@ namespace baboon {
 	}
 
 
-	Return Shower::AddHit( Hit *hit , const double &weight ) {
+	Return Shower::AddCaloHit( CaloHit *caloHit , const double &weight ) {
 
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed.");
+		BABOON_CHECK_POINTER( caloHit );
 
 		if( hitWeights->empty() ) {
 
-			hitCollection->push_back( hit );
+			caloHitCollection->push_back( caloHit );
 			hitWeights->push_back( weight );
 			return BABOON_SUCCESS();
 		}
 
-		if( this->Contains( hit ) )
+		if( this->Contains( caloHit ) )
 			return BABOON_ALREADY_PRESENT("Hit is already in the collection");
 		else {
 
-			hitCollection->push_back( hit );
+			caloHitCollection->push_back( caloHit );
 			hitWeights->push_back( weight );
 			return BABOON_SUCCESS();
 		}
@@ -64,24 +63,23 @@ namespace baboon {
 
 
 
-	Return Shower::AddHit( Hit *hit ) {
+	Return Shower::AddCaloHit( CaloHit *caloHit ) {
 
-		return AddHit( hit , 1.0 );
+		return AddCaloHit( caloHit , 1.0 );
 	}
 
 
-	Return Shower::SetHitWeight( Hit *hit , const double &weight ) {
+	Return Shower::SetCaloHitWeight( CaloHit *caloHit , const double &weight ) {
 
-		if( hit == 0 )
-			return BABOON_INVALID_PARAMETER("Assertion hit != 0 failed.");
+		BABOON_CHECK_POINTER( caloHit );
 
 		if( hitWeights->empty() )
 			return BABOON_NOT_INITIALIZED("Hit weight is empty. Could not set a weight");
 
 
-		for( unsigned int h=0 ; h<hitCollection->size() ; h++ ) {
+		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
 
-			if( hitCollection->at(h) == hit ) {
+			if( caloHitCollection->at(h) == caloHit ) {
 				hitWeights->at(h) = weight;
 				return BABOON_SUCCESS();
 			}
@@ -89,15 +87,15 @@ namespace baboon {
 		return BABOON_NOT_FOUND("Hit not found!");
 	}
 
-	Return Shower::RemoveHit( Hit *hit ) {
+	Return Shower::RemoveCaloHit( CaloHit *caloHit ) {
 
-		if( hitCollection->empty() )
+		if( caloHitCollection->empty() )
 			return BABOON_NOT_FOUND("Try to remove a hit from an empty hit collection.");
 
-		for( unsigned int h=0 ; h<hitCollection->size() ; h++ ) {
-			if( hitCollection->at(h) == hit ) {
+		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
+			if( caloHitCollection->at(h) == caloHit ) {
 
-				hitCollection->erase( hitCollection->begin() + h );
+				caloHitCollection->erase( caloHitCollection->begin() + h );
 				hitWeights->erase( hitWeights->begin() + h );
 				return BABOON_SUCCESS();
 			}
@@ -112,16 +110,16 @@ namespace baboon {
 	}
 
 
-	Return Shower::GetHitWeight( Hit *hit , double &w ) {
+	Return Shower::GetCaloHitWeight( CaloHit *caloHit , double &w ) {
 
-		BABOON_CHECK_POINTER( hit );
+		BABOON_CHECK_POINTER( caloHit );
 
-		HitCollection::iterator it = std::find( hitCollection->begin() , hitCollection->end() , hit );
+		CaloHitCollection::iterator it = std::find( caloHitCollection->begin() , caloHitCollection->end() , caloHit );
 
-		if( it == hitCollection->end() )
+		if( it == caloHitCollection->end() )
 			return BABOON_NOT_FOUND("Hit doesn't belong to this shower!");
 
-		w = hitWeights->at( std::distance( hitCollection->begin() , it ) );
+		w = hitWeights->at( std::distance( caloHitCollection->begin() , it ) );
 
 		return BABOON_SUCCESS();
 	}

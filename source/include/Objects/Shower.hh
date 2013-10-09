@@ -25,7 +25,6 @@
 #include <vector>
 #include <algorithm>
 
-#include "Objects/HitCollection.hh"
 #include "Objects/HitCompositeObject.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Globals.hh"
@@ -53,14 +52,39 @@ namespace baboon {
 			/*! Default Destructor */
 			virtual ~Shower();
 
-			Return AddHit( Hit *hit );
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return AddCaloHit( CaloHit *caloHit );
 
-			Return AddHit( Hit *hit , const double &weight );
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return AddCaloHit( CaloHit *caloHit , const double &weight );
 
-			Return SetHitWeight( Hit *hit , const double &weight );
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetCaloHitWeight( CaloHit *caloHit , const double &weight );
 
-			Return RemoveHit( Hit *hit );
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return RemoveCaloHit( CaloHit *caloHit );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			Return SetStartingPoint( const ThreeVector &startingVec );
 
 
@@ -69,21 +93,23 @@ namespace baboon {
 		protected:
 
 			DoubleVector *hitWeights;
-//			CoreCollection *coreCollection;
-//			TrackCollection *trackCollection;
 			ThreeVector startingPoint;
-//			Track *thrust;
-//			Cone *startingCone;
-
 
 		public:
 
-//			inline HitToWeightsMap *GetHitToWeightsMap()
-//				{ return hitToWeightsMap; }
-
+			/*!
+			 *
+			 *
+			 *
+			 */
 			inline DoubleVector *GetHitWeights()
 				{ return hitWeights; }
 
+			/*!
+			 *
+			 *
+			 *
+			 */
 			inline ThreeVector GetStartingPoint()
 				{ return startingPoint; }
 
@@ -92,22 +118,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			Return GetHitWeight( Hit *hit , double &w );
-
-//			inline Cone *GetStartingCone()
-//				{ return startingCone; }
-
-//			inline int Size()
-//				{ return hitToWeightsMap->size(); }
-
-//			inline Track *GetThrust()
-//				{ return thrust; }
-//
-//			inline CoreCollection *GetCoreCollection()
-//				{ return coreCollection; }
-//
-//			inline TrackCollection *GetTrackCollection()
-//				{ return trackCollection; }
+			Return GetCaloHitWeight( CaloHit *caloHit , double &w );
 
 
 	};  // class
