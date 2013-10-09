@@ -21,13 +21,14 @@ namespace baboon {
 	CaloHit::CaloHit( const CaloHitType &caloType )
 		: type( caloType )
 		,time(0.0)
-		,tag( fUndefinedCaloHit )
 		,weight(0)
-		,module(0)
-		,stave(0)
 		,threshold( fCaloHitThr1 )
-		,energy(0.0) {
+		,energy(0.0)
+		,color(kWhite)
+		,density(0) {
 
+		ijk = IntVector(3,0);
+		tag = UndefinedTag();
 	}
 
 	CaloHit::~CaloHit() {
@@ -51,9 +52,9 @@ namespace baboon {
 	}
 
 
-	Return CaloHit::SetTag( const CaloHitTag &t ) {
+	Return CaloHit::SetTag( const BaseTag &t ) {
 
-		tag = t;
+		tag.CopyTag( t );
 		return BABOON_SUCCESS();
 	}
 
@@ -66,21 +67,6 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
-	Return CaloHit::SetStave( const int &s ) {
-
-		if( s < 0 )
-			return BABOON_INVALID_PARAMETER("Stave < 0");
-		stave = s;
-		return BABOON_SUCCESS();
-	}
-
-	Return CaloHit::SetModule( const int &m ) {
-
-		if( m < 0 )
-			return BABOON_INVALID_PARAMETER("Module < 0");
-		module = m;
-		return BABOON_SUCCESS();
-	}
 
 	Return CaloHit::SetEnergy( const double &e ) {
 
@@ -93,6 +79,32 @@ namespace baboon {
 	Return CaloHit::SetThreshold( const CaloHitThreshold &fThr ) {
 
 		threshold = fThr;
+		return BABOON_SUCCESS();
+	}
+
+	Return CaloHit::SetIJK( const unsigned int &I , const unsigned int &J , const unsigned int &K ) {
+
+		ijk.at(0) = I;
+		ijk.at(1) = J;
+		ijk.at(2) = K;
+		return BABOON_SUCCESS();
+	}
+
+	Return CaloHit::SetTypeID( const int &id ) {
+
+		typeID = id;
+		return BABOON_SUCCESS();
+	}
+
+	Return CaloHit::SetColor( const int &c ) {
+
+		color = c;
+		return BABOON_SUCCESS();
+	}
+
+	Return CaloHit::SetDensity( const double &d ) {
+
+	 	density = d;
 		return BABOON_SUCCESS();
 	}
 

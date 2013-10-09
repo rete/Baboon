@@ -21,36 +21,29 @@
 #include <string> 
 #include <cstdlib> 
 #include <cmath> 
-#include <vector> 
+#include <vector>
+#include <map>
 
 
 #include "Geometry/ThreeVector.hh"
 #include "Utilities/ReturnValues.hh"
+#include "Utilities/Globals.hh"
+#include "Utilities/Internal.hh"
+#include "Reconstruction/Tag.hh"
 
 namespace baboon {
 
 
 	enum CaloHitType {
-
 		fAnalogicCaloHit,
 		fDigitalCaloHit,
 		fSemiDigitalCaloHit
 	};
 
-	enum CaloHitTag {
-
-		fIsolatedCaloHit,
-		fTrackCaloHit,
-		fCoreCaloHit,
-		fNoiseCaloHit,
-		fUndefinedCaloHit
-	};
-
 	enum CaloHitThreshold {
-
-		fCaloHitThr1,
-		fCaloHitThr2,
-		fCaloHitThr3
+		fCaloHitThr1 = 1,
+		fCaloHitThr2 = 2,
+		fCaloHitThr3 = 3
 	};
 
 
@@ -98,7 +91,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			Return SetTag( const CaloHitTag &t );
+			Return SetTag( const BaseTag &t );
 
 			/*!
 			 *
@@ -106,20 +99,6 @@ namespace baboon {
 			 *
 			 */
 			Return SetWeight( const double &w );
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			Return SetStave( const int &s );
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			Return SetModule( const int &m );
 
 			/*!
 			 *
@@ -135,17 +114,48 @@ namespace baboon {
 			 */
 			Return SetThreshold( const CaloHitThreshold &fThr );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetIJK( const unsigned int & , const unsigned int & , const unsigned int & );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetTypeID( const int &id );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetColor( const int &c );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			Return SetDensity( const double &d );
+
+
 	  protected:
 
 			CaloHitType type;
-			CaloHitTag tag;
+			BaseTag tag;
 			CaloHitThreshold threshold;
 			ThreeVector position;
 			double energy;
 			double time;
 			double weight;
-			int stave;
-			int module;
+			double density;
+			int typeID;
+			IntVector ijk;
+			int color;
 
 	  public:
 
@@ -178,7 +188,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			inline CaloHitTag GetTag() const
+			inline BaseTag GetTag() const
 				{ return tag; }
 
 			/*!
@@ -188,22 +198,6 @@ namespace baboon {
 			 */
 			inline double GetWeight() const
 				{ return weight; }
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			inline int GetStave() const
-				{ return stave; }
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			inline int GetModule() const
-				{ return module; }
 
 			/*!
 			 *
@@ -221,10 +215,43 @@ namespace baboon {
 			inline double GetEnergy() const
 				{ return energy; }
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline IntVector GetIJK() const
+				{ return ijk; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline int GetTypeID() const
+				{ return typeID; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline int GetColor() const
+				{ return color; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			inline double GetDensity() const
+				{ return density; }
+
 
 	};  // class
 
 	typedef std::vector<CaloHit*> CaloHitCollection;
+	typedef std::map<unsigned int,CaloHitCollection*> OrderedCaloHitCollection;
 
 }  // namespace 
 
