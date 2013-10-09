@@ -20,6 +20,7 @@
 #include <set>
 #include <string> 
 #include <vector>
+#include <ostream>
 
 
 namespace baboon {
@@ -39,6 +40,17 @@ namespace baboon {
 		for( unsigned int i=0 ; i<vec1.size() ; i++ ) vec.push_back( vec1.at(i) );
 		for( unsigned int i=0 ; i<vec2.size() ; i++ ) vec.push_back( vec2.at(i) );
 		return vec;
+	}
+
+	template <typename T>
+	std::ostream& operator <<( std::ostream &out , std::vector<T> &vec ) {
+
+		if( !vec.empty() ) {
+			out << vec.at(0);
+			for( unsigned int i=1 ; i<vec.size() ; i++ )
+				out << " " << vec.at(i);
+		}
+		return out;
 	}
 
 }  // namespace 
