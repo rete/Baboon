@@ -25,7 +25,6 @@
 #include <algorithm>
 
 #include "Objects/HitCompositeObject.hh"
-#include "Managers/HitManager.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Geometry/Cone.hh"
 
