@@ -314,7 +314,7 @@ namespace baboon {
 	int BaboonMonitoring::GetCaloHitColor( CaloHit *caloHit , const HitDisplayMode displayMode ) {
 
 		if( displayMode == kDisplayUniform ) {
-			return kGray+1;
+			return kOrange+2;
 		}
 		else if( displayMode == kDisplayThresholds ) {
 
