@@ -115,7 +115,7 @@ namespace baboon {
 			TGeoVolume *layer = manager->MakeBox(oss.str().c_str(),vacuum,repeatX*cellSize0/2.0,repeatY*cellSize1/2.0,absorberThickness/2.0);
 
 			layer->SetLineColor(kGray);
-			layer->SetTransparency(90);
+			layer->SetTransparency(95);
 			layer->SetVisibility(true);
 
 			topVolume->AddNode(layer, 0, new TGeoTranslation(0, 0, absorberThickness/2.0 + l*layerThickness ) );
@@ -148,7 +148,13 @@ namespace baboon {
 			posZ = ijk.at(2)*layerThickness + absorberThickness + (layerThickness-absorberThickness)/2.0;
 
 			hits->AddBox( posX , posY , posZ , cellSize0*0.8 , cellSize1*0.8 , layerThickness-absorberThickness );
-			hits->DigitColor( BaboonMonitoring::GetInstance()->GetCaloHitColor( caloHit , displayMode ) , 0 );
+			int color = BaboonMonitoring::GetInstance()->GetCaloHitColor( caloHit , displayMode );
+
+			// transparent hit ( not display )
+			if( color < 0 )
+				hits->DigitColor( color , 100 );
+			else
+				hits->DigitColor( color , 0 );
 		}
 
 		if( parent ) {
