@@ -115,7 +115,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			CoreTag() : BaseTag( "CoreTag" , kMagenta)
+			CoreTag() : BaseTag( "CoreTag" , kMagenta )
 				{}
 
 			/*!
@@ -228,7 +228,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			UndefinedTag() : BaseTag( "UndefinedTag" , kGray+1 )
+			UndefinedTag() : BaseTag( "UndefinedTag" , kOrange+2 )
 				{}
 
 			/*!
