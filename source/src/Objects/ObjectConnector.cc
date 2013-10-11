@@ -25,7 +25,7 @@ namespace baboon {
 
 	ObjectConnector::ObjectConnector() {
 
-		connector = new Connector;
+		connector = new std::pair<HitCompositeObject*,HitCompositeObject*>;
 		connector->first = 0;
 		connector->second = 0;
 	}

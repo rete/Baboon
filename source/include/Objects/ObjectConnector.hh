@@ -31,7 +31,7 @@ namespace baboon {
 
 	class HitCompositeObject;
 
-	typedef std::pair<HitCompositeObject*,HitCompositeObject*> Connector;
+//	typedef std::pair<HitCompositeObject*,HitCompositeObject*> Connector;
 
 	/*!
 	 *
@@ -101,7 +101,7 @@ namespace baboon {
 
 	protected:
 
-			Connector *connector;
+			std::pair<HitCompositeObject*,HitCompositeObject*> *connector;
 
 
 	};  // class
