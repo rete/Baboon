@@ -109,4 +109,16 @@ namespace baboon {
 	}
 
 
+	double EnergyProbability( double energy , double momentum , double detectorResolution ) {
+
+		// corresponds to p = 1 - repartitionGaussienne
+		return 0.5 * ( 1 - TMath::Erf( ( energy - momentum ) / ( detectorResolution * sqrt(2) ) ) );
+	}
+
+
+	double SDHCALResolution( double energy ) {
+
+		// from SDHCAL CAN 37 addendum fit of sigma/E
+		return energy * 0.596 + sqrt( energy ) * 0.0919;
+	}
 }

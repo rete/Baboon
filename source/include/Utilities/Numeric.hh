@@ -25,6 +25,8 @@
 #include <numeric>
 #include <algorithm>
 
+#include "TMath.h"
+
 namespace baboon {
 
 	double square(double x, double y);
@@ -42,6 +44,11 @@ namespace baboon {
 	double RMS90( const std::vector<double> &vec );
 
 	double RecoveryProbabilityWithinSigma( const std::vector<double> &vec , const int &nbOfSigmas );
+
+	double EnergyProbability( double energy , double momemtum , double detectorResolution );
+
+	double SDHCALResolution( double energy );
+
 
 }
 
