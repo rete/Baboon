@@ -59,7 +59,7 @@ namespace baboon {
 		if( shower == 0 )
 			return BABOON_NOT_INITIALIZED("Can't compute energy without setting a shower before.");
 
-		DoubleVector *hitWeights = shower->GetHitWeights();
+		const DoubleVector& hitWeights = shower->GetHitWeights();
 		CaloHitCollection *caloHitCollection = shower->GetCaloHitCollection();
 
 		energy = 0;
@@ -74,11 +74,11 @@ namespace baboon {
 
 		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
 
-			nbOfHits += hitWeights->at(h);
+			nbOfHits += hitWeights.at(h);
 			CaloHit* caloHit = caloHitCollection->at(h);
-			if( caloHit->GetThreshold() == fCaloHitThr1 ) nbThreshold1 += hitWeights->at(h);
-			else if( caloHit->GetThreshold() == fCaloHitThr2 ) nbThreshold2 += hitWeights->at(h);
-			else if( caloHit->GetThreshold() == fCaloHitThr3 ) nbThreshold3 += hitWeights->at(h);
+			if( caloHit->GetThreshold() == fCaloHitThr1 ) nbThreshold1 += hitWeights.at(h);
+			else if( caloHit->GetThreshold() == fCaloHitThr2 ) nbThreshold2 += hitWeights.at(h);
+			else if( caloHit->GetThreshold() == fCaloHitThr3 ) nbThreshold3 += hitWeights.at(h);
 
 		}
 
@@ -93,7 +93,7 @@ namespace baboon {
 	Return WeightEnergyCalculator::SetParameter( const int &i , const double &value ) {
 
 		if( i > 8 )
-			BABOON_OUT_OF_RANGE("Out of range for params[i]");
+			return BABOON_OUT_OF_RANGE("Out of range for params[i]");
 		else params[i] = value;
 		return BABOON_SUCCESS();
 	}
