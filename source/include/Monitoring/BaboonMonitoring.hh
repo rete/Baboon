@@ -115,6 +115,13 @@ namespace baboon {
 			 */
 			static int GetColorBetweenMinAndMax( double min , double max , double value );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void DrawConnector( const ThreeVector & , const ThreeVector & , int color );
+
 
 		protected:
 
