@@ -125,6 +125,8 @@ namespace baboon {
 
 		pointPair.first = 0;
 		pointPair.second = 0;
+		weight = 1.;
+		isGood = true;
 	}
 
 	template<typename T , typename S>
@@ -132,6 +134,7 @@ namespace baboon {
 
 		pointPair.first = 0;
 		pointPair.second = 0;
+		weight = 1.;
 	}
 
 	template< typename T , typename S >
@@ -142,6 +145,19 @@ namespace baboon {
 
 		pointPair.first = point1;
 		pointPair.second = point2;
+		isGood = true;
+	}
+
+	template< typename T , typename S >
+	void Connector<T,S>::Connect( Point<T,S> *point1 , Point<S,T> *point2 , const double &w ) {
+
+		if( point1 == 0 || point2 == 0 )
+			return;
+
+		pointPair.first = point1;
+		pointPair.second = point2;
+		weight = w;
+		isGood = true;
 	}
 
 	template< typename T , typename S >
@@ -149,6 +165,8 @@ namespace baboon {
 
 		pointPair.first = 0;
 		pointPair.second = 0;
+		weight = 1.;
+		isGood = false;
 	}
 
 	template<typename T,typename S>
@@ -163,6 +181,32 @@ namespace baboon {
 		return pointPair.second;
 	}
 
+	template<typename T,typename S>
+	const double &Connector<T,S>::GetWeight() {
+
+		return weight;
+	}
+
+
+	template<typename T,typename S>
+	void Connector<T,S>::SetGood( bool b ) {
+
+		isGood = b;
+	}
+
+	template<typename T,typename S>
+	bool Connector<T,S>::IsGood() {
+
+		return isGood;
+	}
+
+	class CaloHit;
+	class Cluster;
+	class TrackHelper;
+	class Track;
+	class Shower;
+	class Core;
+
 	// for Point
 	template baboon::Point< CaloHit* , CaloHit *>::Point();
 	template baboon::Point< CaloHit *, CaloHit *>::~Point();
@@ -175,11 +219,58 @@ namespace baboon {
 	template typename ConnectorCollection< CaloHit * , CaloHit * >::type &baboon::Point< CaloHit * , CaloHit * >::GetConnectors();
 
 	// for Connector
-	template void Connector< CaloHit * , CaloHit * >::Connect( Point< CaloHit * , CaloHit * > *point1 , Point< CaloHit * , CaloHit *> *point2 );
 	template Connector< CaloHit * , CaloHit * >::Connector();
+	template Connector< CaloHit * , CaloHit * >::~Connector();
+	template void Connector< CaloHit * , CaloHit * >::Connect( Point< CaloHit * , CaloHit * > *point1 , Point< CaloHit * , CaloHit *> *point2 , const double &w );
+	template void Connector< CaloHit * , CaloHit * >::Connect( Point< CaloHit * , CaloHit * > *point1 , Point< CaloHit * , CaloHit *> *point2 );
 	template void Connector< CaloHit * , CaloHit * >::Disconnect();
 	template Point< CaloHit * , CaloHit * > *Connector< CaloHit * , CaloHit * >::GetFirst();
 	template Point< CaloHit * , CaloHit * > *Connector< CaloHit * , CaloHit * >::GetSecond();
+	template const double &Connector< CaloHit * , CaloHit * >::GetWeight();
+	template void Connector< CaloHit * , CaloHit * >::SetGood( bool b );
+	template bool Connector< CaloHit * , CaloHit * >::IsGood();
+
+
+
+
+	// for Point
+	template baboon::Point< Cluster * , TrackHelper * >::Point();
+	template baboon::Point< Cluster *, TrackHelper * >::~Point();
+	template void Point< Cluster * , TrackHelper * >::AddConnector( Connector< Cluster * , TrackHelper * > *connector );
+	template void baboon::Point< Cluster * , TrackHelper * >::RemoveConnector( baboon::Connector< Cluster * , TrackHelper * > *connector );
+	template bool baboon::Point< Cluster * , TrackHelper * >::IsConnectedTo( baboon::Connector< Cluster * , TrackHelper * > *connector );
+	template bool baboon::Point< Cluster * , TrackHelper * >::IsConnectedTo( Point< TrackHelper * , Cluster * > *point );
+	template void baboon::Point< Cluster * , TrackHelper * >::SetObject( Cluster *obj );
+	template Cluster *baboon::Point< Cluster * , TrackHelper * >::GetObject();
+	template typename ConnectorCollection< Cluster * , TrackHelper * >::type &baboon::Point< Cluster * , TrackHelper * >::GetConnectors();
+
+	// for Connector
+	template Connector< Cluster * , TrackHelper * >::Connector();
+	template Connector< Cluster * , TrackHelper * >::~Connector();
+	template void Connector< Cluster * , TrackHelper * >::Connect( Point< Cluster * , TrackHelper * > *point1 , Point< TrackHelper * , Cluster *> *point2 , const double &w );
+	template void Connector< Cluster * , TrackHelper * >::Connect( Point< Cluster * , TrackHelper * > *point1 , Point< TrackHelper * , Cluster *> *point2 );
+	template void Connector< Cluster * , TrackHelper * >::Disconnect();
+	template Point< Cluster * , TrackHelper * > *Connector< Cluster * , TrackHelper * >::GetFirst();
+	template Point< Cluster * , TrackHelper * > *Connector< TrackHelper * , Cluster * >::GetSecond();
+
+	// for Point
+	template baboon::Point< TrackHelper * , Cluster * >::Point();
+	template baboon::Point< TrackHelper *, Cluster * >::~Point();
+	template void Point< TrackHelper * , Cluster * >::AddConnector( Connector< TrackHelper * , Cluster * > *connector );
+	template void baboon::Point< TrackHelper * , Cluster * >::RemoveConnector( baboon::Connector< TrackHelper * , Cluster * > *connector );
+	template bool baboon::Point< TrackHelper * , Cluster * >::IsConnectedTo( baboon::Connector< TrackHelper * , Cluster * > *connector );
+	template bool baboon::Point< TrackHelper * , Cluster * >::IsConnectedTo( Point< Cluster * , TrackHelper * > *point );
+	template void baboon::Point< TrackHelper * , Cluster * >::SetObject( TrackHelper *obj );
+	template TrackHelper *baboon::Point< TrackHelper * , Cluster * >::GetObject();
+	template typename ConnectorCollection< TrackHelper * , Cluster * >::type &baboon::Point< TrackHelper * , Cluster * >::GetConnectors();
+
+	// for Connector
+	template Connector< TrackHelper * , Cluster * >::Connector();
+	template Connector< TrackHelper * , Cluster * >::~Connector();
+	template void Connector< TrackHelper * , Cluster * >::Connect( Point< TrackHelper * , Cluster * > *point1 , Point< Cluster * , TrackHelper *> *point2 );
+	template void Connector< TrackHelper * , Cluster * >::Disconnect();
+	template Point< TrackHelper * , Cluster * > *Connector< TrackHelper * , Cluster * >::GetFirst();
+	template Point< TrackHelper * , Cluster * > *Connector< Cluster * , TrackHelper * >::GetSecond();
 
 
 }  // namespace 
