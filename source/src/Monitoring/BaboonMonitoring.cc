@@ -359,5 +359,27 @@ namespace baboon {
 	}
 
 
+	void BaboonMonitoring::DrawConnector( const ThreeVector &position1 , const ThreeVector &position2 , int color ) {
+
+		if( isEnable ) {
+
+			TEveArrow *connectionArrow = new TEveArrow(
+					 position2.x() - position1.x()
+					,position2.y() - position1.y()
+					,position2.z() - position1.z()
+					,position1.x()
+					,position1.y()
+					,position1.z() );
+
+			connectionArrow->SetMainColor( color );
+			connectionArrow->SetPickable( true );
+//			connectionArrow->SetTubeR( 0.05 );
+//			connectionArrow->SetConeR( 0.008 );
+//			connectionArrow->SetConeL( 0.008 );
+			instance->AddElement( connectionArrow );
+		}
+	}
+
+
 }  // namespace 
 
