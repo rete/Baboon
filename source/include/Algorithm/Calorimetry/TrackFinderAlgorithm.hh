@@ -40,6 +40,7 @@
 #include <cmath>
 #include <vector>
 #include <utility>
+#include <algorithm>
 
 
 // baboon includes
@@ -165,7 +166,6 @@ namespace baboon {
 					 *
 					 */
 					int HowManyForwardConnectors();
-
 
 				protected:
 
@@ -367,6 +367,7 @@ namespace baboon {
 			int lookupDistanceY;       			      ///< The maximum distance between two connection in Y direction
 			int lookupDistanceZ;					  ///< The maximum distance between two connection in Z direction
 			double maximumConnectorsAngle;			  ///< The maximum angle between two consecutive connectors inside a track
+			bool drawConnectors;
 
 	};  // class
 
