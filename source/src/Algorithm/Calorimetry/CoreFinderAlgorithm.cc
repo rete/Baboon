@@ -37,6 +37,7 @@ namespace baboon {
 
 		threshCountVec.clear();
 		data.GetValue("minimumThresholdConcentration",&minimumThresholdConcentration);
+
 		return BABOON_SUCCESS();
 	}
 
@@ -62,28 +63,29 @@ namespace baboon {
 			IntVector ijk = caloHit->GetIJK();
 			CaloHitThreshold thresh = caloHit->GetThreshold();
 
+//			double count = 0;
+//			double total = 0;
 
-			int count = 0;
+//			for(int i=-1 ; i<=1 ; i++ ) {
+//				for(int j=-1 ; j<=1 ; j++) {
+//					for(int k=-2 ; k<=2 ; k++) {
+//
+//						total++;
+//
+//						if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
+//							continue;
+//
+//						CaloHit* touchedHit = calorimeter->GetCaloHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
+//
+//						count += touchedHit->GetThreshold();
+//
+//					}
+//				}
+//			}
+//			caloHit->SetDensity( count / total );
 
-			for(int i=-1 ; i<=1 ; i++ ) {
-				for(int j=-1 ; j<=1 ; j++) {
-					for(int k=-1 ; k<=1 ; k++) {
-
-						if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
-							continue;
-
-						CaloHit* touchedHit = calorimeter->GetCaloHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
-
-						int factor = 1;
-						factor *= touchedHit->GetThreshold();
-						count += factor;
-
-					}
-				}
-			}
-			caloHit->SetDensity( double(count) / 27.0 );
-
-			if(count / 27.0 >= minimumThresholdConcentration )
+//			if( count / total >= minimumThresholdConcentration )
+			if( caloHit->GetDensity() >= minimumThresholdConcentration )
 				caloHit->SetTag( CoreTag() );
 
 		}

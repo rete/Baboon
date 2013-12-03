@@ -62,7 +62,6 @@ namespace baboon {
 
 	Return IsolationTaggingAlgorithm::Execute() {
 
-//		HitManager *hitManager = HitManager::GetInstance();
 		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
 
 		unsigned int hitID = 0;
@@ -71,35 +70,36 @@ namespace baboon {
 		for( hitID=0 ; hitID<size ; hitID++ ) {
 
 			CaloHit *caloHit = caloHitCollection->at(hitID);
-			IntVector ijk1 = caloHit->GetIJK();
+//			IntVector ijk1 = caloHit->GetIJK();
+//
+//			int count = 0;
+//			int volume = 0;
+//
+//			for( int i=-distance ; i<=distance ; i++ ) {
+//				for( int j=-distance ; j<=distance ; j++ ) {
+//					for( int k=-distance ; k<=distance ; k++ ) {
+//
+//						volume++;
+//
+//						if( !calorimeter->IsPadFired( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k ) )
+//							continue;
+//
+//						CaloHit *caloHit2 = calorimeter->GetCaloHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
+//						int factor = 1;
+//						factor *= caloHit2->GetThreshold();
+//						count += factor;
+//					}
+//				}
+//			}
 
-			int count = 0;
-			int volume = 0;
+//			caloHit->SetDensity( double(count) / volume );
 
-			for( int i=-distance ; i<=distance ; i++ ) {
-				for( int j=-distance ; j<=distance ; j++ ) {
-					for( int k=-distance ; k<=distance ; k++ ) {
-
-						volume++;
-
-						if( !calorimeter->IsPadFired( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k ) )
-							continue;
-
-						CaloHit *caloHit2 = calorimeter->GetCaloHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
-						int factor = 1;
-						factor *= caloHit2->GetThreshold();
-						count += factor;
-					}
-				}
-			}
-
-			caloHit->SetDensity( double(count) / volume );
-
-			isolationWeights.push_back( double(count) / volume );
+//			isolationWeights.push_back( caloHit->GetDensity() );
 //			cout << "density : " << double(count) / volume << endl;
-			if( double(count) / volume < concentrationLimit ) {
+//			if( double(count) / volume < concentrationLimit ) {
+			if( caloHit->GetDensity() < concentrationLimit )
 				caloHit->SetTag( IsolatedTag() );
-			}
+//			}
 		}
 		return BABOON_SUCCESS();
 	}
