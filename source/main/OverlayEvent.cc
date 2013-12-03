@@ -45,19 +45,17 @@
 #include "Overlay/Overlayer.hh"
 #include "Objects/CaloHit.hh"
 #include "Utilities/ReturnValues.hh"
-#include "Managers/AnalysisManager.hh"
-#include "Reconstruction/EnergyCalculator/SimpleEnergyCalculator.hh"
+#include "Managers/AlgorithmManager.hh"
+#include "Algorithm/OverlayEventAlgorithm.hh"
+#include "Algorithm/Calorimetry/TrackFinderAlgorithm.hh"
+#include "Algorithm/Calorimetry/ClusteringAlgorithm.hh"
 #include "Utilities/Internal.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/CaloHitHelper.hh"
+#include "Detector/SDHCAL.hh"
 
-// root includes
-#include "TCanvas.h"
-#include "TH2D.h"
-#include "TH3D.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TBranch.h"
+//#include "gear/GearXML.h"
+#include "gear/GearMgr.h"
 
 // tclap includes
 #include "tclap/CmdLine.h"
@@ -67,6 +65,7 @@ using namespace cfgparser;
 using namespace baboon;
 using namespace EVENT;
 using namespace UTIL;
+using namespace gear;
 
 // for debug messages (devel)
 #define __DEBUG__ 0
@@ -142,7 +141,8 @@ int main (int argc ,char *argv[]) {
 	string codingPattern2 = "";
 	string outputCollectionName = "";
 	string outputCodingPattern = "";
-	string rootOutputFile = "";
+	string gearFile = "";
+	string algorithmConfigFile = "";
 	int separationDistance = 0;
 	int nbOfEventsToOverlay = 0;
 
@@ -154,6 +154,9 @@ int main (int argc ,char *argv[]) {
 	CfgParser *parser = new CfgParser( overlayCfgFileName );
 	parser->Read();
 
+	parser->GetValue("general","gearFile",&gearFile);
+	parser->GetValue("general","algorithmConfigFile",&algorithmConfigFile);
+
 	parser->GetValue("input1","slcioFile",&inputFile1);
 	parser->GetValue("input1","collectionName",&inputCollectionName1);
 	parser->GetValue("input1","codingPattern",&codingPattern1);
@@ -163,19 +166,46 @@ int main (int argc ,char *argv[]) {
 	parser->GetValue("input2","codingPattern",&codingPattern2);
 
 	parser->GetValue("output","nbOfEventsToOverlay",&nbOfEventsToOverlay);
-	parser->GetValue("output","separationDistance",&separationDistance);
+//	parser->GetValue("output","separationDistance",&separationDistance);
 	parser->GetValue("output","slcioFile",&slcioOutputFile);
 	parser->GetValue("output","collectionName",&outputCollectionName);
 	parser->GetValue("output","codingPattern",&outputCodingPattern);
 
-	try {
-		parser->GetValue("output","rootOutputFile",&rootOutputFile);
-	}
-	catch ( DataException &e ) {
 
-		cout << "ROOT output file not given!" << endl;
-	}
+	/****************************************
+	 *          Calorimeter loading
+	 ****************************************/
 
+	GearXML gearParser( gearFile );
+	GearMgr *gearMgr = gearParser.createGearMgr();
+
+	DetectorManager * detectorMan = DetectorManager::GetInstance();
+	detectorMan->RegisterDetector( new SDHCAL("SDHCAL1") );
+	detectorMan->RegisterDetector( new SDHCAL("SDHCAL2") );
+	BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , detectorMan->Init( gearMgr ) );
+
+
+	/****************************************
+	 *          Algorithm loading
+	 ****************************************/
+
+	AlgorithmManager *algoMan = AlgorithmManager::GetInstance();
+
+	// Register overlay algo
+	algoMan->RegisterAlgorithm( new OverlayEventAlgorithm() );
+
+	// Register track finder algo
+	algoMan->RegisterAlgorithm( new TrackFinderAlgorithm() );
+
+	// Register clustering algo
+	algoMan->RegisterAlgorithm( new ClusteringAlgorithm() );
+
+	algoMan->SetConfigFileName( algorithmConfigFile );
+	algoMan->Initialize();
+
+	OverlayEventAlgorithm *overlayer = (OverlayEventAlgorithm *) algoMan->GetAlgorithm( "OverlayEventAlgorithm" );
+	Data data = overlayer->GetData();
+	data.GetValue("separationDistance", &separationDistance);
 
 	/*****************************************
 	 * LC readers (input) and writer (output)
@@ -187,12 +217,8 @@ int main (int argc ,char *argv[]) {
 	lcReader1->open( inputFile1 );
 	lcReader2->open( inputFile2 );
 	lcWriter->open( slcioOutputFile , LCIO::WRITE_NEW );
-	EVENT::LCEvent *evt1;
-	EVENT::LCEvent *evt2;
-
-	AnalysisManager *analysisManager = AnalysisManager::GetInstance();
-	analysisManager->SetRootFileName( rootOutputFile );
-	analysisManager->Init();
+	EVENT::LCEvent *evt1( nullptr );
+	EVENT::LCEvent *evt2( nullptr );
 
 	/*******************************************
 	 * Check if the number of events to overlay
@@ -269,8 +295,6 @@ int main (int argc ,char *argv[]) {
 		CaloHitCollection *collection1 = new CaloHitCollection();
 		CaloHitCollection *collection2 = new CaloHitCollection();
 
-		SimpleEnergyCalculator *calculator = new SimpleEnergyCalculator();
-
 		// Copy collection 1
 		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern1 );
 		UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder1( lcCollection1 );
@@ -303,10 +327,6 @@ int main (int argc ,char *argv[]) {
 			collection1->push_back( caloHit );
 		}
 
-//		calculator->SetHitCollection( collection1 );
-//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
-//		double energyCollection1 = calculator->GetEnergy();
-
 		// Copy collection 2
 		UTIL::CellIDDecoder<CalorimeterHit>::setDefaultEncoding( codingPattern2 );
 		UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder2( lcCollection2 );
@@ -338,87 +358,117 @@ int main (int argc ,char *argv[]) {
 
 			collection2->push_back( caloHit );
 		}
+
+		OverlayEventAlgorithm *overlayer = (OverlayEventAlgorithm *) algoMan->GetAlgorithm( "OverlayEventAlgorithm" );
+		overlayer->SetCollection1( collection1 );
+		overlayer->SetCollection2( collection2 );
+		SDHCAL *sdhcal1 = (SDHCAL *) detectorMan->GetDetector("SDHCAL1");
+		SDHCAL *sdhcal2 = (SDHCAL *) detectorMan->GetDetector("SDHCAL2");
+		overlayer->SetCalorimeter1( sdhcal1 );
+		overlayer->SetCalorimeter2( sdhcal2 );
+
+		overlayer->Process();
+
+//		// Compute the centers of gravity
+//		ThreeVector cog1(0,0,0);
+//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection1 , cog1 ) );
 //
-//		calculator->SetHitCollection( collection2 );
-//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , calculator->CalculateEnergy() );
-//		double energyCollection2 = calculator->GetEnergy();
-
-		// Compute the centers of gravity
-		ThreeVector cog1(0,0,0);
-		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection1 , cog1 ) );
-
-		ThreeVector cog2(0,0,0);
-		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection2 , cog2 ) );
-
-		Overlayer overlayer( collection1 , collection2 );
+//		ThreeVector cog2(0,0,0);
+//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection2 , cog2 ) );
+//
+//		Overlayer overlayer( collection1 , collection2 );
 
 		// Separate the two events by the given separation distance
 		// and center it at the center of the SDHCAL in the x direction
 		// and re-center them on the y axis
-		overlayer.SetTranslations(
-				new ThreeVector( nbOfPadsXYZ.at(0)/2.0 + separationDistance / 2.0 - cog1.x()
-								 ,nbOfPadsXYZ.at(1)/2.0 - cog1.y()
-								,0)
-			   ,new ThreeVector( nbOfPadsXYZ.at(0)/2.0 - separationDistance / 2.0 - cog2.x()
-					   	   	    ,nbOfPadsXYZ.at(1)/2.0 - cog2.y()
-					   	   	    ,0) );
-
-		overlayer.OverlayCollections();
+//		overlayer.SetTranslations(
+//				new ThreeVector( nbOfPadsXYZ.at(0)/2.0 + separationDistance / 2.0 - cog1.x()
+//								 ,nbOfPadsXYZ.at(1)/2.0 - cog1.y()
+//								,0)
+//			   ,new ThreeVector( nbOfPadsXYZ.at(0)/2.0 - separationDistance / 2.0 - cog2.x()
+//					   	   	    ,nbOfPadsXYZ.at(1)/2.0 - cog2.y()
+//					   	   	    ,0) );
+//
+//		overlayer.OverlayCollections();
 
 
 
 		// Grab the final overlaid collection and fill more
 		// information in the collection and in the event.
-		CaloHitCollection *outputCollection = overlayer.GetOverlaidCollection();
+//		CaloHitCollection *outputCollection = overlayer.GetOverlaidCollection();
 
-		// Fill the new LCIO collection
-		IMPL::LCCollectionVec *lcOutputCollection = new IMPL::LCCollectionVec( LCIO::CALORIMETERHIT );
-		UTIL::CellIDEncoder<IMPL::CalorimeterHitImpl> idEncoder (outputCodingPattern,lcOutputCollection);
+		if( overlayer->OverlayDone() ) {
 
-		for( unsigned int i=0 ; i<outputCollection->size() ; i++ ) {
+			const CaloHitCollection *outputCollection = overlayer->GetOverlaidCollection();
+			// Fill the new LCIO CalorimeterHit collection
+			IMPL::LCCollectionVec *lcOutputCollection = new IMPL::LCCollectionVec( LCIO::CALORIMETERHIT );
+			UTIL::CellIDEncoder<IMPL::CalorimeterHitImpl> idEncoder (outputCodingPattern,lcOutputCollection);
 
-			CaloHit *caloHit = outputCollection->at(i);
-			IMPL::CalorimeterHitImpl *hitImpl = new IMPL::CalorimeterHitImpl();
+			for( unsigned int i=0 ; i<outputCollection->size() ; i++ ) {
 
-			float pos[3] = { float(caloHit->GetPosition().x())
-							, float(caloHit->GetPosition().y())
-							, float(caloHit->GetPosition().z()) };
-			hitImpl->setPosition( pos );
-			hitImpl->setType( caloHit->GetTypeID() );
-			hitImpl->setTime( float(caloHit->GetTime()) );
-			if( caloHit->GetThreshold() == fCaloHitThr1 ) hitImpl->setEnergy(1.0);
-			if( caloHit->GetThreshold() == fCaloHitThr2 ) hitImpl->setEnergy(2.0);
-			if( caloHit->GetThreshold() == fCaloHitThr3 ) hitImpl->setEnergy(3.0);
-			idEncoder["I"] = caloHit->GetIJK().at(0);
-			idEncoder["J"] = caloHit->GetIJK().at(1);
-			idEncoder["K-1"] = caloHit->GetIJK().at(2);
-			idEncoder.setCellID( hitImpl );
+				CaloHit *caloHit = outputCollection->at(i);
+				IMPL::CalorimeterHitImpl *hitImpl = new IMPL::CalorimeterHitImpl();
 
-			lcOutputCollection->addElement( hitImpl );
+				float pos[3] = { float(caloHit->GetPosition().x())
+								, float(caloHit->GetPosition().y())
+								, float(caloHit->GetPosition().z()) };
+				hitImpl->setPosition( pos );
+				hitImpl->setType( caloHit->GetTypeID() );
+				hitImpl->setTime( float(caloHit->GetTime()) );
+				if( caloHit->GetThreshold() == fCaloHitThr1 ) hitImpl->setEnergy(1.0);
+				if( caloHit->GetThreshold() == fCaloHitThr2 ) hitImpl->setEnergy(2.0);
+				if( caloHit->GetThreshold() == fCaloHitThr3 ) hitImpl->setEnergy(3.0);
+				idEncoder["I"] = caloHit->GetIJK().at(0);
+				idEncoder["J"] = caloHit->GetIJK().at(1);
+				idEncoder["K-1"] = caloHit->GetIJK().at(2);
+				idEncoder.setCellID( hitImpl );
+
+				lcOutputCollection->addElement( hitImpl );
+			}
+
+			// Fill the lcio track collection
+			IMPL::LCCollectionVec *lcTrackOutputCollection = new IMPL::LCCollectionVec( LCIO::TRACK );
+
+			if( overlayer->GetTrackPair().first != nullptr )
+				lcTrackOutputCollection->addElement( overlayer->GetTrackPair().first );
+
+			if( overlayer->GetTrackPair().second != nullptr )
+				lcTrackOutputCollection->addElement( overlayer->GetTrackPair().second );
+
+			// Fill the final event
+			IMPL::LCEventImpl *outputEvent = new IMPL::LCEventImpl();
+
+			IMPL::LCFlagImpl chFlag(0);
+			EVENT::LCIO bitinfo;
+			chFlag.setBit(bitinfo.CHBIT_LONG );   // calorimeter hit position
+			chFlag.setBit(bitinfo.CHBIT_ID1 );    // cell ID
+			chFlag.setBit(bitinfo.CHBIT_STEP );   // step info
+
+			lcOutputCollection->setFlag( chFlag.getFlag()  ) ;
+			nbOfOverlaidEvents++;
+
+			outputEvent->addCollection( (LCCollection*) lcOutputCollection,outputCollectionName);
+			outputEvent->addCollection( (LCCollection*) lcTrackOutputCollection , "SDHCALPrimaryTracks" );
+			outputEvent->setRunNumber(0);
+			outputEvent->setEventNumber(nbOfOverlaidEvents);
+			outputEvent->setDetectorName( evt1->getDetectorName() );
+
+			// write the final event
+			lcWriter->writeEvent(outputEvent);
+
+			sdhcal1->ClearContent();
+			sdhcal2->ClearContent();
+
+			nbOfLostHits += overlayer->GetNumberOfLostHits();
+			evtID++;
 		}
+		else {
 
-		// Fill the final event
-		IMPL::LCEventImpl *outputEvent = new IMPL::LCEventImpl();
-
-		IMPL::LCFlagImpl chFlag(0);
-		EVENT::LCIO bitinfo;
-		chFlag.setBit(bitinfo.CHBIT_LONG );   // calorimeter hit position
-		chFlag.setBit(bitinfo.CHBIT_ID1 );    // cell ID
-		chFlag.setBit(bitinfo.CHBIT_STEP );   // step info
-
-		lcOutputCollection->setFlag( chFlag.getFlag()  ) ;
-		nbOfOverlaidEvents++;
-
-		outputEvent->addCollection( (LCCollection*) lcOutputCollection,outputCollectionName);
-		outputEvent->setRunNumber(0);
-		outputEvent->setEventNumber(nbOfOverlaidEvents);
-		outputEvent->setDetectorName( evt1->getDetectorName() );
-
-		// write the final event
-		lcWriter->writeEvent(outputEvent);
-
-		nbOfLostHits += overlayer.GetNumberOfLostHits();
-		evtID++;
+			sdhcal1->ClearContent();
+			sdhcal2->ClearContent();
+			nbOfSkippedEvents++;
+			evtID++;
+		}
 	}
 
 
@@ -430,8 +480,7 @@ int main (int argc ,char *argv[]) {
 	lcReader2->close();
 
 	SdhcalConfig::Kill();
-//	analysisManager->End();
-//	AnalysisManager::Kill();
+
 	delete parser;
 	delete lcReader1;
 	delete lcReader2;
@@ -449,14 +498,14 @@ int main (int argc ,char *argv[]) {
 		cout << "*                                                       "  << endl;
 		cout << "*  - Number of overlaid events : " << nbOfOverlaidEvents  << endl;
 		cout << "*  - Number of skipped events   : " << nbOfSkippedEvents    << endl;
-		if(nbOfSkippedEvents != 0) {
-			cout << "*  - List of skipped events : ";
-			for(unsigned int i=0 ; i<skippedEventsVec.size() ; i++) {
-				cout << skippedEventsVec.at(i);
-				if(i!=skippedEventsVec.size()-1) cout << " , ";
-				else cout << endl;
-			}
-		}
+//		if(nbOfSkippedEvents != 0) {
+//			cout << "*  - List of skipped events : ";
+//			for(unsigned int i=0 ; i<skippedEventsVec.size() ; i++) {
+//				cout << skippedEventsVec.at(i);
+//				if(i!=skippedEventsVec.size()-1) cout << " , ";
+//				else cout << endl;
+//			}
+//		}
 		cout << "*  - Number of lost hits        : " << nbOfLostHits << endl;
 		cout << "*  - Input sclio files          : " << endl;
 		cout << "*       " << inputFile1 << endl;
