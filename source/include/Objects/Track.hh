@@ -87,10 +87,78 @@ namespace baboon {
 			 */
 			std::vector<ThreeVector> GetIJKs() const;
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetForwardThrust( const ThreeVector &thrust )
+				{ forwardThrust = thrust; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			const ThreeVector &GetForwardThrust()
+				{ return forwardThrust; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetBackwardThrust( const ThreeVector &thrust )
+				{ backwardThrust = thrust; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			const ThreeVector &GetBackwardThrust()
+				{ return backwardThrust; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetBeginPosition( const ThreeVector &pos )
+				{ beginPosition = pos; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			const ThreeVector &GetBeginPosition()
+				{ return beginPosition; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetEndPosition( const ThreeVector &pos )
+				{ endPosition = pos; }
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			const ThreeVector &GetEndPosition()
+				{ return endPosition; }
+
+
 		protected:
 
 			TrackExtremities extremities;
-
+			ThreeVector forwardThrust;
+			ThreeVector backwardThrust;
+			ThreeVector beginPosition;
+			ThreeVector endPosition;
 
 	};  // class
 
