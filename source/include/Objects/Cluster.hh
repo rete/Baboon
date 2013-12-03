@@ -41,6 +41,11 @@ namespace baboon {
 		fCluster3D
 	};
 
+	enum PositionComputation {
+		fComputeCell,
+		fComputePosition
+	};
+
 	/*!
 	 * Class SDHCALCluster.
 	 */
@@ -59,7 +64,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			void ComputePosition();
+			void ComputePosition( PositionComputation computation = fComputeCell );
 
 		public :
 
@@ -82,8 +87,8 @@ namespace baboon {
 			 *
 			 *
 			 */
-			const ThreeVector& GetPosition() {
-				this->ComputePosition();
+			const ThreeVector& GetPosition( PositionComputation computation = fComputeCell ) {
+				this->ComputePosition( computation );
 				return position;
 			}
 

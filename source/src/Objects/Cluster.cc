@@ -31,22 +31,39 @@ namespace baboon {
 	}
 
 
-	void Cluster::ComputePosition() {
+	void Cluster::ComputePosition( PositionComputation computation ) {
 
-		if( caloHitCollection->empty() ) return;
+		if( caloHitCollection->empty() )
+			return;
+
 		ThreeVector pos(0,0,0);
-		if(position == pos) {
+
+		if( computation == fComputeCell ) {
 			for(unsigned int i=0 ; i<caloHitCollection->size() ; i++) {
+
 				CaloHit *caloHit = caloHitCollection->at(i);
 				IntVector hitIJK = caloHit->GetIJK();
 
 				pos.set( pos.x() + hitIJK.at(0)
-				        ,pos.y() + hitIJK.at(1)
-				        ,pos.z() + hitIJK.at(2) );
+						,pos.y() + hitIJK.at(1)
+						,pos.z() + hitIJK.at(2) );
 			}
-			pos *= double(1.0/caloHitCollection->size());
-			position = pos;
 		}
+		else {
+			for(unsigned int i=0 ; i<caloHitCollection->size() ; i++) {
+
+				CaloHit *caloHit = caloHitCollection->at(i);
+				ThreeVector hitPos = caloHit->GetPosition();
+
+				pos.set( pos.x() + hitPos.x()
+						,pos.y() + hitPos.y()
+						,pos.z() + hitPos.z() );
+			}
+		}
+
+
+		pos *= double(1.0/caloHitCollection->size());
+		position = pos;
 	}
 
 	bool Cluster::IsIsolatedFromClusters(const ClusterCollection* clusters) {
