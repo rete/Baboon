@@ -39,23 +39,21 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
-
-#include "Objects/CaloHit.hh"
+#include <map>
 
 
 #define MACRO_TEMPLATE_INIT_POINT( typeT , typeS )																	 \
 {                                                                                                                    \
 	template baboon::Point< typeT , typeS >::Point();																 \
+	template baboon::Point< typeT , typeS >::~Point();																	 \
+	template void baboon::Point< typeT , typeS >::AddConnector( baboon::Connector< typeT , typeS > *connector );       \
+	template void baboon::Point< typeT , typeS >::RemoveConnector( baboon::Connector< typeT , typeS > *connector );    \
+	template bool baboon::Point< typeT , typeS >::IsConnectedTo( baboon::Connector< typeT , typeS > *connector );      \
+	template bool baboon::Point< typeT , typeS >::IsConnectedTo( Point< typeS , typeT > *point );                      \
+	template void baboon::Point< typeT , typeS >::SetObject( typeT *obj );                                             \
+	template typeT *baboon::Point< typeT , typeS >::GetObject();                                                        \
+	template typename ConnectorCollection< typeT , typeS >::type &baboon::Point< typeT , typeS >::GetConnectors();     \
 }
-//	template baboon::Point< typeT , typeS >::~Point();																	 \
-//	template void baboon::Point< typeT , typeS >::AddConnector( baboon::Connector< typeT , typeS > *connector );       \
-//	template void baboon::Point< typeT , typeS >::RemoveConnector( baboon::Connector< typeT , typeS > *connector );    \
-//	template bool baboon::Point< typeT , typeS >::IsConnectedTo( baboon::Connector< typeT , typeS > *connector );      \
-//	template bool baboon::Point< typeT , typeS >::IsConnectedTo( Point< typeS , typeT > *point );                      \
-//	template void baboon::Point< typeT , typeS >::SetObject( typeT *obj );                                             \
-//	template typeT *baboon::Point< typeT , typeS >::GetObject();                                                        \
-//	template typename ConnectorCollection< typeT , typeS >::type &baboon::Point< typeT , typeS >::GetConnectors();     \
-//}
 
 //	template baboon::Point< typeT , typeS >::Point();
 //	template baboon::Point< typeT , typeS >::~Point();
@@ -92,10 +90,21 @@ namespace baboon {
 
 	// forward declaration of PointPair typedef
 	template<typename T,typename S>
-	struct PointPair{
+	struct PointPair {
 		typedef std::pair< Point<T,S> * , Point<S,T> * > type;
 	};
 
+	// forward declaration of PointCollection typedef
+	template<typename T,typename S>
+	struct  PointCollection {
+		typedef std::vector< class Point<T,S> * > type;
+	};
+
+	// forward declaration of OrderedPointCollection typedef
+	template<typename T,typename S>
+	struct OrderedPointCollection {
+		typedef std::map< int , class PointCollection<T,S>::type * > type;
+	};
 
 	/*!
 	 *
@@ -217,6 +226,13 @@ namespace baboon {
 
 			/*!
 			 *
+			 *
+			 *
+			 */
+			void Connect( Point<T,S> *point1 , Point<S,T> *point2 , const double &w );
+
+			/*!
+			 *
 			 * @brief Disconnect the two points
 			 *
 			 */
@@ -236,10 +252,32 @@ namespace baboon {
 			 */
 			Point<S,T> *GetSecond();
 
+			/*!
+			 *
+			 * @brief Return the weight of the connection
+			 *
+			 */
+			const double &GetWeight();
+
+			/*!
+			 *
+			 * @brief Set the connector a 'good' one
+			 *
+			 */
+			void SetGood( bool b );
+
+			/*!
+			 *
+			 * @brief True if the connector is a 'good' connector
+			 *
+			 */
+			bool IsGood();
 
 		protected:
 
 			typename PointPair<T,S>::type pointPair;    ///< The point pair that are connected
+			double weight;
+			bool isGood;
 
 	}; // class
 
