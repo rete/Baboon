@@ -30,6 +30,7 @@
 
 
 #include "Algorithm/Calorimetry/TrackFinderAlgorithm.hh"
+#include <valgrind/memcheck.h>
 
 using namespace std;
 
@@ -195,12 +196,14 @@ namespace baboon {
 
 	Return TrackFinderAlgorithm::Init() {
 
+//		VALGRIND_DO_QUICK_LEAK_CHECK;
 		data.GetValue( "clusterSizeLimit" , &clusterSizeLimit );
 		data.GetValue( "minimumTrackSize" , &minimumTrackSize );
 		data.GetValue( "lookupDistanceX" , &lookupDistanceX );
 		data.GetValue( "lookupDistanceY" , &lookupDistanceY );
 		data.GetValue( "lookupDistanceZ" , &lookupDistanceZ );
 		data.GetValue( "maximumConnectorsAngle" , &maximumConnectorsAngle );
+		data.GetValue( "drawConnectors" , &drawConnectors);
 
 		return BABOON_SUCCESS();
 	}
@@ -218,6 +221,9 @@ namespace baboon {
 
 	Return TrackFinderAlgorithm::Execute() {
 
+//		cout << "Beginning of 1st valgrind test !" << endl;
+////		VALGRIND_DO_QUICK_LEAK_CHECK;
+//		cout << "End of 1st valgrind test !" << endl;
 		ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 		ClusterCollection *clusters2D = clusteringManager->GetCluster2D();
 
@@ -388,6 +394,7 @@ namespace baboon {
 
 		// Here the tracks are made.
 		// We need to create "Track *" objects and register them in the TrackManager.
+		TrackCollection tempTrackCollection;
 
 		for( unsigned int pt=0 ; pt<finalTracks.size() ; pt++ ) {
 
@@ -406,10 +413,204 @@ namespace baboon {
 				}
 			}
 
-			BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , TrackManager::GetInstance()->AddTrack( track ) );
+			if( drawConnectors )
+				this->DrawTrackConnectors( trackPoints , pt+1 );
 
-			this->DrawTrackConnectors( trackPoints , pt+1 );
+			track->SortHits();
+			CaloHitCollection *trackHits = track->GetCaloHitCollection();
+			int lastTrackLayer = track->GetCaloHitCollection()->at( track->Size() - 1 )->GetIJK().at(2);
+			int firstTrackLayer = track->GetCaloHitCollection()->at( 0 )->GetIJK().at(2);
+
+			ClusterCollection trackClusters;
+			Cluster *currentCluster = new Cluster();
+
+			for( unsigned int h=0 ; h<trackHits->size() ; h++ ) {
+
+				CaloHit *caloHit = trackHits->at( h );
+				if( h == trackHits->size() - 1 ) {
+					currentCluster->AddCaloHit( caloHit );
+					trackClusters.push_back( currentCluster );
+					break;
+				}
+
+				CaloHit *hit = trackHits->at( h );
+				CaloHit *nextHit = trackHits->at( h+1 );
+
+				if( hit->GetIJK().at(2) == nextHit->GetIJK().at(2) ) {
+					currentCluster->AddCaloHit( hit );
+					continue;
+				}
+				else {
+					currentCluster->AddCaloHit( hit );
+					trackClusters.push_back( currentCluster );
+					currentCluster = new Cluster();
+				}
+			}
+
+			currentCluster = 0;
+
+			ThreeVector tempBackwardThrust;
+			ThreeVector tempForwardThrust;
+
+			for( unsigned int cl=0 ; cl<trackClusters.size() ; cl++ ) {
+
+				if( cl == 0 )
+					track->SetBeginPosition( trackClusters.at( cl )->GetPosition( fComputePosition ) );
+
+				if( cl == trackClusters.size() - 1 ) {
+					track->SetEndPosition( trackClusters.at( cl )->GetPosition( fComputePosition ) );
+					break;
+				}
+
+				Cluster *cluster = trackClusters.at( cl );
+				Cluster *nextCluster = trackClusters.at( cl+1 );
+				ThreeVector difference = nextCluster->GetPosition( fComputePosition ) - cluster->GetPosition( fComputePosition );
+
+				if( difference.z() < 0 )
+					difference = -difference;
+
+				// for the track beginning
+				if( cl < 4 ) {
+					tempBackwardThrust += difference;
+
+				}
+				// for the track end
+				if( cl > trackClusters.size() - 4 ) {
+					tempForwardThrust += difference;
+				}
+			}
+
+			if( tempBackwardThrust != ThreeVector() )
+				tempBackwardThrust.setMag( 1.f );
+			if( tempForwardThrust != ThreeVector() )
+				tempForwardThrust.setMag( 1.f );
+
+			if( tempBackwardThrust.z() > 0 )
+				tempBackwardThrust = -tempBackwardThrust;
+			if( tempForwardThrust.z() < 0 )
+				tempForwardThrust = -tempForwardThrust;
+
+			track->SetBackwardThrust( tempBackwardThrust );
+			track->SetForwardThrust( tempForwardThrust );
+
+			tempTrackCollection.push_back( track );
+
+			for( unsigned int cl=0 ; cl<trackClusters.size() ; cl++ ) {
+				if( trackClusters.at( cl ) != 0 )
+					delete trackClusters.at( cl );
+			}
+			trackClusters.clear();
+
 		}
+
+		double angle1 = 0.14;
+		double angle2 = 0.14;
+		double difPos = 100;
+
+
+		// TO DO :
+		// Comparer le début des deux traces en cours.
+
+
+		// Broken track correction
+		for( unsigned int tr1=0 ; tr1<tempTrackCollection.size() ; tr1++ ) {
+
+			Track *track1 = tempTrackCollection.at( tr1 );
+			if( track1 == 0 )
+				continue;
+
+			for( unsigned int tr2=0 ; tr2<tempTrackCollection.size() ; tr2++ ) {
+
+				if( tr1 == tr2 )
+					continue;
+
+				Track *track2 = tempTrackCollection.at( tr2 );
+
+				if( track2 == 0 )
+					continue;
+
+//				if( track1 == 0 )
+//					continue;
+
+//				cout << endl;
+//				cout << "Track 1 end : " << track1->GetEndPosition()/26.131 << endl;
+//				cout << "Track 2 begin : " << track2->GetBeginPosition()/26.131 << endl;
+//				cout << "Angle 1 of : ";
+//				cout << track1->GetForwardThrust().angle( -track2->GetBackwardThrust() ) << endl;
+//				cout << " , an angle 2 of : ";
+//				cout << track1->GetForwardThrust().angle( track2->GetBeginPosition() - track1->GetEndPosition() ) << endl;
+//				cout << " and a pos dif of : ";
+//				cout << (track1->GetEndPosition() - track2->GetBeginPosition() ).mag() << endl;
+//				cout << endl;
+
+				if( track1->GetForwardThrust().angle( -track2->GetBackwardThrust() ) < angle1
+//					&& track1->GetForwardThrust().angle( track2->GetBeginPosition() - track1->GetEndPosition() ) < angle2
+					&& (track1->GetEndPosition() - track2->GetBeginPosition() ).mag() < difPos ) {
+
+
+					for( unsigned int h=0 ; h<track2->Size() ; h++ ) {
+						track1->AddCaloHit( track2->GetCaloHitCollection()->at( h ) );
+					}
+
+//					cout << "!!! FOUND !!!" << endl;
+//					cout << "Track 1 end : " << track1->GetEndPosition()/26.131 << endl;
+//					cout << "Track 2 begin : " << track2->GetBeginPosition()/26.131 << endl;
+//					cout << "Broken tracks compatibles with an angle 1 of : ";
+//					cout << track1->GetForwardThrust().angle( -track2->GetBackwardThrust() ) << endl;
+//					cout << " , an angle 2 of : ";
+//					cout << track1->GetForwardThrust().angle( track2->GetBeginPosition() - track1->GetEndPosition() ) << endl;
+//					cout << " and a pos dif of : ";
+//					cout << (track1->GetEndPosition() - track2->GetBeginPosition() ).mag() << endl;
+
+					track1->SetEndPosition( track2->GetEndPosition() );
+					track1->SetForwardThrust( track2->GetForwardThrust() );
+					delete track2;
+					tempTrackCollection.at( tr2 ) = 0;
+
+				}
+				else if( track2->GetForwardThrust().angle( -track1->GetBackwardThrust() ) < angle1
+	//					&& track1->GetForwardThrust().angle( track2->GetBeginPosition() - track1->GetEndPosition() ) < angle2
+					&& ( track2->GetEndPosition() - track1->GetBeginPosition() ).mag() < difPos ) {
+
+
+					for( unsigned int h=0 ; h<track1->Size() ; h++ ) {
+						track2->AddCaloHit( track1->GetCaloHitCollection()->at( h ) );
+					}
+
+//					cout << "!!! FOUND !!!" << endl;
+//					cout << "Track 1 begin : " << track1->GetBeginPosition()/26.131 << endl;
+//					cout << "Track 2 end : " << track2->GetEndPosition()/26.131 << endl;
+//					cout << "Broken tracks compatibles with an angle 1 of : ";
+//					cout << track2->GetForwardThrust().angle( -track1->GetBackwardThrust() ) << endl;
+//					cout << " , an angle 2 of : ";
+//					cout << track2->GetForwardThrust().angle( track1->GetBeginPosition() - track2->GetEndPosition() ) << endl;
+//					cout << " and a pos dif of : ";
+//					cout << (track2->GetEndPosition() - track1->GetBeginPosition() ).mag() << endl;
+
+					track2->SetEndPosition( track1->GetEndPosition() );
+					track2->SetForwardThrust( track1->GetForwardThrust() );
+					delete track1;
+					tempTrackCollection.at( tr1 ) = 0;
+					break;
+				}
+			}
+		}
+
+
+//		cout << "nb of tracks (before) : " << tempTrackCollection.size() << endl;
+
+		for( unsigned int tr=0 ; tr<tempTrackCollection.size() ; tr++ ) {
+
+			if( tempTrackCollection.at( tr ) != 0 ) {
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , TrackManager::GetInstance()->AddTrack( tempTrackCollection.at( tr ) ) );
+			}
+
+//			if( drawConnectors )
+//				this->DrawTrackConnectors( trackPoints , pt+1 );
+		}
+
+//		cout << "nb of tracks (after): " << TrackManager::GetInstance()->GetTrackCollection()->size() << endl;
+		tempTrackCollection.clear();
 
 		// deletion area
 
@@ -463,9 +664,12 @@ namespace baboon {
 		}
 		orderedPoints->clear();
 
-
+//		cout << "Beginning of 2nd valgrind test !" << endl;
+//		VALGRIND_DO_ADDED_LEAK_CHECK;
+//		cout << "End of 2nd valgrind test !" << endl;
 
 		return BABOON_SUCCESS();
+
 	}
 
 
@@ -473,6 +677,7 @@ namespace baboon {
 	Return TrackFinderAlgorithm::End() {
 
 		calorimeter = 0;
+//		VALGRIND_DO_QUICK_LEAK_CHECK;
 		return BABOON_SUCCESS();
 	}
 
@@ -504,8 +709,8 @@ namespace baboon {
 			if( otherClusterPosition.z() != clusterPosition.z() )
 				continue;
 
-			if( abs( otherClusterPosition.x() - clusterPosition.x() ) < 5
-			 && abs( otherClusterPosition.y() - clusterPosition.y() ) < 5 ) {
+			if( abs( otherClusterPosition.x() - clusterPosition.x() ) < 4
+			 && abs( otherClusterPosition.y() - clusterPosition.y() ) < 4 ) {
 
 				neighborClusters++;
 
@@ -513,7 +718,7 @@ namespace baboon {
 					return false;
 			}
 
-			if( neighborClusters == 2 )
+			if( neighborClusters == 3 )
 				return false;
 
 		}
