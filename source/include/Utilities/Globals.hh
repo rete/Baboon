@@ -43,7 +43,7 @@ namespace baboon {
 	}
 
 	template <typename T>
-	std::ostream& operator <<( std::ostream &out , std::vector<T> &vec ) {
+	std::ostream& operator <<( std::ostream &out , const std::vector<T> &vec ) {
 
 		if( !vec.empty() ) {
 			out << vec.at(0);
@@ -52,6 +52,8 @@ namespace baboon {
 		}
 		return out;
 	}
+
+
 
 }  // namespace 
 
