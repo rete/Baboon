@@ -20,8 +20,8 @@ using namespace std;
 
 namespace baboon {
 
-	SDHCAL::SDHCAL()
-		: Calorimeter( "SDHCAL" , kHcalEndcap ) {
+	SDHCAL::SDHCAL( const std::string &instanceName )
+		: Calorimeter( instanceName , kHcalEndcap ) {
 
 		viewContent = true;
 	}
