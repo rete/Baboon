@@ -126,9 +126,10 @@ namespace baboon {
 			 *
 			 *
 			 */
-			bool MergeWithClosestCluster( Cluster *cluster , ClusterCollection *clusterCollection );
+			void MergeClusters();
 
 			CaloHitCollection treatedHits;
+			ClusterCollection clusters;
 
 			Calorimeter *calorimeter;
 			double initialCoreConcentration;
