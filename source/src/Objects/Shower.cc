@@ -20,23 +20,15 @@ namespace baboon {
 
 	Shower::Shower()
 		: TypedObject("Shower") {
-		hitWeights = new DoubleVector;
-//		startingCone = 0;
-//		thrust = 0;
-//		coreCollection = new CoreCollection();
-//		trackCollection = new TrackCollection();
+//		hitWeights = new DoubleVector;
+
 	}
 
 
 	Shower::~Shower() {
 
-		hitWeights->clear();
-		delete hitWeights;
-//		delete hitToWeightsMap;
-//		coreCollection->clear();
-//		delete coreCollection;
-//		trackCollection->clear();
-//		delete trackCollection;
+		hitWeights.clear();
+//		delete hitWeights;
 	}
 
 
@@ -44,10 +36,10 @@ namespace baboon {
 
 		BABOON_CHECK_POINTER( caloHit );
 
-		if( hitWeights->empty() ) {
+		if( hitWeights.empty() ) {
 
 			caloHitCollection->push_back( caloHit );
-			hitWeights->push_back( weight );
+			hitWeights.push_back( weight );
 			return BABOON_SUCCESS();
 		}
 
@@ -56,7 +48,7 @@ namespace baboon {
 		else {
 
 			caloHitCollection->push_back( caloHit );
-			hitWeights->push_back( weight );
+			hitWeights.push_back( weight );
 			return BABOON_SUCCESS();
 		}
 	}
@@ -73,14 +65,14 @@ namespace baboon {
 
 		BABOON_CHECK_POINTER( caloHit );
 
-		if( hitWeights->empty() )
+		if( hitWeights.empty() )
 			return BABOON_NOT_INITIALIZED("Hit weight is empty. Could not set a weight");
 
 
 		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
 
 			if( caloHitCollection->at(h) == caloHit ) {
-				hitWeights->at(h) = weight;
+				hitWeights.at(h) = weight;
 				return BABOON_SUCCESS();
 			}
 		}
@@ -96,7 +88,7 @@ namespace baboon {
 			if( caloHitCollection->at(h) == caloHit ) {
 
 				caloHitCollection->erase( caloHitCollection->begin() + h );
-				hitWeights->erase( hitWeights->begin() + h );
+				hitWeights.erase( hitWeights.begin() + h );
 				return BABOON_SUCCESS();
 			}
 		}
@@ -119,7 +111,7 @@ namespace baboon {
 		if( it == caloHitCollection->end() )
 			return BABOON_NOT_FOUND("Hit doesn't belong to this shower!");
 
-		w = hitWeights->at( std::distance( caloHitCollection->begin() , it ) );
+		w = hitWeights.at( std::distance( caloHitCollection->begin() , it ) );
 
 		return BABOON_SUCCESS();
 	}

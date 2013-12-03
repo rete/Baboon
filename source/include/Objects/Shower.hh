@@ -92,7 +92,7 @@ namespace baboon {
 
 		protected:
 
-			DoubleVector *hitWeights;
+			DoubleVector hitWeights;
 			ThreeVector startingPoint;
 
 		public:
@@ -102,7 +102,7 @@ namespace baboon {
 			 *
 			 *
 			 */
-			inline DoubleVector *GetHitWeights()
+			inline const DoubleVector &GetHitWeights()
 				{ return hitWeights; }
 
 			/*!
