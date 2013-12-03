@@ -45,7 +45,7 @@ namespace baboon {
 			 * Default Constructor
 			 *
 			 */
-			SDHCAL();
+			SDHCAL( const std::string &instanceName = "SDHCAL" );
 
 			/*!
 			 *
