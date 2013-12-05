@@ -42,36 +42,6 @@
 #include <map>
 
 
-#define MACRO_TEMPLATE_INIT_POINT( typeT , typeS )																	 \
-{                                                                                                                    \
-	template baboon::Point< typeT , typeS >::Point();																 \
-	template baboon::Point< typeT , typeS >::~Point();																	 \
-	template void baboon::Point< typeT , typeS >::AddConnector( baboon::Connector< typeT , typeS > *connector );       \
-	template void baboon::Point< typeT , typeS >::RemoveConnector( baboon::Connector< typeT , typeS > *connector );    \
-	template bool baboon::Point< typeT , typeS >::IsConnectedTo( baboon::Connector< typeT , typeS > *connector );      \
-	template bool baboon::Point< typeT , typeS >::IsConnectedTo( Point< typeS , typeT > *point );                      \
-	template void baboon::Point< typeT , typeS >::SetObject( typeT *obj );                                             \
-	template typeT *baboon::Point< typeT , typeS >::GetObject();                                                        \
-	template typename ConnectorCollection< typeT , typeS >::type &baboon::Point< typeT , typeS >::GetConnectors();     \
-}
-
-//	template baboon::Point< typeT , typeS >::Point();
-//	template baboon::Point< typeT , typeS >::~Point();
-//	template void baboon::Point< typeT , typeS >::AddConnector( baboon::Connector< typeT , typeS > *connector );
-//	template void baboon::Point< typeT , typeS >::RemoveConnector( baboon::Connector< typeT , typeS > *connector );
-//	template bool baboon::Point< typeT , typeS >::IsConnectedTo( baboon::Connector< typeT , typeS > *connector );
-//	template bool baboon::Point< typeT , typeS >::IsConnectedTo( Point< typeS , typeT > *point );
-//	template void baboon::Point< typeT , typeS >::SetObject( typeT *obj );
-//	template typeT *baboon::Point< typeT , typeS >::GetObject();
-//	template typename ConnectorCollection< typeT , typeS >::type &baboon::Point< typeT , typeS >::GetConnectors();
-
-
-//#define MACRO_TEMPLATE_INIT_CONNECTOR( typeT , typeS )          \\
-//{
-//	template
-//}
-
-
 namespace baboon {
 
 	// forward declaration of Connector class
@@ -121,70 +91,116 @@ namespace baboon {
 			* @brief  Default constructor
 			*
 			*/
-			Point();
+			Point() {
+
+			}
 
 			/*!
 			*
 			* @brief  Default destructor
 			*
 			*/
-			virtual ~Point();
+			virtual ~Point() {
+
+				connectors.clear();
+			}
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			void AddConnector( Connector<T,S> *connector );
+			void AddConnector( Connector<T,S> *connector ) {
+
+				if( connector == 0 )
+					return;
+
+				if( !this->IsConnectedTo( connector ) ) {
+					connectors.push_back( connector );
+				}
+				return;
+			}
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			void RemoveConnector( Connector<T,S> *connector );
+			void RemoveConnector( Connector<T,S> *connector ) {
+
+				if( connector == 0 )
+					return;
+
+				typename ConnectorCollection< T , S >::type::iterator it = std::find( connectors.begin() , connectors.end() , connector );
+				if( it != connectors.end() ) {
+					connectors.erase( it );
+				}
+				return;
+			}
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			bool IsConnectedTo( Connector<T,S> *connector );
+			bool IsConnectedTo( Connector<T,S> *connector ) {
+
+				return ( std::find( connectors.begin() , connectors.end() , connector ) != connectors.end() );
+			}
 
 			/*!
 			 *
 			 * @brief Return true if the point is connected to 'point'
 			 *
 			 */
-			bool IsConnectedTo( Point<S,T> *point );
+			bool IsConnectedTo( Point<S,T> *point ) {
+
+				for( unsigned int c=0 ; c<connectors.size() ; c++ )
+					if( connectors.at( c )->GetSecond() == point )
+						return true;
+
+				return false;
+			}
 
 			/*!
 			 *
 			 * Set the object
 			 *
 			 */
-			void SetObject( T obj );
+			void SetObject( T obj ) {
+
+				object = obj;
+			}
 
 			/*!
 			 *
 			 * @brief Return the object
 			 *
 			 */
-			T GetObject();
+			T GetObject() {
+
+				return object;
+			}
 
 			/*!
 			 *
 			 * @brief Return true if there is no connection
 			 *
 			 */
-			bool HasNoConnection();
+			bool HasNoConnection() {
+
+				return connectors.empty();
+			}
 
 			/*!
 			 *
 			 *  @brief Return the connectors
 			 *
 			 */
-			typename ConnectorCollection< T , S >::type &GetConnectors();
+			typename ConnectorCollection< T , S >::type &GetConnectors() {
+
+				return connectors;
+			}
 
 		protected:
 
@@ -208,70 +224,119 @@ namespace baboon {
 			 * @brief Default constructor
 			 *
 			 */
-			Connector();
+			Connector() {
+
+				pointPair.first = 0;
+				pointPair.second = 0;
+				weight = 1.;
+				isGood = true;
+			}
 
 			/*!
 			 *
 			 * @brief Default destructor
 			 *
 			 */
-			~Connector();
+			~Connector() {
+
+				pointPair.first = 0;
+				pointPair.second = 0;
+				weight = 1.;
+			}
 
 			/*
 			 *
 			 * @brief Connects two points
 			 *
 			 */
-			void Connect( Point<T,S> *point1 , Point<S,T> *point2 );
+			void Connect( Point<T,S> *point1 , Point<S,T> *point2 ) {
+
+				if( point1 == 0 || point2 == 0 )
+					return;
+
+				pointPair.first = point1;
+				pointPair.second = point2;
+				isGood = true;
+			}
 
 			/*!
 			 *
 			 *
 			 *
 			 */
-			void Connect( Point<T,S> *point1 , Point<S,T> *point2 , const double &w );
+			void Connect( Point<T,S> *point1 , Point<S,T> *point2 , const double &w ) {
+
+				if( point1 == 0 || point2 == 0 )
+					return;
+
+				pointPair.first = point1;
+				pointPair.second = point2;
+				weight = w;
+				isGood = true;
+			}
 
 			/*!
 			 *
 			 * @brief Disconnect the two points
 			 *
 			 */
-			void Disconnect();
+			void Disconnect() {
+
+				pointPair.first = 0;
+				pointPair.second = 0;
+				weight = 1.;
+				isGood = false;
+			}
 
 			/*!
 			 *
 			 * @brief Return the first connected point
 			 *
 			 */
-			Point<T,S> *GetFirst();
+			Point<T,S> *GetFirst() {
+
+				return pointPair.first;
+			}
 
 			/*!
 			 *
 			 * @brief Return the second connected point
 			 *
 			 */
-			Point<S,T> *GetSecond();
+			Point<S,T> *GetSecond() {
+
+				return pointPair.second;
+			}
 
 			/*!
 			 *
 			 * @brief Return the weight of the connection
 			 *
 			 */
-			const double &GetWeight();
+			const double &GetWeight() {
+
+				return weight;
+			}
 
 			/*!
 			 *
 			 * @brief Set the connector a 'good' one
 			 *
 			 */
-			void SetGood( bool b );
+			void SetGood( bool b ) {
+
+				isGood = b;
+			}
 
 			/*!
 			 *
 			 * @brief True if the connector is a 'good' connector
 			 *
 			 */
-			bool IsGood();
+			bool IsGood() {
+
+				return isGood;
+			}
 
 		protected:
 
