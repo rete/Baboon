@@ -30,7 +30,6 @@
 
 
 #include "Algorithm/Calorimetry/TrackFinderAlgorithm.hh"
-#include <valgrind/memcheck.h>
 
 using namespace std;
 
@@ -196,7 +195,6 @@ namespace baboon {
 
 	Return TrackFinderAlgorithm::Init() {
 
-//		VALGRIND_DO_QUICK_LEAK_CHECK;
 		data.GetValue( "clusterSizeLimit" , &clusterSizeLimit );
 		data.GetValue( "minimumTrackSize" , &minimumTrackSize );
 		data.GetValue( "lookupDistanceX" , &lookupDistanceX );
@@ -221,9 +219,6 @@ namespace baboon {
 
 	Return TrackFinderAlgorithm::Execute() {
 
-//		cout << "Beginning of 1st valgrind test !" << endl;
-////		VALGRIND_DO_QUICK_LEAK_CHECK;
-//		cout << "End of 1st valgrind test !" << endl;
 		ClusteringManager *clusteringManager = ClusteringManager::GetInstance();
 		ClusterCollection *clusters2D = clusteringManager->GetCluster2D();
 
@@ -663,10 +658,6 @@ namespace baboon {
 			}
 		}
 		orderedPoints->clear();
-
-//		cout << "Beginning of 2nd valgrind test !" << endl;
-//		VALGRIND_DO_ADDED_LEAK_CHECK;
-//		cout << "End of 2nd valgrind test !" << endl;
 
 		return BABOON_SUCCESS();
 
