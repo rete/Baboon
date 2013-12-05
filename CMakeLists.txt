@@ -25,7 +25,7 @@ INCLUDE( ilcsoft_default_settings )
 FIND_PACKAGE( CLHEP REQUIRED )
 FIND_PACKAGE( GEAR REQUIRED )
 FIND_PACKAGE( LCIO REQUIRED )
-FIND_PACKAGE( ROOT 5.34.05 REQUIRED COMPONENTS Core Gui Geom TreePlayer RGL GeomPainter Eve Minuit) # look for ROOT versions >= 5.27.06
+FIND_PACKAGE( ROOT 5.34 REQUIRED COMPONENTS Core Gui Geom TreePlayer RGL GeomPainter Eve Minuit) # look for ROOT versions >= 5.27.06
 
 FOREACH( pkg ROOT CLHEP GEAR LCIO )
     IF( ${pkg}_FOUND )
