@@ -66,126 +66,61 @@ namespace baboon {
 
 	Return DensityClusteringAlgorithm::Execute() {
 
+		/*
 		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
-		CaloHitCollection *hitSortedByDensity = new CaloHitCollection();
 
-		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
+		// sort hits by decreasing densities
+		std::sort( caloHitCollection->begin() , caloHitCollection->end() ,
+				[&] ( CaloHit *caloHit1 , CaloHit *caloHit2 ) -> bool
+				{ if( caloHit1->GetDensity() < caloHit2->GetDensity() ) return true;
+				else return false; } );
 
-			if( caloHitCollection->at( h )->GetTag() == IsolatedTag()
-			|| caloHitCollection->at( h )->GetTag() == TrackTag() )
+		// Clusters the calo hits by density
+		for( auto caloHit :*caloHitCollection ) {
+
+			if( caloHit->GetTag() == TrackTag() )
 				continue;
-
-			hitSortedByDensity->push_back( caloHitCollection->at( h ) );
-		}
-
-
-
-		CaloHit *caloHit = 0;
-		int i = 0;
-		int j = 0;
-
-		for( j=1 ; j<hitSortedByDensity->size() ; j++ ) {
-
-			i = j-1;
-
-			while( hitSortedByDensity->at(j)->GetDensity() > hitSortedByDensity->at(i)->GetDensity() ) {
-
-				caloHit = hitSortedByDensity->at(i);
-				hitSortedByDensity->at(i) = hitSortedByDensity->at(j);
-				hitSortedByDensity->at(j) = caloHit;
-				i=i-1;
-				j=j-1;
-
-				if( i < 0 )
-					break;
-			}
-		}
-
-		ClusterCollection *clusterCollection = new ClusterCollection();
-
-		for( unsigned int h=0 ; h<hitSortedByDensity->size() ; h++ ) {
-
-			CaloHit *caloHit = hitSortedByDensity->at( h );
 
 			if( std::find( treatedHits.begin() , treatedHits.end() , caloHit ) == treatedHits.end() ) {
 
-				Cluster *cluster = new Cluster();
-				cluster->AddCaloHit( caloHit );
+				Cluster *newCluster = new Cluster();
+				newCluster->SetClusterType( fCluster3D );
 				treatedHits.push_back( caloHit );
-				this->AgglomerateFromCaloHit( caloHit , cluster );
-				clusterCollection->push_back( cluster );
-			}
-			else {
+				newCluster->AddCaloHit( caloHit );
 
-				treatedHits.push_back( caloHit );
-			}
-		}
+				this->AgglomerateFromCaloHit( caloHit , newCluster );
 
-
-		Cluster *cluster = 0;
-		i = 0;
-		j = 0;
-
-		for( j=1 ; j<clusterCollection->size() ; j++ ) {
-
-			i = j-1;
-
-			while( clusterCollection->at(j)->Size() < clusterCollection->at(i)->Size() ) {
-
-				cluster = clusterCollection->at(i);
-				clusterCollection->at(i) = clusterCollection->at(j);
-				clusterCollection->at(j) = cluster;
-				i=i-1;
-				j=j-1;
-
-				if( i < 0 )
-					break;
+				clusters.push_back( newCluster );
 			}
 		}
 
-		cout << "nb of clusters (before) : " << clusterCollection->size() <<  endl;
 
-		SimpleEnergyCalculator *calculator = new SimpleEnergyCalculator();
+//		this->MergeClusters();
 
-		for( unsigned int cl=0 ; cl<clusterCollection->size() ; cl++ ) {
 
-			CaloHitCollection *clusterHits = clusterCollection->at( cl )->GetCaloHitCollection();
-			calculator->SetCaloHitCollection( clusterHits );
-			calculator->CalculateEnergy();
-			double energy = calculator->GetEnergy();
-			cout << "cluster energy : " << energy << endl;
 
-			if( energy < 0.8 ) { // in GeV
+		cout << "Nb of clusters : " << clusters.size() << endl;
 
-				bool hasBeenMerged = this->MergeWithClosestCluster( clusterCollection->at( cl ) , clusterCollection );
+		for( auto cluster :clusters ) {
 
-//				if( hasBeenMerged ) {
+			Shower *newShower = new Shower();
+			CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
 
-					delete clusterCollection->at( cl );
-					clusterCollection->erase( clusterCollection->begin() + cl );
-					cl--;
-					continue;
-//				}
-			}
+			ClusteringManager::GetInstance()->AddCluster( cluster );
 
-			cout << "cluster size : " << clusterHits->size() << endl;
-			for( unsigned int h=0 ; h<clusterHits->size() ; h++ ) {
-				clusterHits->at( h )->SetColor( cl +1 );
-			}
+			for( auto caloHit :*clusterHits )
+				newShower->AddCaloHit( caloHit );
+
+			ShowerManager::GetInstance()->AddShower( newShower );
 		}
-
-		delete calculator;
-
-		cout << "nb of clusters (after) : " << clusterCollection->size() <<  endl;
-
-		hitSortedByDensity->clear();
-
+*/
 		return BABOON_SUCCESS();
 	}
 
 	Return DensityClusteringAlgorithm::End() {
 
 		treatedHits.clear();
+		clusters.clear();
 		calorimeter = 0;
 		return BABOON_SUCCESS();
 	}
@@ -193,23 +128,22 @@ namespace baboon {
 	void DensityClusteringAlgorithm::AgglomerateFromCaloHit( CaloHit *caloHit , Cluster *cluster ) {
 
 		IntVector ijk = caloHit->GetIJK();
+		double density = caloHit->GetDensity();
 
-		for( int i=-1 ; i<=1 ; i++ ) {
-			for( int j=-1 ; j<=1 ; j++ ) {
-				for( int k=-1 ; k<=1 ; k++ ) {
+		for( int i=-2 ; i<=2 ; i++ ) {
+			for( int j=-2 ; j<=2 ; j++ ) {
+				for( int k=-2 ; k<=2 ; k++ ) {
 
-//					cout << i << " " << j << " " << k << endl;
 					if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
 						continue;
 
 					CaloHit *otherCaloHit = calorimeter->GetCaloHitAt( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k );
 
-					if( otherCaloHit->GetTag() == IsolatedTag()
-					|| otherCaloHit->GetTag() == TrackTag() )
+					if( otherCaloHit->GetTag() == TrackTag() )
 						continue;
 
-					if( caloHit->GetDensity() >= otherCaloHit->GetDensity()
-						|| abs( caloHit->GetDensity() - otherCaloHit->GetDensity() ) < densityError ) {
+					if( density <= otherCaloHit->GetDensity()
+						&& abs( density - otherCaloHit->GetDensity() ) < densityError ) {
 
 						if( !cluster->Contains( otherCaloHit )
 						&&  std::find( treatedHits.begin() , treatedHits.end() , otherCaloHit ) == treatedHits.end() ) {
@@ -217,6 +151,7 @@ namespace baboon {
 							cluster->AddCaloHit( otherCaloHit );
 							treatedHits.push_back( otherCaloHit );
 							this->AgglomerateFromCaloHit( otherCaloHit , cluster );
+
 						}
 					}
 
@@ -224,46 +159,49 @@ namespace baboon {
 			} // j
 		} // i
 
-
 	}
 
 
 
-	bool DensityClusteringAlgorithm::MergeWithClosestCluster( Cluster *cluster , ClusterCollection *clusterCollection ) {
+	void DensityClusteringAlgorithm::MergeClusters() {
 
-		ThreeVector position = cluster->GetPosition();
 
-		Cluster *closestCluster = 0;
-		double closestDistance = 10000000.0;
 
-		for( unsigned int cl=0 ; cl<clusterCollection->size() ; cl++ ) {
 
-			Cluster *otherCluster = clusterCollection->at( cl );
 
-			if( cluster == otherCluster )
-				continue;
-
-			double distance = (otherCluster->GetPosition() - position ).mag();
-
-			if( distance < closestDistance && distance < 5 ) {
-				closestDistance = distance;
-				closestCluster = otherCluster;
-			}
-		}
-
-		if( closestCluster == 0 )
-			return false;
-
-		CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
-
-		for( unsigned int h=0 ; h<cluster->Size() ; h++ ) {
-
-			if( !closestCluster->Contains( clusterHits->at( h ) ) ) {
-				closestCluster->AddCaloHit( clusterHits->at( h ) );
-			}
-		}
-
-		return true;
+//		ThreeVector position = cluster->GetPosition();
+//
+//		Cluster *closestCluster = 0;
+//		double closestDistance = 10000000.0;
+//
+//		for( unsigned int cl=0 ; cl<clusterCollection->size() ; cl++ ) {
+//
+//			Cluster *otherCluster = clusterCollection->at( cl );
+//
+//			if( cluster == otherCluster )
+//				continue;
+//
+//			double distance = (otherCluster->GetPosition() - position ).mag();
+//
+//			if( distance < closestDistance && distance < 5 ) {
+//				closestDistance = distance;
+//				closestCluster = otherCluster;
+//			}
+//		}
+//
+//		if( closestCluster == 0 )
+//			return false;
+//
+//		CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
+//
+//		for( unsigned int h=0 ; h<cluster->Size() ; h++ ) {
+//
+//			if( !closestCluster->Contains( clusterHits->at( h ) ) ) {
+//				closestCluster->AddCaloHit( clusterHits->at( h ) );
+//			}
+//		}
+//
+//		return true;
 
 	}
 
