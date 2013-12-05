@@ -45,6 +45,16 @@ namespace baboon {
 		: AbstractAlgorithm("OverlayEventAlgorithm") {
 
 		needData = true;
+		_overlayDone = false;
+		_generatesLCTracks = false;
+		_collection1 = nullptr;
+		_collection2 = nullptr;
+		_collectionToOverlay1 = new CaloHitCollection();
+		_collectionToOverlay2 = new CaloHitCollection();
+		_lostHitCollection = new CaloHitCollection();
+		_overlaidCollection = new CaloHitCollection();
+		_calorimeter1 = nullptr;
+		_calorimeter2 = nullptr;
 	}
 
 	OverlayEventAlgorithm::~OverlayEventAlgorithm() {
@@ -69,8 +79,8 @@ namespace baboon {
 
 		_overlayDone = false;
 
-		_trackPair.first = nullptr;
-		_trackPair.second = nullptr;
+		_trackPair.first = 0;
+		_trackPair.second = 0;
 
 		return BABOON_SUCCESS();
 	}
@@ -98,8 +108,8 @@ namespace baboon {
 		if( _useTrackInfo ) {
 
 			AlgorithmManager *algoMan = AlgorithmManager::GetInstance();
-			TrackFinderAlgorithm *trackFinder( nullptr );
-			ClusteringAlgorithm *clusteringAlgo( nullptr );
+			TrackFinderAlgorithm *trackFinder( 0 );
+			ClusteringAlgorithm *clusteringAlgo( 0 );
 
 			if( algoMan->AlgorithmIsRegistered("TrackFinderAlgorithm") ) {
 				trackFinder = (TrackFinderAlgorithm *) algoMan->GetAlgorithm("TrackFinderAlgorithm");
@@ -124,8 +134,8 @@ namespace baboon {
 
 //----------------------------------------------------------------------------------------------------
 
-			for( auto caloHit : *_collection1 )
-				_calorimeter1->AddCaloHit( caloHit );
+			for( unsigned int h=0 ; h<_collection1->size() ; h++ )
+				_calorimeter1->AddCaloHit( _collection1->at(h) );
 
 
 			ClusterCollection *clusters = new ClusterCollection();
@@ -135,8 +145,8 @@ namespace baboon {
 			clusteringAlgo->Process();
 
 			// Register them to the clustering manager just for memory management...
-			for( auto cluster : *clusters ) {
-				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ClusteringManager::GetInstance()->AddCluster( cluster ) );
+			for( unsigned int c=0 ; c<clusters->size() ; c++ ) {
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ClusteringManager::GetInstance()->AddCluster( clusters->at(c) ) );
 			}
 
 			clusters->clear();
@@ -149,8 +159,9 @@ namespace baboon {
 			TrackCollection *trackCollection1 = trackMan->GetTrackCollection();
 			bool primaryTrackFound1 = false;
 
-			for( auto track1 : *trackCollection1 ) {
+			for( unsigned int tr=0 ; tr<trackCollection1->size() ; tr++ ) {
 
+				Track *track1 = trackCollection1->at(tr);
 				TrackInfo *trackInfo = new TrackInfo;
 				trackInfo->track = track1;
 				this->FillTrackInfo( trackInfo );
@@ -178,7 +189,7 @@ namespace baboon {
 			if( !primaryTrackFound1 && _particleType1 == "charged" ) {
 
 				delete clusters;
-				clusters = nullptr;
+				clusters = 0;
 				return BABOON_SUCCESS();
 			}
 
@@ -214,8 +225,8 @@ namespace baboon {
 
 //----------------------------------------------------------------------------------------------------
 
-			for( auto caloHit : *_collection2 )
-				_calorimeter2->AddCaloHit( caloHit );
+			for( unsigned int h=0 ; h<_collection2->size() ; h++ )
+				_calorimeter2->AddCaloHit( _collection2->at(h) );
 
 
 			clusteringAlgo->SetClusteringMode( fClustering2D );
@@ -224,8 +235,8 @@ namespace baboon {
 			clusteringAlgo->Process();
 
 			// Register them to the clustering manager just for memory management...
-			for( auto cluster : *clusters ) {
-				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ClusteringManager::GetInstance()->AddCluster( cluster ) );
+			for( unsigned int c=0 ; c<clusters->size() ; c++ ) {
+				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ClusteringManager::GetInstance()->AddCluster( clusters->at(c) ) );
 			}
 
 			clusters->clear();
@@ -237,9 +248,9 @@ namespace baboon {
 			TrackCollection *trackCollection2 = trackMan->GetTrackCollection();
 			bool primaryTrackFound2 = false;
 
-			for( auto track2 : *trackCollection2 ) {
+			for( unsigned int tr=0 ; tr<trackCollection2->size() ; tr++ ) {
 
-
+				Track *track2 = trackCollection2->at(tr);
 				TrackInfo *trackInfo = new TrackInfo;
 				trackInfo->track = track2;
 				this->FillTrackInfo( trackInfo );
@@ -264,7 +275,7 @@ namespace baboon {
 			ClusteringManager::GetInstance()->ClearAllContent();
 
 			delete clusters;
-			clusters = nullptr;
+			clusters = 0;
 
 			// If primary track is not found and we asked for a charged particle, the overlay is not done.
 			if( !primaryTrackFound2 && _particleType2 == "charged" ) {
@@ -342,8 +353,8 @@ namespace baboon {
 
 	Return OverlayEventAlgorithm::End() {
 
-		_calorimeter1 = nullptr;
-		_calorimeter2 = nullptr;
+		_calorimeter1 = 0;
+		_calorimeter2 = 0;
 
 		return BABOON_SUCCESS();
 	}
@@ -356,11 +367,12 @@ namespace baboon {
 													  , CaloHitCollection *finalCollection
 													  , const ThreeVector &vec ) {
 
-		if( initialCollection == nullptr || finalCollection == nullptr )
+		if( initialCollection == 0 || finalCollection == 0 )
 			return;
 
-		for( auto caloHit: *initialCollection ) {
+		for( unsigned int h=0 ; h<initialCollection->size() ; h++ ) {
 
+			CaloHit *caloHit = initialCollection->at(h);
 			IntVector ijk = caloHit->GetIJK();
 
 			// if the hit is outside of the sdhcal remove it from the collection!
@@ -396,11 +408,11 @@ namespace baboon {
 
 	void OverlayEventAlgorithm::OverlayCollections( CaloHitCollection *collection1 , CaloHitCollection *collection2 ) {
 
-		if( collection1 == nullptr || collection2 == nullptr )
+		if( collection1 == 0 || collection2 == 0 )
 			return;
 
-		for( auto caloHit :*collection1 )
-			_overlaidCollection->push_back( caloHit );
+		for( unsigned int h=0 ; h<collection1->size() ; h++ )
+			_overlaidCollection->push_back( collection1->at(h) );
 
 
 		int count = 0;
@@ -408,14 +420,16 @@ namespace baboon {
 												  fCaloHitThr2 , fCaloHitThr2 , fCaloHitThr3 ,
 												  fCaloHitThr3 , fCaloHitThr3 , fCaloHitThr3 };
 
-		for( auto caloHit2 : *collection2 ) {
+		for( unsigned int h2=0 ; h2<collection2->size() ; h2++ ) {
 
+			CaloHit *caloHit2 = collection2->at(h2);
 			IntVector ijk2 = caloHit2->GetIJK();
 
 			bool hitIsOverlaid = false;
 
-			for( auto caloHit1 : *collection1 ) {
+			for( unsigned int h1=0 ; h1<collection1->size() ; h1++ ) {
 
+				CaloHit *caloHit1 = collection1->at(h1);
 				IntVector ijk1 = caloHit1->GetIJK();
 
 				if( ijk1.at(0) == ijk2.at(0)
@@ -491,7 +505,7 @@ namespace baboon {
 		}
 
 		currentCluster = 0;
-		Cluster *firstCluster( nullptr );
+		Cluster *firstCluster( 0 );
 		ThreeVector backwardThrust;
 
 		for( unsigned int cl=0 ; cl<trackClusters.size() ; cl++ ) {
@@ -548,7 +562,7 @@ namespace baboon {
 
 	void OverlayEventAlgorithm::EraseTrackFromCollection( Track *track , CaloHitCollection *collection ) {
 
-		if( track == nullptr || collection == nullptr )
+		if( track == 0 || collection == 0 )
 			return;
 
 		CaloHitCollection *trackHits = track->GetCaloHitCollection();
@@ -557,8 +571,9 @@ namespace baboon {
 
 			CaloHit *caloHit = collection->at( h );
 
-			for( auto trackHit : *trackHits ) {
+			for( unsigned int trH=0 ; trH<trackHits->size() ; trH++ ) {
 
+				CaloHit *trackHit = trackHits->at(trH);
 				if( caloHit == trackHit ) {
 
 					collection->erase( collection->begin()  + h );

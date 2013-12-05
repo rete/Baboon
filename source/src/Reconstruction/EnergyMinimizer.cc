@@ -34,7 +34,7 @@
 
 namespace baboon {
 
-	EnergyMinimizer *EnergyMinimizer::instance = nullptr;
+	EnergyMinimizer *EnergyMinimizer::instance = 0;
 
 
 	EnergyMinimizer::EnergyMinimizer() {
@@ -44,6 +44,7 @@ namespace baboon {
 
 		availableMinimizerTypes.push_back( "SIMPLEX" );
 		availableMinimizerTypes.push_back( "MINUIT" );
+		numberOfIteration = 3;
 	}
 
 
@@ -55,7 +56,7 @@ namespace baboon {
 
 	EnergyMinimizer *EnergyMinimizer::GetInstance() {
 
-		if( instance == nullptr )
+		if( instance == 0 )
 			instance = new EnergyMinimizer();
 		return instance;
 	}
@@ -63,7 +64,7 @@ namespace baboon {
 
 	void EnergyMinimizer::Kill() {
 
-		if( instance != nullptr ) {
+		if( instance != 0 ) {
 			delete instance;
 			instance = nullptr;
 		}
@@ -79,10 +80,23 @@ namespace baboon {
 
 	void EnergyMinimizer::AddParameter( const EnergyMinimizer::FitterParameter &param ) {
 
-		auto it = std::find_if( parameterList.begin() , parameterList.end()
-				, [&]( FitterParameter &p ) -> bool { return (param.name == p.name); } );
-		if( it != parameterList.end() )
+		bool found = false;
+		for( unsigned int i=0 ; i<parameterList.size() ; i++ ) {
+			if( parameterList.at(i).name == param.name ) {
+				found = true;
+				break;
+			}
+		}
+
+		if( found )
 			throw Exception( "EnergyMinimizer::AddParameter() : param name was already present" );
+
+		// C++ 11 not available
+
+//		auto it = std::find_if( parameterList.begin() , parameterList.end()
+//				, [&]( FitterParameter &p ) -> bool { return (param.name == p.name); } );
+//		if( it != parameterList.end() )
+//			throw Exception( "EnergyMinimizer::AddParameter() : param name was already present" );
 
 		parameterList.push_back( param );
 	}

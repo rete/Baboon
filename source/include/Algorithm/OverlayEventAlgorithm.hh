@@ -186,16 +186,16 @@ namespace baboon {
 
 
 
-		bool _overlayDone = false;
-		bool _generatesLCTracks = false;
-		CaloHitCollection *_collection1 = nullptr;
-		CaloHitCollection *_collection2 = nullptr;
-		CaloHitCollection *_collectionToOverlay1 = new CaloHitCollection();
-		CaloHitCollection *_collectionToOverlay2 = new CaloHitCollection();
-		CaloHitCollection *_lostHitCollection = new CaloHitCollection();
-		CaloHitCollection *_overlaidCollection = new CaloHitCollection();
-		Calorimeter *_calorimeter1 = nullptr;
-		Calorimeter *_calorimeter2 = nullptr;
+		bool _overlayDone;
+		bool _generatesLCTracks;
+		CaloHitCollection *_collection1;
+		CaloHitCollection *_collection2;
+		CaloHitCollection *_collectionToOverlay1;
+		CaloHitCollection *_collectionToOverlay2;
+		CaloHitCollection *_lostHitCollection;
+		CaloHitCollection *_overlaidCollection;
+		Calorimeter *_calorimeter1;
+		Calorimeter *_calorimeter2;
 		std::pair< IMPL::ReconstructedParticleImpl * , IMPL::ReconstructedParticleImpl * > _trackPair;
 
 		// Algorithm parameters

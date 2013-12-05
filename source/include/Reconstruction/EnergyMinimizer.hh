@@ -58,11 +58,18 @@ namespace baboon {
 		 */
 		struct FitterParameter {
 
-			std::string name = "";
-			double variable = 0.0;
-			double error = 0.0 ;
-			double lowerValue = 0.0;
-			double upperValue = 0.0;
+			FitterParameter()
+				: name("")
+				, variable(0.0)
+				, error(0.0)
+				, lowerValue(0.0)
+				, upperValue(0.0) {}
+
+			std::string name;
+			double variable;
+			double error;
+			double lowerValue;
+			double upperValue;
 		};
 
 
@@ -123,9 +130,9 @@ namespace baboon {
 		std::string minimizerType;
 		std::vector< FitterParameter > parameterList;
 		std::vector< FitterParameter > outputParameterList;
-		TFitter *fitter = nullptr;
+		TFitter *fitter;
 		void (*function)( int& nDim , double* gout , double& result , double par[] , int flg );
-		int numberOfIteration = 3;
+		int numberOfIteration;
 		std::vector<std::string> availableMinimizerTypes;
 
 		/**
