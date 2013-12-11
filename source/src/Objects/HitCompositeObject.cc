@@ -33,13 +33,10 @@ namespace baboon {
 
 		objectConnectors->clear();
 		delete objectConnectors;
-
-		if( caloHitCollection != 0 ) {
-
-			caloHitCollection->clear();
-			delete caloHitCollection;
-			caloHitCollection = 0;
-		}
+		weights.clear();
+		caloHitCollection->clear();
+		delete caloHitCollection;
+		caloHitCollection = 0;
 	}
 
 
@@ -50,16 +47,39 @@ namespace baboon {
 			delete caloHitCollection;
 		}
 		caloHitCollection = caloHitCol;
+		weights.clear();
+		weights = DoubleVector( (int)caloHitCollection->size() , 0.0 );
 		return BABOON_SUCCESS();
 	}
 
 
-	Return HitCompositeObject::AddCaloHit( CaloHit *caloHit ) {
+//	Return HitCompositeObject::AddCaloHit( CaloHit *caloHit ) {
+//
+//		BABOON_CHECK_POINTER( caloHit );
+//
+//		if( caloHitCollection->empty() ) {
+//			caloHitCollection->push_back( caloHit );
+//			weights->push_back( 1.0 );
+//			return BABOON_SUCCESS();
+//		}
+//
+//		if( this->Contains( caloHit ) )
+//			return BABOON_ALREADY_PRESENT("Hit was already in the collection");
+//		else {
+//			caloHitCollection->push_back( caloHit );
+//			weights->push_back( 1.0 );
+//			return BABOON_SUCCESS();
+//		}
+//	}
+
+
+	Return HitCompositeObject::AddCaloHit( CaloHit* caloHit , double w ) {
 
 		BABOON_CHECK_POINTER( caloHit );
 
 		if( caloHitCollection->empty() ) {
 			caloHitCollection->push_back( caloHit );
+			weights.push_back( w );
 			return BABOON_SUCCESS();
 		}
 
@@ -67,6 +87,7 @@ namespace baboon {
 			return BABOON_ALREADY_PRESENT("Hit was already in the collection");
 		else {
 			caloHitCollection->push_back( caloHit );
+			weights.push_back( w );
 			return BABOON_SUCCESS();
 		}
 	}
@@ -81,6 +102,7 @@ namespace baboon {
 
 		if( it != caloHitCollection->end() ) {
 			caloHitCollection->erase( it );
+			weights.erase( weights.begin() + std::distance( caloHitCollection->begin() , it ) );
 			return BABOON_SUCCESS();
 		}
 		else {
@@ -92,6 +114,35 @@ namespace baboon {
 
 		return ( find( caloHitCollection->begin() , caloHitCollection->end() , caloHit ) != caloHitCollection->end() );
 	}
+
+
+	const DoubleVector &HitCompositeObject::GetWeights() {
+
+		return weights;
+	}
+
+	double HitCompositeObject::GetWeight( CaloHit *caloHit ) {
+
+		CaloHitCollection::iterator it = std::find( caloHitCollection->begin() , caloHitCollection->end() , caloHit );
+
+		if( it != caloHitCollection->end() )
+			return weights.at( std::distance( caloHitCollection->begin() , it ) );
+		else
+			return 0.0;
+	}
+
+
+	void HitCompositeObject::Clear() {
+
+		caloHitCollection->clear();
+		weights.clear();
+
+		for( unsigned int c=0 ; c<objectConnectors->size() ; c++ )
+			delete objectConnectors->at(c);
+
+		objectConnectors->clear();
+	}
+
 
 //---------------------------------------------------------------------------------------------------------------------------
 
