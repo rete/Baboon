@@ -27,7 +27,6 @@
 // sdhcal includes
 #include "Geometry/ThreeVector.hh"
 #include "Objects/HitCompositeObject.hh"
-#include "Config/SdhcalConfig.hh"
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
 
@@ -91,6 +90,13 @@ namespace baboon {
 				this->ComputePosition( computation );
 				return position;
 			}
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void SetPosition( const ThreeVector &pos );
 
 			/*!
 			 *
