@@ -26,9 +26,6 @@
 // cfgparser includes
 #include "CfgParser/Data.hh"
 
-// xml includes
-#include "Xml/tinyxml.h"
-
 // sdhcal includes
 #include "Utilities/ReturnValues.hh"
 #include "Reconstruction/Tag.hh"
