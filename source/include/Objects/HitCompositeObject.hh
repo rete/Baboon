@@ -86,7 +86,15 @@ namespace baboon {
 			 *
 			 *
 			 */
-			virtual Return AddCaloHit( CaloHit* caloHit );
+//			virtual Return AddCaloHit( CaloHit* caloHit );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			virtual Return AddCaloHit( CaloHit* caloHit , double w = 1.0 );
+
 
 			/*!
 			 *
@@ -101,6 +109,20 @@ namespace baboon {
 			 *
 			 */
 			virtual bool Contains( CaloHit* caloHit );
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			const DoubleVector &GetWeights();
+
+			/*!
+			 *
+			 *
+			 *
+			 */
+			double GetWeight( CaloHit *caloHit );
 
 			/*!
 			 *
@@ -130,10 +152,18 @@ namespace baboon {
 			 */
 			Return RemoveConnectionWith( HitCompositeObject *obj );
 
+			/*!
+			 *
+			 *
+			 *
+			 */
+			void Clear();
+
 		protected:
 
 			CaloHitCollection *caloHitCollection;
 			ObjectConnectorCollection *objectConnectors;
+			DoubleVector weights;
 
 		public:
 
