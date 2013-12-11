@@ -66,6 +66,11 @@ namespace baboon {
 		position = pos;
 	}
 
+	void Cluster::SetPosition( const ThreeVector &pos ) {
+
+		position = pos;
+	}
+
 	bool Cluster::IsIsolatedFromClusters(const ClusterCollection* clusters) {
 
 		bool isol=false;
