@@ -31,7 +31,13 @@
 
 #include "Algorithm/Calorimetry/ConnectorClusteringAlgorithm.hh"
 
+#include "Utilities/Globals.hh"
+
 using namespace std;
+
+// TODO :
+// * Find a way to merge correctly missing cluster that are mainly tracks
+
 
 namespace baboon {
 
@@ -41,28 +47,18 @@ namespace baboon {
 
 		needData = true;
 		calorimeter = 0;
-		trackHelpers = new TrackHelperCollection();
 	}
 
 	ConnectorClusteringAlgorithm::~ConnectorClusteringAlgorithm() {
 
-		for( unsigned int tr=0 ; tr<trackHelpers->size() ; tr++ ) {
-			if( trackHelpers->at( tr ) != 0 )
-				delete trackHelpers->at( tr );
-		}
-		trackHelpers->clear();
-		delete trackHelpers;
 	}
 
 
 	Return ConnectorClusteringAlgorithm::Init() {
 
-		data.GetValue( "lookupTransverseDistance" , &lookupTransverseDistance );
-		data.GetValue( "lookupLayerDistance" , &lookupLayerDistance );
-		data.GetValue( "maxNbOfForwardConnectors" , &maxNbOfForwardConnectors );
-		data.GetValue( "trackConnectionConeLength" , &trackConnectionConeLength );
-		data.GetValue( "trackConnectionOpeningAngle" , &trackConnectionOpeningAngle );
-		data.GetValue( "minimumWeight" , &minimumWeight);
+		data.GetValue( "thresholdDistanceXY" , &thresholdDistanceXY );
+		data.GetValue( "thresholdDistanceZ" , &thresholdDistanceZ );
+		data.GetValue( "minimumClusterSizeMerging" , &minimumClusterSizeMerging );
 
 		return BABOON_SUCCESS();
 	}
@@ -71,163 +67,37 @@ namespace baboon {
 	Return ConnectorClusteringAlgorithm::CheckConsistency() {
 
 		BABOON_CHECK_POINTER( calorimeter );
-		if( lookupTransverseDistance <= 0 || lookupLayerDistance <= 0 )
-			return BABOON_INVALID_PARAMETER( "lookup distance (transverse or layer) should be > 0 !" );
+
 		return BABOON_SUCCESS();
 	}
 
 
 	Return ConnectorClusteringAlgorithm::Execute() {
 
-		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
-		unsigned int nbOfLayers = calorimeter->GetNbOfLayers();
 
-		// nothing to do if no calo hits
-		if( caloHitCollection->empty() )
-			return BABOON_SUCCESS();
+		InitializeConnectors();
 
-		TrackCollection *trackCollection = TrackManager::GetInstance()->GetTrackCollection();
+		IterateAndCleanConnectors();
 
+		CreateClusters();
 
-		for( unsigned int tr=0 ; tr<trackCollection->size() ; tr++ ) {
+		ClusterMerging();
 
-			Track *track = trackCollection->at( tr );
-			TrackHelper *trackHelper = new TrackHelper();
-			trackHelper->track = track;
-			this->FillTrackHelper( trackHelper );
-			trackHelpers->push_back( trackHelper );
-		}
+//		IsolatedHitMerging();
 
-		// Order the calo hits by layer
-		// Choose only the one that are not tagged as isolated or track
-		for( unsigned int h=0 ; h<caloHitCollection->size() ; h++ ) {
+//		cout << "finalClusters.size() : " << finalClusters.size() << endl;
 
-			CaloHit *caloHit = caloHitCollection->at( h );
+		// for monitoring
+		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
 
-			if( caloHit->GetTag() == IsolatedTag() || caloHit->GetTag() == TrackTag() )
-				continue;
+			CaloHitCollection *clusterHits = finalClusters.at(cl)->GetCaloHitCollection();
 
-			int layer = caloHit->GetIJK().at(2);
+			ClusteringManager::GetInstance()->AddCluster( finalClusters.at(cl) );
 
-			if( allOrderedPoints[ layer ] == 0 )
-				allOrderedPoints[ layer ] = new PointCollection< CaloHit * , CaloHit * >::type();
-
-			Point< CaloHit * , CaloHit *> *caloHitPoint = new Point< CaloHit * , CaloHit *>();
-			caloHitPoint->SetObject( caloHit );
-			allPoints.push_back( caloHitPoint );
-			allOrderedPoints[ layer ]->push_back( caloHitPoint );
-		}
-
-		// Connect all the calo hits layer by layer in a given region
-		for( unsigned int l=0 ; l<nbOfLayers ; l++ ) {
-
-			this->ConnectLayerCaloHits( l );
-		}
-
-		// Iterate on each point and keep only the best connectors
-//		for( unsigned int p=0 ; p<allPoints.size() ; p++ ) {
-//
-//			Point<CaloHit*,CaloHit*> *point = allPoints.at( p );
-//			ConnectorCollection<CaloHit*,CaloHit*>::type &connectorCollection = point->GetConnectors();
-//
-//			this->SortConnectorsByWeight( connectorCollection );
-//			int count = 0;
-//
-//			for( unsigned int c=0 ; c<connectorCollection.size() ; c++ ) {
-//
-//				if( connectorCollection.at( c )->GetFirst()->GetObject() == point->GetObject() ) {
-//
-//					if( count >= maxNbOfForwardConnectors ) {
-//
-//						if( connectorCollection.at( c )->GetWeight() > minimumWeight )
-//						connectorCollection.at( c )->SetGood( false );
-//					}
-//					else
-//						count++;
-//				}
-//			}
-//
-//
-//
-//			for( unsigned int c=0 ; c<connectorCollection.size() ; c++ ) {
-//
-//				if( connectorCollection.at( c )->IsGood() )
-//					this->DrawConnector( connectorCollection.at( c ) , kWhite );
-//			}
-//		}
-
-
-
-
-//		this->ConnectTracksWithClusters();
-
-		// Connect Tracks With Clusters
-
-		ShowerCollection showerCollection;
-
-		for( unsigned int th=0 ; th<trackHelpers->size() ; th++ ) {
-
-			Track *track = trackHelpers->at( th )->track;
-
-			Cone *forwardCone = new Cone( trackHelpers->at( th )->endPosition
-										, trackConnectionOpeningAngle
-										, trackHelpers->at( th )->forwardThrust
-										, trackConnectionConeLength*std::tan(trackConnectionOpeningAngle) );
-
-			trackHelpers->at( th )->forwardConnectedPoints.clear();
-
-			for( unsigned int p=0 ; p<allPoints.size() ; p++ ) {
-
-				CaloHit *caloHit = allPoints.at( p )->GetObject();
-
-				if( forwardCone->Contains( caloHit->GetPosition() ) )
-					trackHelpers->at( th )->forwardConnectedPoints.push_back( allPoints.at( p ) );
-
+			for( unsigned int c1=0 ; c1<clusterHits->size() ; c1++ ) {
+				clusterHits->at(c1)->SetColor( cl + 1 );
 			}
-
-			if( !trackHelpers->at( th )->forwardConnectedPoints.empty() ) {
-
-				cout << "trackHelper->beginPosition : " << trackHelpers->at( th )->beginPosition << endl;
-				cout << "trackHelper->endPosition : " << trackHelpers->at( th )->endPosition << endl;
-				cout << "trackHelper->backwardThrust : " << trackHelpers->at( th )->backwardThrust << endl;
-				cout << "trackHelper->forwardThrust : " << trackHelpers->at( th )->forwardThrust << endl;
-				cout << "trackHelper->forwardConnectedPoints.size() : " << trackHelpers->at( th )->forwardConnectedPoints.size() << endl;
-				cout << endl;
-
-				Shower *newShower = new Shower();
-//				newShower->AddTrack( trackHelpers->at( th )->track );
-				showerCollection.push_back( newShower );
-
-
-
-//				this->AgglomerateChargedParticle( trackHelpers->at( th ) );
-
-			}
-
 		}
-
-
-
-		ThreeVector v( 2.0 , 1.0 , 0.0 );
-		ThreeVector p( 3.5 , 3.0 , 0.0 );
-		ThreeVector lookV( 3.0 , 4.0 , 0.0 );
-
-		cout << "Look for value : " << (lookV - p ).mag()  << endl;
-		cout << "Test with p.projection(v) : " << endl;
-		cout << p.project( v ) << endl;
-		cout << "Test with v.projection(p) : " << endl;
-		cout << v.project( p ) << endl;
-		cout << "Test with p.howNear(v) : " << endl;
-		cout << p.howNear( v ) << endl;
-		cout << "Test with v.howNear(p) : " << endl;
-		cout << v.howNear( p ) << endl;
-
-		// The good one
-		cout << "Test with p.per(v) : " << endl;
-		cout << p.perp( v ) << endl;
-
-		cout << "Test with v.per(p) : " << endl;
-		cout << v.perp( p ) << endl;
 
 		return BABOON_SUCCESS();
 	}
@@ -235,231 +105,26 @@ namespace baboon {
 
 	Return ConnectorClusteringAlgorithm::End() {
 
-		/*
-		 * deletion area
-		 */
-
-		// all points
-		for( unsigned int p=0 ; p<allPoints.size() ; p++ ) {
-			if( allPoints.at( p ) != 0 )
-				delete allPoints.at( p );
+		for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
+			if( connectors.at( co ) != 0 )
+				delete connectors.at( co );
 		}
-		allPoints.clear();
 
-		// all connectors
-		for( unsigned int p=0 ; p<allConnectors.size() ; p++ ) {
-			if( allConnectors.at( p ) != 0 )
-				delete allConnectors.at( p );
-		}
-		allConnectors.clear();
-
-		// ordered point collections
-		OrderedPointCollection< CaloHit * , CaloHit * >::type::iterator it;
-		for( it=allOrderedPoints.begin() ; it!=allOrderedPoints.end() ; it++ ) {
-			if( it->second != 0 ) {
-				it->second->clear();
-				delete it->second;
-			}
-		}
-		allOrderedPoints.clear();
-
+		connectors.clear();
 		calorimeter = 0;
-
-		for( unsigned int tr=0 ; tr<trackHelpers->size() ; tr++ ) {
-			if( trackHelpers->at( tr ) != 0 )
-				delete trackHelpers->at( tr );
-		}
-		trackHelpers->clear();
+		finalClusters.clear();
+		usedCaloHits.clear();
 
 		return BABOON_SUCCESS();
 	}
 
 
-	void ConnectorClusteringAlgorithm::FillTrackHelper( TrackHelper *trackHelper ) {
-
-		if( trackHelper == 0 ) {
-			return;
-		}
-
-		Track *track = trackHelper->track;
-
-		track->SortHits();
-		CaloHitCollection *trackHits = track->GetCaloHitCollection();
-		int lastTrackLayer = track->GetCaloHitCollection()->at( track->Size() - 1 )->GetIJK().at(2);
-		int firstTrackLayer = track->GetCaloHitCollection()->at( 0 )->GetIJK().at(2);
-
-		ClusterCollection trackClusters;
-		Cluster *currentCluster = new Cluster();
-
-		for( unsigned int h=0 ; h<trackHits->size() ; h++ ) {
-
-			CaloHit *caloHit = trackHits->at( h );
-			if( h == trackHits->size() - 1 ) {
-				currentCluster->AddCaloHit( caloHit );
-				trackClusters.push_back( currentCluster );
-				break;
-			}
-
-			CaloHit *hit = trackHits->at( h );
-			CaloHit *nextHit = trackHits->at( h+1 );
-
-			if( hit->GetIJK().at(2) == nextHit->GetIJK().at(2) ) {
-				currentCluster->AddCaloHit( hit );
-				continue;
-			}
-			else {
-				currentCluster->AddCaloHit( hit );
-				trackClusters.push_back( currentCluster );
-				currentCluster = new Cluster();
-			}
-		}
-
-		currentCluster = 0;
-
-		for( unsigned int cl=0 ; cl<trackClusters.size() ; cl++ ) {
-
-			if( cl == 0 )
-				trackHelper->beginPosition = trackClusters.at( cl )->GetPosition( fComputePosition );
-
-			if( cl == trackClusters.size() - 1 ) {
-				trackHelper->endPosition = trackClusters.at( cl )->GetPosition( fComputePosition );
-				break;
-			}
-
-			Cluster *cluster = trackClusters.at( cl );
-			Cluster *nextCluster = trackClusters.at( cl+1 );
-			ThreeVector difference = nextCluster->GetPosition( fComputePosition ) - cluster->GetPosition( fComputePosition );
-
-			if( difference.z() < 0 )
-				difference = -difference;
-
-			// for the track beginning
-			if( cl < 4 ) {
-				trackHelper->backwardThrust += difference;
-
-			}
-			// for the track end
-			if( cl > trackClusters.size() - 4 ) {
-				trackHelper->forwardThrust += difference;
-			}
-		}
-
-		if( trackHelper->backwardThrust != ThreeVector() )
-			trackHelper->backwardThrust.setMag( 1.f );
-		if( trackHelper->forwardThrust != ThreeVector() )
-			trackHelper->forwardThrust.setMag( 1.f );
-
-		if( trackHelper->backwardThrust.z() > 0 )
-			trackHelper->backwardThrust = -trackHelper->backwardThrust;
-		if( trackHelper->forwardThrust.z() < 0 )
-			trackHelper->forwardThrust = -trackHelper->forwardThrust;
-
-		TrackExtremities extremities = track->GetExtremities();
-		CaloHit *first = extremities.first;
-		CaloHit *last = extremities.second;
-
-		ThreeVector direction = first->GetPosition() - last->GetPosition();
-		if( direction.z() < 0.f )
-			direction = -direction;
-
-		if( direction.theta() < 0.3 ) {
-			if( first->GetPosition().z() < -600.f && last->GetPosition().z() < -600.f ) {
-				trackHelper->isPrimaryTrack = true;
-			}
-		}
-
-
-		for( unsigned int cl=0 ; cl<trackClusters.size() ; cl++ ) {
-			if( trackClusters.at( cl ) != 0 )
-				delete trackClusters.at( cl );
-		}
-		trackClusters.clear();
-
-	}
-
-
-
-	void ConnectorClusteringAlgorithm::ConnectLayerCaloHits( int layer ) {
-
-
-		// tester si les deux collections ne sont pas vides !!!!!
-
-		PointCollection< CaloHit * , CaloHit * >::type *pointCollection1 = allOrderedPoints[ layer ];
-
-		// if there is not calo hits in the layer, return ...
-		if( pointCollection1 == 0 )
-			return;
-
-		for( unsigned int p1=0 ; p1<pointCollection1->size() ; p1++ ) {
-
-			Point< CaloHit * , CaloHit * > *point1 = pointCollection1->at( p1 );
-			CaloHit *caloHit1 = point1->GetObject();
-
-			for( unsigned int l=layer+1 ; l<=layer+lookupLayerDistance ; l++ ) {
-
-				PointCollection< CaloHit * , CaloHit * >::type *pointCollection2 = allOrderedPoints[ l ];
-
-				// if no calo hits in the layer continue;
-				if( pointCollection2 == 0 )
-					continue;
-
-				for( unsigned int p2=0 ; p2<pointCollection2->size() ; p2++ ) {
-
-					Point< CaloHit * , CaloHit * > *point2 = pointCollection2->at( p2 );
-					CaloHit *caloHit2 = point2->GetObject();
-
-					if( abs( caloHit2->GetPosition().x() - caloHit1->GetPosition().x() ) > lookupTransverseDistance
-					 || abs( caloHit2->GetPosition().y() - caloHit1->GetPosition().y() ) > lookupTransverseDistance )
-						continue;
-
-					// Weight the link according to the distance and the difference of density
-					double distance = ( caloHit2->GetPosition() - caloHit1->GetPosition() ).mag();
-					// delta density normalized to 1
-					double deltaDensity = abs( caloHit2->GetDensity() - caloHit1->GetDensity() ) / 3.0;
-					double coreFactor = 1.0;
-
-					if( caloHit1->GetTag() == CoreTag() && caloHit2->GetTag() == CoreTag() )
-						coreFactor = 10.0;
-					else if( caloHit1->GetTag() == CoreTag() && caloHit1->GetTag() != CoreTag() )
-						coreFactor = 5.0;
-					else if( caloHit1->GetTag() != CoreTag() && caloHit1->GetTag() != CoreTag() )
-						coreFactor = 5.0;
-					else
-						coreFactor = 1.0;
-
-					double weight = 0.f;
-
-					if( deltaDensity != 0 )
-						weight =  coreFactor / ( distance*deltaDensity );
-					else
-						weight =  coreFactor / ( distance );
-//					cout << "weight : " << weight << endl;
-
-					Connector< CaloHit * , CaloHit * > *connector = new Connector< CaloHit * , CaloHit * >();
-					connector->Connect( point1 , point2    // the connected points
-										, weight ); // the weight
-					point1->AddConnector( connector );
-					point2->AddConnector( connector );
-
-					// for memory management...
-					allConnectors.push_back( connector );
-//					this->DrawConnector( connector , kWhite );
-				}
-			}
-
-
-		}
-
-	}
-
-
-
-	void ConnectorClusteringAlgorithm::DrawConnector( Connector< CaloHit * , CaloHit * > *connector , int color ) {
+	void ConnectorClusteringAlgorithm::DrawConnector( Connector< CaloHit, CaloHit> *connector , int color ) {
 
 		if( BaboonMonitoring::IsEnable() && gEve ) {
 
-			CaloHit *caloHit1 = connector->GetFirst()->GetObject();
-			CaloHit *caloHit2 = connector->GetSecond()->GetObject();
+			CaloHit *caloHit1 = connector->First();
+			CaloHit *caloHit2 = connector->Second();
 			IntVector ijk1 = caloHit1->GetIJK();
 			IntVector ijk2 = caloHit2->GetIJK();
 
@@ -486,87 +151,388 @@ namespace baboon {
 
 			connectionArrow->SetMainColor( color );
 			connectionArrow->SetPickable( true );
-//			connectionArrow->SetTubeR( 0.05 );
-//			connectionArrow->SetConeR( 0.008 );
-//			connectionArrow->SetConeL( 0.008 );
 			monitoring->AddElement( connectionArrow );
 		}
 
 	}
 
 
+	void ConnectorClusteringAlgorithm::InitializeConnectors() {
 
-	void ConnectorClusteringAlgorithm::SortConnectorsByWeight( ConnectorCollection< CaloHit * , CaloHit * >::type &connectors ) {
+		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
 
-		int i = 0;
-		int j = 0;
-		Connector< CaloHit * , CaloHit * > *connector = 0;
+		// nothing to do if no calo hits
+		if( caloHitCollection->empty() )
+			return;
 
-		for( j=1 ; j<connectors.size() ; j++ ) {
+		for( unsigned int c1=0 ; c1<caloHitCollection->size() ; c1++ ) {
 
-			i = j-1;
-			while( connectors.at(j)->GetWeight() > connectors.at(i)->GetWeight() ) {
-				connector = connectors.at(i);
-				connectors.at(i) = connectors.at(j);
-				connectors.at(j) = connector;
-				i=i-1;
-				j=j-1;
-				if( i<0 ) break;
+			CaloHit *caloHit1 = caloHitCollection->at(c1);
+
+			if( caloHit1->GetTag() == IsolatedTag() )
+				continue;
+
+			int K1 = caloHit1->GetIJK().at(2);
+			ThreeVector pos1 = caloHit1->GetPosition();
+
+			for( unsigned int c2=0 ; c2<caloHitCollection->size() ; c2++ ) {
+
+				CaloHit *caloHit2 = caloHitCollection->at(c2);
+
+				if( caloHit2->GetTag() == IsolatedTag() )
+					continue;
+
+				int K2 = caloHit2->GetIJK().at(2);
+				ThreeVector pos2 = caloHit2->GetPosition();
+				double xDif = pos1.x() - pos2.x();
+				double yDif = pos1.y() - pos2.y();
+				double xyDistance = sqrt( xDif*xDif + yDif*yDif );
+				double zDistance = fabs( pos1.z() - pos2.z() );
+
+				if( K1 < K2 && xyDistance < thresholdDistanceXY && zDistance < thresholdDistanceZ ) {
+
+					Connector<CaloHit,CaloHit> *connector = new Connector<CaloHit,CaloHit>();
+					connector->Connect( caloHit1 , caloHit2 );
+					connector->SetWeight( (pos1 - pos2).mag() );
+					connectors.push_back( connector );
+				}
 			}
 		}
 	}
 
-	void ConnectorClusteringAlgorithm::ConnectTracksWithClusters() {
 
-		for( unsigned int th=0 ; th<trackHelpers->size() ; th++ ) {
+	void ConnectorClusteringAlgorithm::IterateAndCleanConnectors() {
 
-			Track *track = trackHelpers->at( th )->track;
+		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
 
-			Cone *forwardCone = new Cone( trackHelpers->at( th )->endPosition
-										, trackConnectionOpeningAngle
-										, trackHelpers->at( th )->forwardThrust
-										, trackConnectionConeLength*std::tan(trackConnectionOpeningAngle) );
+		// nothing to do if no calo hits
+		if( caloHitCollection->empty() )
+			return;
 
-			trackHelpers->at( th )->forwardConnectedPoints.clear();
+		CaloHitConnectors outputConnectors;
 
-			for( unsigned int p=0 ; p<allPoints.size() ; p++ ) {
+		for( unsigned int c1=0 ; c1<caloHitCollection->size() ; c1++ ) {
 
-				CaloHit *caloHit = allPoints.at( p )->GetObject();
+			CaloHit *caloHit1 = caloHitCollection->at(c1);
 
-				if( forwardCone->Contains( caloHit->GetPosition() ) )
-					trackHelpers->at( th )->forwardConnectedPoints.push_back( allPoints.at( p ) );
+			if( caloHit1->GetTag() == IsolatedTag() )
+				continue;
 
-			}
+			ThreeVector pos1 = caloHit1->GetPosition();
+			bool hasBackwardConnection = false;
+			bool hasForwardConnection = false;
+			ThreeVector meanForwardDirection;
+			ThreeVector meanBackwardDirection;
+			int nbBackward = 0;
+			int nbForward = 0;
 
+			for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
 
-//			cout << "trackHelper->beginPosition : " << trackHelpers->at( th )->beginPosition << endl;
-//			cout << "trackHelper->endPosition : " << trackHelpers->at( th )->endPosition << endl;
-//			cout << "trackHelper->backwardThrust : " << trackHelpers->at( th )->backwardThrust << endl;
-//			cout << "trackHelper->forwardThrust : " << trackHelpers->at( th )->forwardThrust << endl;
-//			cout << "trackHelper->forwardConnectedPoints.size() : " << trackHelpers->at( th )->forwardConnectedPoints.size() << endl;
-//			cout << endl;
+				if( connectors.at(co)->First() == caloHit1 ) {
 
-			if( !trackHelpers->at( th )->forwardConnectedPoints.empty() ) {
+					nbForward++;
+					CaloHit *caloHit2 = connectors.at(co)->Second();
+					ThreeVector pos2 = caloHit2->GetPosition();
+					hasForwardConnection = true;
+					ThreeVector diffPos = pos2 - pos1;
+					meanForwardDirection += diffPos.unit();
+//					meanForwardDirection += diffPos.unit()*static_cast<int>( caloHit2->GetThreshold() );
+//					meanForwardDirection += diffPos.unit()*caloHit2->GetDensity();
+				}
+				else if( connectors.at(co)->Second() == caloHit1 ) {
 
-				cout << "trackHelper->beginPosition : " << trackHelpers->at( th )->beginPosition << endl;
-				cout << "trackHelper->endPosition : " << trackHelpers->at( th )->endPosition << endl;
-				cout << "trackHelper->backwardThrust : " << trackHelpers->at( th )->backwardThrust << endl;
-				cout << "trackHelper->forwardThrust : " << trackHelpers->at( th )->forwardThrust << endl;
-				cout << "trackHelper->forwardConnectedPoints.size() : " << trackHelpers->at( th )->forwardConnectedPoints.size() << endl;
-				cout << endl;
+					nbBackward++;
+					CaloHit *caloHit2 = connectors.at(co)->First();
+					ThreeVector pos2 = caloHit2->GetPosition();
+					hasBackwardConnection = true;
+					ThreeVector diffPos = pos2 - pos1;
+					meanBackwardDirection += diffPos.unit();
+//					meanBackwardDirection += diffPos.unit()*static_cast<int>( caloHit2->GetThreshold() );
+//					meanBackwardDirection += diffPos.unit()*caloHit2->GetDensity();
+				}
+			} // connector loop
 
-				this->AgglomerateChargedParticle( trackHelpers->at( th ) );
+			if( !hasForwardConnection && !hasBackwardConnection )
+				continue;
 
-			}
+			if( !hasBackwardConnection )
+				continue;
+
+			ThreeVector referenceVector;
+
+			if( !hasForwardConnection )
+				referenceVector = meanBackwardDirection.unit();
+
+			Connector<CaloHit, CaloHit> *bestConnector = 0;
+			double minAngleDistance = 1000000000;
+
+			for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
+
+				if( connectors.at(co)->Second() == caloHit1 ) {
+
+					if( bestConnector == 0 ) {
+						bestConnector = connectors.at(co);
+						continue;
+					}
+					else {
+
+						CaloHit *caloHit2 = connectors.at(co)->First();
+						ThreeVector diffPos = caloHit2->GetPosition() - caloHit1->GetPosition();
+						double angleDistance = diffPos.angle( referenceVector )*sqrt( diffPos.mag() );
+
+						if( angleDistance < minAngleDistance ) {
+
+							bestConnector = connectors.at(co);
+							minAngleDistance = angleDistance;
+						}
+					}
+				}
+			} // connector loop
+
+			// debug check
+			assert( bestConnector != 0 );
+
+			outputConnectors.push_back( bestConnector );
 
 		}
 
+		// Remove all the connectors that are not the bests
+		for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
+
+
+			if( std::find( outputConnectors.begin() , outputConnectors.end() , connectors.at(co) ) == outputConnectors.end() ) {
+
+				delete connectors.at(co);
+				connectors.erase( connectors.begin() + co );
+				co --;
+			}
+		}
+
+		for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
+			this->DrawConnector( connectors.at(co) , kBlack );
+		}
+
+
+		outputConnectors.clear();
 	}
 
-	void ConnectorClusteringAlgorithm::AgglomerateChargedParticle( TrackHelper *trackHelper ) {
 
-		// TO DO
-		// Trouver une fonction de poids pour peser les connections entre hits et decider combien en garder
+	void ConnectorClusteringAlgorithm::CreateClusters() {
+
+		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
+
+		// nothing to do if no calo hits
+		if( caloHitCollection->empty() )
+			return;
+
+		std::sort( caloHitCollection->begin() , caloHitCollection->end() , ConnectorClusteringAlgorithm::SortByLayer );
+
+		for( unsigned int c1=0 ; c1<caloHitCollection->size() ; c1++ ) {
+
+			CaloHit *caloHit = caloHitCollection->at(c1);
+
+			if( caloHit->GetTag() == IsolatedTag() )
+				continue;
+
+			if( std::find( usedCaloHits.begin() , usedCaloHits.end() , caloHit ) != usedCaloHits.end() )
+				continue;
+
+			Cluster *cluster = new Cluster();
+			cluster->SetClusterType( fCluster3D );
+			cluster->AddCaloHit( caloHit );
+			usedCaloHits.push_back( caloHit );
+
+			this->RecursiveClustering( caloHit , cluster );
+
+			finalClusters.push_back( cluster );
+		}
+	}
+
+
+	void ConnectorClusteringAlgorithm::ClusterMerging() {
+
+		// here a cluster merging is done for each clusters that have the first calo hit
+		// belonging to the same 2D cluster
+
+		ClusterCollection *clusters2D = ClusteringManager::GetInstance()->GetCluster2D();
+
+		if( clusters2D->empty() )
+			return;
+
+
+		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
+
+			Cluster *cluster = finalClusters.at(cl);
+			CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
+			std::sort( clusterHits->begin() , clusterHits->end() , ConnectorClusteringAlgorithm::SortByLayer );
+		}
+
+		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
+
+			Cluster *cluster = finalClusters.at(cl);
+			CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
+
+			if( cluster->Size() == 0 )
+				continue;
+
+			CaloHit *firstCaloHitInCluster = clusterHits->at(0);
+
+			for( unsigned int cl2=cl ; cl2<finalClusters.size() ; cl2++ ) {
+
+				if( cl == cl2 )
+					continue;
+
+				Cluster *cluster2 = finalClusters.at(cl2);
+
+				if( cluster2->Size() == 0 )
+					continue;
+
+				CaloHitCollection *clusterHits2 = cluster2->GetCaloHitCollection();
+
+				CaloHit *firstCaloHitInCluster2 = clusterHits2->at(0);
+				Cluster *cluster2DOfFirst2 = 0;
+
+				for( unsigned int cl2D=0 ; cl2D<clusters2D->size() ; cl2D++ ) {
+
+					if( clusters2D->at(cl2D)->Contains( firstCaloHitInCluster2 ) ) {
+						cluster2DOfFirst2 = clusters2D->at(cl2D);
+						break;
+					}
+				}
+
+				if( cluster2DOfFirst2 == 0 )
+					continue;
+
+				// if the two calo hits belongs to the same 2D cluster, set them to be merged
+				if( cluster2DOfFirst2->Contains( firstCaloHitInCluster ) ) {
+
+					for( unsigned int clID=0 ; clID<cluster2->Size() ; clID++ )
+						cluster->AddCaloHit( cluster2->GetCaloHitCollection()->at(clID) );
+
+					cluster2->Clear();
+				}
+			}
+		}
+
+		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
+
+			if( finalClusters.at(cl)->Size() == 0 ) {
+
+				delete finalClusters.at(cl);
+				finalClusters.erase( finalClusters.begin() + cl );
+			}
+		}
+
+
+		std::map<Cluster*,Cluster*> smallToBigClustersToMerge;
+
+		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
+
+			if( finalClusters.at(cl)->Size() > minimumClusterSizeMerging )
+				continue;
+
+			Cluster *smallCluster = finalClusters.at(cl);
+
+			ThreeVector clusterPosition = smallCluster->GetPosition( fComputePosition );
+			double minimumDistance = 100000000.0;
+			Cluster *closestCluster = 0;
+
+			for( unsigned int cl2=0 ; cl2<finalClusters.size() ; cl2++ ) {
+
+				if( finalClusters.at(cl2)->Size() <= minimumClusterSizeMerging )
+					continue;
+
+				Cluster *cluster2 = finalClusters.at(cl2);
+
+				if( closestCluster == 0 ) {
+
+					minimumDistance = DistanceToCluster( clusterPosition , cluster2 );
+					closestCluster = cluster2;
+					continue;
+				}
+
+				double distance = DistanceToCluster( clusterPosition , cluster2 );
+
+				if( distance < minimumDistance ) {
+
+					minimumDistance = distance;
+					closestCluster = cluster2;
+				}
+			}
+
+			smallToBigClustersToMerge[ smallCluster ] = closestCluster;
+		}
+
+		for( std::map<Cluster*,Cluster*>::iterator it=smallToBigClustersToMerge.begin() ;
+			it!=smallToBigClustersToMerge.end() ; it++ ) {
+
+			if( it->second == 0 || it->first == 0 )
+				continue;
+
+			CaloHitCollection *smallClusterHits = it->first->GetCaloHitCollection();
+
+			for( unsigned int h1=0 ; h1<smallClusterHits->size() ; h1++ )
+				it->second->AddCaloHit( smallClusterHits->at(h1) );
+
+			std::vector<Cluster*>::iterator clIt = std::find( finalClusters.begin() , finalClusters.end() , it->first );
+			delete (*clIt);
+			finalClusters.erase( clIt );
+		}
+		smallToBigClustersToMerge.clear();
+	}
+
+
+	void ConnectorClusteringAlgorithm::RecursiveClustering( CaloHit *caloHit , Cluster *cluster ) {
+
+		if( caloHit == 0 || cluster == 0 )
+			return;
+
+		for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
+
+			if( connectors.at(co)->First() == caloHit ) {
+
+				if( cluster->Contains( connectors.at(co)->Second() ) )
+					continue;
+
+				if( std::find( usedCaloHits.begin() , usedCaloHits.end() , connectors.at(co)->Second() ) != usedCaloHits.end() )
+					continue;
+
+				cluster->AddCaloHit( connectors.at(co)->Second() );
+				usedCaloHits.push_back( connectors.at(co)->Second() );
+
+				this->RecursiveClustering( connectors.at(co)->Second() , cluster );
+			}
+		}
+	}
+
+
+	bool ConnectorClusteringAlgorithm::SortByLayer( CaloHit *caloHit1 , CaloHit *caloHit2 ) {
+
+		if( caloHit2->GetIJK().at(2) > caloHit1->GetIJK().at(2) )
+			return true;
+		else return false;
+	}
+
+
+	double ConnectorClusteringAlgorithm::DistanceToCluster( const ThreeVector &pos , Cluster *cluster ) {
+
+		if( cluster == 0 )
+			return 0.0;
+
+		CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
+
+		double distanceMinimum = 10000000.0;
+
+		for( unsigned int i=0 ; i<clusterHits->size() ; i++ ) {
+
+			double distance = (pos - clusterHits->at(i)->GetPosition() ).mag();
+
+			if( distance < distanceMinimum )
+				distanceMinimum = distance;
+
+		}
+
+		return distanceMinimum;
 	}
 
 }  // namespace 

@@ -42,59 +42,107 @@
 
 
 #include "Detector/Calorimeter.hh"
-#include "Reconstruction/Connector.hh"
 #include "Objects/Cluster.hh"
 #include "Monitoring/BaboonMonitoring.hh"
 #include "TEveArrow.h"
 #include "Geometry/Cone.hh"
-
-
+#include "Managers/ClusteringManager.hh"
 
 namespace baboon {
 
-
-	/*!
-	*
-	* @brief  ConnectorClusteringAlgorithm class
-	* Inherits from base class AbstractAlgorithm
-	*
-	*/
+	/**
+	 * @brief  ConnectorClusteringAlgorithm class
+	 * Inherits from base class AbstractAlgorithm
+	 */
 	class ConnectorClusteringAlgorithm : public AbstractAlgorithm {
 
 		public:
 
-			struct TrackHelper {
+			/**
+			 * @brief A connector class to connect objects with a weight
+			 */
+			template <typename T , typename S>
+			class Connector {
 
-				Track *track;
-				ThreeVector beginPosition;
-				ThreeVector endPosition;
-				ThreeVector forwardThrust;
-				ThreeVector backwardThrust;
-				PointCollection< CaloHit * , CaloHit * >::type forwardConnectedPoints;
-				PointCollection< CaloHit * , CaloHit * >::type backwardConnectedPoints;
-				bool isPrimaryTrack;
+			public:
+
+				/**
+				 * @brief Constructor
+				 */
+				Connector() {
+
+					obj1 = 0;
+					obj2 = 0;
+					weight = 1.0;
+				}
+
+				/**
+				 * @brief Connect two objects with a given weight. Default weight is 1.0
+				 */
+				void Connect( T *o1 , S *o2 , double w = 1.0 ) {
+
+					if( o1 == 0 || o2 == 0 )
+						return;
+
+					obj1 = o1;
+					obj2 = o2;
+					weight = w;
+				}
+
+				/**
+				 * @brief Returns the first connected object
+				 */
+				T *First() {
+					return obj1;
+				}
+
+				/**
+				 * @brief Returns the second connected object
+				 */
+				S* Second() {
+					return obj2;
+				}
+
+				/**
+				 * @brief Set the weight of the connection
+				 */
+				void SetWeight( double w ) {
+
+					weight = w;
+				}
+
+				/**
+				 * @brief return the weight of the connection
+				 */
+				double GetWeight() {
+
+					return weight;
+				}
+
+
+			protected:
+
+				double weight; ///< The weight of the connection
+				T *obj1;       ///< The first connected object
+				S *obj2;       ///< The second connected object
+
 			};
 
-			typedef std::vector< TrackHelper * > TrackHelperCollection;
+			typedef ConnectorClusteringAlgorithm::Connector<CaloHit, CaloHit> CaloHitConnector;
+			typedef std::vector< CaloHitConnector * > CaloHitConnectors;
 
-			/*!
-			*
-			* @brief  Default constructor
-			*
-			*/
+			/**
+			 * @brief Default constructor
+			 */
 			ConnectorClusteringAlgorithm();
 
-			/*!
-			*
-			* @brief  Default destructor
-			*
-			*/
+			/**
+			 * @brief Default destructor
+			 */
 			virtual ~ConnectorClusteringAlgorithm();
 
-			/*!
-			 *
-			 *
-			 *
+			/**
+			 * @brief Set the calorimeter to use
 			 */
 			void SetCalorimeter( Calorimeter *calo )
 				{ calorimeter = calo; }
@@ -102,93 +150,81 @@ namespace baboon {
 
 		protected:
 
-			/*!
-			 *
+			/**
 			 * @brief Initialize the algorithm, i.e by initializing specific variables
-			 *
 			 */
 			virtual Return Init();
 
 
-			/*!
-			 *
+			/**
 			 * @brief Execute the algorithm
-			 *
 			 */
 			virtual Return Execute();
 
 
-			/*!
-			 *
+			/**
 			 * @brief Finalize the algorithm
-			 *
 			 */
 			virtual Return End();
 
 
-			/*!
-			 *
+			/**
 			 * @brief Allow to check if everything is well set in the algorithm before starting it
-			 *
 			 */
 			virtual Return CheckConsistency();
 
-			/*!
-			 *
-			 *
-			 *
+			/**
+			 * @brief Draw a connector with a given color in the monitoring if it is available
 			 */
-			void FillTrackHelper( TrackHelper *trackHelper );
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			void ConnectLayerCaloHits( int layer );
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			void DrawConnector( Connector< CaloHit * , CaloHit * > *connector , int color );
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			void SortConnectorsByWeight( ConnectorCollection< CaloHit * , CaloHit * >::type &connectors );
-
-			/*!
-			 *
-			 *
-			 *
-			 */
-			void ConnectTracksWithClusters();
+			void DrawConnector( CaloHitConnector *connector , int color );
 
 			/**
-			 *
+			 * @brief Make the initial connections between calo hits. Uses only non-isolated hits
 			 */
-			void AgglomerateChargedParticle( TrackHelper *trackHelper  );
+			void InitializeConnectors();
+
+			/**
+			 * @brief Iterates on connection and choose only one backward connector for a given calo hit
+			 */
+			void IterateAndCleanConnectors();
+
+			/**
+			 * @brief Create the clusters using a recursive function ( see RecursiveClustering() ) and using the remaining connection
+			 */
+			void CreateClusters();
+
+			/**
+			 * @brief Merge the cluster that are small and clusters that share the same starting 2D cluster
+			 */
+			void ClusterMerging();
+
+			/**
+			 * @brief A recursive function to cluster the the calo hits using the connectors
+			 */
+			void RecursiveClustering( CaloHit *caloHit , Cluster *cluster );
+
+			/**
+			 * @brief Function used by std::sort to sort the calo hits by increasing layer
+			 */
+			static bool SortByLayer( CaloHit * , CaloHit * );
+
+			/**
+			 * @brief Returns the distance between the position and the closest calo hit in the cluster
+			 */
+			double DistanceToCluster( const ThreeVector &pos , Cluster *cluster );
+
+
 
 
 			Calorimeter *calorimeter;         ///< The calorimeter instance
-			ConnectorCollection< CaloHit * , CaloHit * >::type allConnectors;
-			PointCollection< CaloHit * , CaloHit * >::type allPoints;
-//			PointCollection< Cluster * , TrackHelper * >::type clusterToTrackPoints;
-			OrderedPointCollection< CaloHit * , CaloHit * >::type allOrderedPoints;
-			TrackHelperCollection *trackHelpers;
+			CaloHitConnectors connectors;     ///< All the connectors created, cleaned and sorted during the algorithm
+			CaloHitCollection usedCaloHits;   ///< A temporary calo hit collection used during recursive clustering
+			ClusterCollection finalClusters;  ///< The final cluster collection. These are registered into the clustering manager at the end
 
-
-			// algorithm parameters
-			double lookupTransverseDistance;
-			int lookupLayerDistance;
-			int maxNbOfForwardConnectors;
-			double trackConnectionConeLength;
-			double trackConnectionOpeningAngle;
-			double minimumWeight;
+			// new algorithm parameters following the Arbor ideas
+			double thresholdDistanceXY;      ///< The initial distance in X and Y direction to make the initial connections
+			double thresholdDistanceZ;       ///< The initial distance in Z direction to make the initial connections
+			int minimumClusterSizeMerging;   ///< The maximum size for a cluster to be merged in a bigger cluster
 
 
 	};  // class
