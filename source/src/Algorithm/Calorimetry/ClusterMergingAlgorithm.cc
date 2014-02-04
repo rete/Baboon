@@ -73,11 +73,17 @@ namespace baboon {
 		if( shouldMergeClusterWithSameStartingPoint )
 			this->MergeSameClusterStartingPoint();
 
+//		cout << "after starting point merging : " << clusterCollection->size() << endl;
+//		for( unsigned int cl=0 ; cl<clusterCollection->size() ; cl++ )
+//			cout << "cluster size : " << clusterCollection->at(cl)->Size() << endl;
+
 		this->MergeSmallClusters();
 
+//		cout << "after small cluster merging : " << clusterCollection->size() << endl;
 		for( unsigned int cl=0 ; cl<clusterCollection->size() ; cl++ ) {
 
 			CaloHitCollection *clusterHits = clusterCollection->at(cl)->GetCaloHitCollection();
+//			cout << "cluster size : " << clusterCollection->at(cl)->Size() << endl;
 
 			for( unsigned int c1=0 ; c1<clusterHits->size() ; c1++ )
 				clusterHits->at(c1)->SetColor( cl + 1 );
@@ -96,7 +102,6 @@ namespace baboon {
 
 
 	void ClusterMergingAlgorithm::MergeSameClusterStartingPoint() {
-
 
 		// here a cluster merging is done for each clusters that have the first calo hit
 		// belonging to the same 2D cluster
@@ -175,8 +180,6 @@ namespace baboon {
 
 			Cluster *smallCluster = clusterCollection->at(cl);
 
-			cout << "cluster (small) size : " << smallCluster->Size() << endl;
-
 			ThreeVector clusterPosition = smallCluster->GetPosition( fComputePosition );
 			double minimumDistance = 100000000.0;
 			Cluster *closestCluster = 0;
@@ -187,8 +190,6 @@ namespace baboon {
 					continue;
 
 				Cluster *cluster2 = clusterCollection->at(cl2);
-
-				cout << "cluster (big) size : " << cluster2->Size() << endl;
 
 				if( closestCluster == 0 ) {
 
@@ -205,8 +206,6 @@ namespace baboon {
 					closestCluster = cluster2;
 				}
 			}
-
-			cout << "minimumDistance : " << minimumDistance << endl;
 			smallToBigClustersToMerge[ smallCluster ] = closestCluster;
 		}
 
