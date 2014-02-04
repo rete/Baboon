@@ -58,7 +58,8 @@ namespace baboon {
 
 		data.GetValue( "thresholdDistanceXY" , &thresholdDistanceXY );
 		data.GetValue( "thresholdDistanceZ" , &thresholdDistanceZ );
-		data.GetValue( "minimumClusterSizeMerging" , &minimumClusterSizeMerging );
+		data.GetValue( "drawConnectors" , &drawConnectors );
+		data.GetValue( "shouldUseIsolatedHits" , &shouldUseIsolatedHits );
 
 		return BABOON_SUCCESS();
 	}
@@ -81,22 +82,13 @@ namespace baboon {
 
 		CreateClusters();
 
-		ClusterMerging();
-
-//		IsolatedHitMerging();
-
-//		cout << "finalClusters.size() : " << finalClusters.size() << endl;
-
-		// for monitoring
 		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
 
 			CaloHitCollection *clusterHits = finalClusters.at(cl)->GetCaloHitCollection();
-
 			ClusteringManager::GetInstance()->AddCluster( finalClusters.at(cl) );
 
-			for( unsigned int c1=0 ; c1<clusterHits->size() ; c1++ ) {
+			for( unsigned int c1=0 ; c1<clusterHits->size() ; c1++ )
 				clusterHits->at(c1)->SetColor( cl + 1 );
-			}
 		}
 
 		return BABOON_SUCCESS();
@@ -169,7 +161,7 @@ namespace baboon {
 
 			CaloHit *caloHit1 = caloHitCollection->at(c1);
 
-			if( caloHit1->GetTag() == IsolatedTag() )
+			if( caloHit1->GetTag() == IsolatedTag() && !shouldUseIsolatedHits )
 				continue;
 
 			int K1 = caloHit1->GetIJK().at(2);
@@ -179,7 +171,7 @@ namespace baboon {
 
 				CaloHit *caloHit2 = caloHitCollection->at(c2);
 
-				if( caloHit2->GetTag() == IsolatedTag() )
+				if( caloHit2->GetTag() == IsolatedTag() && !shouldUseIsolatedHits )
 					continue;
 
 				int K2 = caloHit2->GetIJK().at(2);
@@ -215,7 +207,7 @@ namespace baboon {
 
 			CaloHit *caloHit1 = caloHitCollection->at(c1);
 
-			if( caloHit1->GetTag() == IsolatedTag() )
+			if( caloHit1->GetTag() == IsolatedTag() && !shouldUseIsolatedHits )
 				continue;
 
 			ThreeVector pos1 = caloHit1->GetPosition();
@@ -228,27 +220,25 @@ namespace baboon {
 
 			for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
 
-				if( connectors.at(co)->First() == caloHit1 ) {
-
-					nbForward++;
-					CaloHit *caloHit2 = connectors.at(co)->Second();
-					ThreeVector pos2 = caloHit2->GetPosition();
-					hasForwardConnection = true;
-					ThreeVector diffPos = pos2 - pos1;
-					meanForwardDirection += diffPos.unit();
-//					meanForwardDirection += diffPos.unit()*static_cast<int>( caloHit2->GetThreshold() );
-//					meanForwardDirection += diffPos.unit()*caloHit2->GetDensity();
-				}
-				else if( connectors.at(co)->Second() == caloHit1 ) {
+				if( connectors.at(co)->Second() == caloHit1 ) {
 
 					nbBackward++;
 					CaloHit *caloHit2 = connectors.at(co)->First();
 					ThreeVector pos2 = caloHit2->GetPosition();
 					hasBackwardConnection = true;
 					ThreeVector diffPos = pos2 - pos1;
-					meanBackwardDirection += diffPos.unit();
-//					meanBackwardDirection += diffPos.unit()*static_cast<int>( caloHit2->GetThreshold() );
-//					meanBackwardDirection += diffPos.unit()*caloHit2->GetDensity();
+					double connectionFactor = 0.0;
+
+					if( caloHit1->GetTag() == TrackTag()
+					 && caloHit2->GetTag() == TrackTag()
+					 && this->BelongToSameTrack( caloHit1 , caloHit2 ) )  // TODO forcer la connection pour les traces
+						connectionFactor = 10.0;
+					else if( caloHit2->GetTag() == IsolatedTag() )
+						connectionFactor = 0.2;
+					else
+						connectionFactor = 1.0;
+
+					meanBackwardDirection += diffPos.unit()*connectionFactor;
 				}
 			} // connector loop
 
@@ -258,11 +248,7 @@ namespace baboon {
 			if( !hasBackwardConnection )
 				continue;
 
-			ThreeVector referenceVector;
-
-			if( !hasForwardConnection )
-				referenceVector = meanBackwardDirection.unit();
-
+			ThreeVector referenceVector( meanBackwardDirection.unit() );
 			Connector<CaloHit, CaloHit> *bestConnector = 0;
 			double minAngleDistance = 1000000000;
 
@@ -278,7 +264,7 @@ namespace baboon {
 
 						CaloHit *caloHit2 = connectors.at(co)->First();
 						ThreeVector diffPos = caloHit2->GetPosition() - caloHit1->GetPosition();
-						double angleDistance = diffPos.angle( referenceVector )*sqrt( diffPos.mag() );
+						double angleDistance = diffPos.angle( referenceVector )*sqrt( diffPos.mag() ); // TODO ajouter poids relatif entre dist et angle
 
 						if( angleDistance < minAngleDistance ) {
 
@@ -291,14 +277,11 @@ namespace baboon {
 
 			// debug check
 			assert( bestConnector != 0 );
-
 			outputConnectors.push_back( bestConnector );
-
 		}
 
 		// Remove all the connectors that are not the bests
 		for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
-
 
 			if( std::find( outputConnectors.begin() , outputConnectors.end() , connectors.at(co) ) == outputConnectors.end() ) {
 
@@ -308,11 +291,11 @@ namespace baboon {
 			}
 		}
 
-		for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
-			this->DrawConnector( connectors.at(co) , kBlack );
+		if( drawConnectors ) {
+			for( unsigned int co=0 ; co<connectors.size() ; co++ ) {
+				this->DrawConnector( connectors.at(co) , kBlack );
+			}
 		}
-
-
 		outputConnectors.clear();
 	}
 
@@ -325,7 +308,7 @@ namespace baboon {
 		if( caloHitCollection->empty() )
 			return;
 
-		std::sort( caloHitCollection->begin() , caloHitCollection->end() , ConnectorClusteringAlgorithm::SortByLayer );
+		std::sort( caloHitCollection->begin() , caloHitCollection->end() , CaloHit::SortByLayer );
 
 		for( unsigned int c1=0 ; c1<caloHitCollection->size() ; c1++ ) {
 
@@ -346,139 +329,6 @@ namespace baboon {
 
 			finalClusters.push_back( cluster );
 		}
-	}
-
-
-	void ConnectorClusteringAlgorithm::ClusterMerging() {
-
-		// here a cluster merging is done for each clusters that have the first calo hit
-		// belonging to the same 2D cluster
-
-		ClusterCollection *clusters2D = ClusteringManager::GetInstance()->GetCluster2D();
-
-		if( clusters2D->empty() )
-			return;
-
-
-		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
-
-			Cluster *cluster = finalClusters.at(cl);
-			CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
-			std::sort( clusterHits->begin() , clusterHits->end() , ConnectorClusteringAlgorithm::SortByLayer );
-		}
-
-		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
-
-			Cluster *cluster = finalClusters.at(cl);
-			CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
-
-			if( cluster->Size() == 0 )
-				continue;
-
-			CaloHit *firstCaloHitInCluster = clusterHits->at(0);
-
-			for( unsigned int cl2=cl ; cl2<finalClusters.size() ; cl2++ ) {
-
-				if( cl == cl2 )
-					continue;
-
-				Cluster *cluster2 = finalClusters.at(cl2);
-
-				if( cluster2->Size() == 0 )
-					continue;
-
-				CaloHitCollection *clusterHits2 = cluster2->GetCaloHitCollection();
-
-				CaloHit *firstCaloHitInCluster2 = clusterHits2->at(0);
-				Cluster *cluster2DOfFirst2 = 0;
-
-				for( unsigned int cl2D=0 ; cl2D<clusters2D->size() ; cl2D++ ) {
-
-					if( clusters2D->at(cl2D)->Contains( firstCaloHitInCluster2 ) ) {
-						cluster2DOfFirst2 = clusters2D->at(cl2D);
-						break;
-					}
-				}
-
-				if( cluster2DOfFirst2 == 0 )
-					continue;
-
-				// if the two calo hits belongs to the same 2D cluster, set them to be merged
-				if( cluster2DOfFirst2->Contains( firstCaloHitInCluster ) ) {
-
-					for( unsigned int clID=0 ; clID<cluster2->Size() ; clID++ )
-						cluster->AddCaloHit( cluster2->GetCaloHitCollection()->at(clID) );
-
-					cluster2->Clear();
-				}
-			}
-		}
-
-		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
-
-			if( finalClusters.at(cl)->Size() == 0 ) {
-
-				delete finalClusters.at(cl);
-				finalClusters.erase( finalClusters.begin() + cl );
-			}
-		}
-
-
-		std::map<Cluster*,Cluster*> smallToBigClustersToMerge;
-
-		for( unsigned int cl=0 ; cl<finalClusters.size() ; cl++ ) {
-
-			if( finalClusters.at(cl)->Size() > minimumClusterSizeMerging )
-				continue;
-
-			Cluster *smallCluster = finalClusters.at(cl);
-
-			ThreeVector clusterPosition = smallCluster->GetPosition( fComputePosition );
-			double minimumDistance = 100000000.0;
-			Cluster *closestCluster = 0;
-
-			for( unsigned int cl2=0 ; cl2<finalClusters.size() ; cl2++ ) {
-
-				if( finalClusters.at(cl2)->Size() <= minimumClusterSizeMerging )
-					continue;
-
-				Cluster *cluster2 = finalClusters.at(cl2);
-
-				if( closestCluster == 0 ) {
-
-					minimumDistance = DistanceToCluster( clusterPosition , cluster2 );
-					closestCluster = cluster2;
-					continue;
-				}
-
-				double distance = DistanceToCluster( clusterPosition , cluster2 );
-
-				if( distance < minimumDistance ) {
-
-					minimumDistance = distance;
-					closestCluster = cluster2;
-				}
-			}
-
-			smallToBigClustersToMerge[ smallCluster ] = closestCluster;
-		}
-
-		for( std::map<Cluster*,Cluster*>::iterator it=smallToBigClustersToMerge.begin() ;
-			it!=smallToBigClustersToMerge.end() ; it++ ) {
-
-			if( it->second == 0 || it->first == 0 )
-				continue;
-
-			CaloHitCollection *smallClusterHits = it->first->GetCaloHitCollection();
-
-			for( unsigned int h1=0 ; h1<smallClusterHits->size() ; h1++ )
-				it->second->AddCaloHit( smallClusterHits->at(h1) );
-
-			std::vector<Cluster*>::iterator clIt = std::find( finalClusters.begin() , finalClusters.end() , it->first );
-			delete (*clIt);
-			finalClusters.erase( clIt );
-		}
-		smallToBigClustersToMerge.clear();
 	}
 
 
@@ -506,33 +356,27 @@ namespace baboon {
 	}
 
 
-	bool ConnectorClusteringAlgorithm::SortByLayer( CaloHit *caloHit1 , CaloHit *caloHit2 ) {
+	bool ConnectorClusteringAlgorithm::BelongToSameTrack( CaloHit *caloHit1 , CaloHit *caloHit2 ) {
 
-		if( caloHit2->GetIJK().at(2) > caloHit1->GetIJK().at(2) )
-			return true;
-		else return false;
-	}
+		TrackCollection *tracks = TrackManager::GetInstance()->GetTrackCollection();
 
+		if( tracks->empty() )
+			return false;
 
-	double ConnectorClusteringAlgorithm::DistanceToCluster( const ThreeVector &pos , Cluster *cluster ) {
+		Track *track1 = 0;
 
-		if( cluster == 0 )
-			return 0.0;
+		for( unsigned int tr=0 ; tr<tracks->size() ; tr++ ) {
 
-		CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
-
-		double distanceMinimum = 10000000.0;
-
-		for( unsigned int i=0 ; i<clusterHits->size() ; i++ ) {
-
-			double distance = (pos - clusterHits->at(i)->GetPosition() ).mag();
-
-			if( distance < distanceMinimum )
-				distanceMinimum = distance;
-
+			if( tracks->at(tr)->Contains( caloHit1 ) ) {
+				track1 = tracks->at(tr);
+				break;
+			}
 		}
 
-		return distanceMinimum;
+		if( track1 == 0 )
+			return false;
+
+		return track1->Contains( caloHit2 );
 	}
 
 }  // namespace 
