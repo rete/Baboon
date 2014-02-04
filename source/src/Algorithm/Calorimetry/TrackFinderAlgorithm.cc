@@ -368,7 +368,7 @@ namespace baboon {
 							Point *point = potentialTrack->at( p );
 							Point *nextPoint = potentialTrack->at( p+1 );
 
-							if( abs( point->GetCluster()->GetPosition().z() - nextPoint->GetCluster()->GetPosition().z() ) > 2 ) {
+							if( fabs( point->GetCluster()->GetPosition().z() - nextPoint->GetCluster()->GetPosition().z() ) > 2 ) {
 								shouldKeep = false;
 								break;
 							}
@@ -409,7 +409,7 @@ namespace baboon {
 			}
 
 			if( drawConnectors )
-				this->DrawTrackConnectors( trackPoints , pt+1 );
+				this->DrawTrackConnectors( trackPoints , pt+2 );
 
 			track->SortHits();
 			CaloHitCollection *trackHits = track->GetCaloHitCollection();
@@ -684,7 +684,7 @@ namespace baboon {
 		if( clusterCollection == 0 )
 			return true;
 
-		ThreeVector clusterPosition = cluster->GetPosition();
+		ThreeVector clusterPosition = cluster->GetPosition( fComputePosition );
 		int neighborClusters = 0;
 
 		for( unsigned int cl=0 ; cl<clusterCollection->size() ; cl++ ) {
@@ -694,14 +694,14 @@ namespace baboon {
 			if( otherCluster == cluster )
 				continue;
 
-			ThreeVector otherClusterPosition = otherCluster->GetPosition();
+			ThreeVector otherClusterPosition = otherCluster->GetPosition( fComputePosition );
 
 			// look in the same layer
 			if( otherClusterPosition.z() != clusterPosition.z() )
 				continue;
 
-			if( abs( otherClusterPosition.x() - clusterPosition.x() ) < 4
-			 && abs( otherClusterPosition.y() - clusterPosition.y() ) < 4 ) {
+			if( fabs( otherClusterPosition.x() - clusterPosition.x() ) < 40.1
+			 && fabs( otherClusterPosition.y() - clusterPosition.y() ) < 40.1 ) {
 
 				neighborClusters++;
 
@@ -736,9 +736,9 @@ namespace baboon {
 			Cluster *clusterInLayer = pointInNextLayer->GetCluster();
 			ThreeVector clusterInLayerPosition = clusterInLayer->GetPosition();
 
-			if( abs( clusterInLayerPosition.x() - clusterPosition.x() ) > lookupDistanceX
-			 || abs( clusterInLayerPosition.y() - clusterPosition.y() ) > lookupDistanceY
-			 || abs( clusterInLayerPosition.z() - clusterPosition.z() ) > lookupDistanceZ )
+			if( fabs( clusterInLayerPosition.x() - clusterPosition.x() ) > lookupDistanceX
+			 || fabs( clusterInLayerPosition.y() - clusterPosition.y() ) > lookupDistanceY
+			 || fabs( clusterInLayerPosition.z() - clusterPosition.z() ) > lookupDistanceZ )
 				continue;
 
 			found = true;
