@@ -76,6 +76,9 @@ namespace baboon {
 
 			CaloHit *caloHit = caloHitCollection->at(c1);
 
+			if( caloHit->GetTag() != IsolatedTag() )
+				continue;
+
 			double minimumDistance;
 			Cluster *closestCluster = 0;
 
@@ -85,10 +88,12 @@ namespace baboon {
 
 					closestCluster = clusters->at(cl);
 					minimumDistance = DistanceToCluster( caloHit->GetPosition() , clusters->at(cl) );
+//					minimumDistance *= 1 + std::log (((double)biggestClusterSize/(double)clusters->at(cl)->Size()) );
 					continue;
 				}
 
 				double distance = DistanceToCluster( caloHit->GetPosition() , clusters->at(cl) );
+//				distance *= 1 + std::log( ((double)biggestClusterSize/(double)clusters->at(cl)->Size()) );
 
 				if( distance < minimumDistance ) {
 					minimumDistance = distance;
