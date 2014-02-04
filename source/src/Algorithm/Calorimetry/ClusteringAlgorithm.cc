@@ -107,9 +107,14 @@ namespace baboon {
 			for( int j=-distance ; j<=distance ; j++ ) {
 				for( int k=-distance ; k<=distance ; k++ ) {
 
-					if( fClusteringMode == fClustering2D )
+					if( fClusteringMode == fClustering2D ) {
 						if( k != 0 )
 							continue;
+
+						// avoid corners
+						if( abs( i ) + abs( j ) >= 2 )
+							continue;
+					}
 
 					if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
 						continue;
