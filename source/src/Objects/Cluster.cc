@@ -136,6 +136,20 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
+	double Cluster::DistanceToMe( const ThreeVector &pos ) {
 
+		double distanceMinimum = 10000000.0;
+
+		for( unsigned int i=0 ; i<caloHitCollection->size() ; i++ ) {
+
+			double distance = (pos - caloHitCollection->at(i)->GetPosition() ).mag();
+
+			if( distance < distanceMinimum )
+				distanceMinimum = distance;
+
+		}
+
+		return distanceMinimum;
+	}
 
 }

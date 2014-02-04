@@ -142,6 +142,11 @@ namespace baboon {
 			inline ClusterType GetClusterType() const
 				{ return fType; }
 
+			/**
+			 *
+			 */
+			double DistanceToMe( const ThreeVector &pos );
+
 	};
 
 	typedef std::vector<Cluster*> ClusterCollection;
