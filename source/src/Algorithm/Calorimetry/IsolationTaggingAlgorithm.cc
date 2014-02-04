@@ -47,6 +47,7 @@ namespace baboon {
 
 		data.GetValue("distance",&distance);
 		data.GetValue("concentrationLimit",&concentrationLimit);
+		data.GetValue("maximumClusterSize" , &maximumClusterSize );
 
 		isolationWeights.clear();
 
@@ -63,13 +64,43 @@ namespace baboon {
 	Return IsolationTaggingAlgorithm::Execute() {
 
 		CaloHitCollection *caloHitCollection = calorimeter->GetCaloHitCollection();
+		ClusterCollection *clusters2D = ClusteringManager::GetInstance()->GetCluster2D();
 
-		unsigned int hitID = 0;
-		unsigned int size = caloHitCollection->size();
+		if( clusters2D->empty() )
+			return BABOON_SUCCESS();
 
-		for( hitID=0 ; hitID<size ; hitID++ ) {
+		for( unsigned int cl=0 ; cl<clusters2D->size() ; cl++ ) {
 
-			CaloHit *caloHit = caloHitCollection->at(hitID);
+			Cluster *cluster = clusters2D->at(cl);
+
+			if( cluster->Size() > maximumClusterSize )
+				continue;
+
+			CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
+			double densitySum = 0.0;
+
+			for( unsigned int h=0 ; h<clusterHits->size() ; h++ ) {
+
+				densitySum += clusterHits->at(h)->GetDensity();
+			}
+
+			densitySum /= clusterHits->size();
+
+			if( densitySum < concentrationLimit )
+				SetClusterHitsTagToIsolated( cluster );
+
+		}
+
+//		unsigned int hitID = 0;
+//		unsigned int size = caloHitCollection->size();
+//
+//		for( hitID=0 ; hitID<size ; hitID++ ) {
+//
+//			CaloHit *caloHit = caloHitCollection->at(hitID);
+//
+//			if( caloHit->GetTag() == TrackTag() )
+//				continue;
+//
 //			IntVector ijk1 = caloHit->GetIJK();
 //
 //			int count = 0;
@@ -85,22 +116,28 @@ namespace baboon {
 //							continue;
 //
 //						CaloHit *caloHit2 = calorimeter->GetCaloHitAt( ijk1.at(0)+i , ijk1.at(1)+j , ijk1.at(2)+k );
+//
+//						if( caloHit2->GetTag() == TrackTag() )
+//							continue;
+//
 //						int factor = 1;
 //						factor *= caloHit2->GetThreshold();
 //						count += factor;
 //					}
 //				}
 //			}
-
-//			caloHit->SetDensity( double(count) / volume );
-
-//			isolationWeights.push_back( caloHit->GetDensity() );
-//			cout << "density : " << double(count) / volume << endl;
-//			if( double(count) / volume < concentrationLimit ) {
-			if( caloHit->GetDensity() < concentrationLimit )
-				caloHit->SetTag( IsolatedTag() );
-//			}
-		}
+//
+////			caloHit->SetDensity( double(count) / volume );
+//
+////			isolationWeights.push_back( caloHit->GetDensity() );
+////			cout << "density : " << double(count) / volume << endl;
+////			if( double(count) / volume < concentrationLimit ) {
+//			if( caloHit->GetDensity() < concentrationLimit
+//			 && caloHit->GetTag() != TrackTag()
+//			 && count/volume < concentrationLimit2 )
+//				caloHit->SetTag( IsolatedTag() );
+////			}
+//		}
 		return BABOON_SUCCESS();
 	}
 
@@ -114,6 +151,18 @@ namespace baboon {
 
 		calorimeter = calo;
 		return BABOON_SUCCESS();
+	}
+
+
+
+	void IsolationTaggingAlgorithm::SetClusterHitsTagToIsolated( Cluster *cluster ) {
+
+		CaloHitCollection *clusterHits = cluster->GetCaloHitCollection();
+
+		for( unsigned int h=0 ; h<clusterHits->size() ; h++ ) {
+			if( clusterHits->at(h)->GetTag() != TrackTag() )
+				clusterHits->at(h)->SetTag( IsolatedTag() );
+		}
 	}
 
 
