@@ -118,8 +118,8 @@ namespace baboon {
 
 		map< CaloHitThreshold , double > thresholdToFactorMap;
 		thresholdToFactorMap[ fCaloHitThr1 ] = 1.0;
-		thresholdToFactorMap[ fCaloHitThr2 ] = 10.0;
-		thresholdToFactorMap[ fCaloHitThr3 ] = 100.0;
+		thresholdToFactorMap[ fCaloHitThr2 ] = 1.0;
+		thresholdToFactorMap[ fCaloHitThr3 ] = 1.0;
 
 		#pragma omp for parallel default(none) shared(caloHitCollection,calorimeter) private(size,densityX,densityY,densityZ)
 		for( unsigned int h=0 ; h<size ; h++ ) {
@@ -128,12 +128,18 @@ namespace baboon {
 			IntVector ijk = currentCaloHit->GetIJK();
 			double total = 0.0;
 			double count = 0.0;
+//			double thr3Factor = thresholdToFactorMap[ fCaloHitThr3 ];
+//			total = thr3Factor * (2*densityX+1) * (2*densityY+1) * (2*densityZ+1);
+
 
 			for( int i=-densityX ; i<=densityX ; i++ ) {
-				for( int  j=-densityY ; j<=densityY ; j++ ) {
+				for( int j=-densityY ; j<=densityY ; j++ ) {
 					for( int k=-densityZ ; k<=densityZ ; k++ ) {
 
-						total += thresholdToFactorMap[ fCaloHitThr3 ];
+						if( k != 0 )
+							total += thresholdToFactorMap[ fCaloHitThr3 ]*2;
+						else
+							total += thresholdToFactorMap[ fCaloHitThr3 ];
 
 						if( !calorimeter->IsPadFired( ijk.at(0)+i , ijk.at(1)+j , ijk.at(2)+k ) )
 							continue;
@@ -148,6 +154,9 @@ namespace baboon {
 							factor = otherCaloHit->GetEnergy();
 						else if( otherCaloHit->GetType() == fDigitalCaloHit )
 							factor = 1.0;
+
+//						if( k != 0 )
+//							factor *= 2.0;
 
 						count += factor;
 					}
