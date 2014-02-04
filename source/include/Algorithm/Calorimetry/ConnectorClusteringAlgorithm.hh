@@ -47,6 +47,8 @@
 #include "TEveArrow.h"
 #include "Geometry/Cone.hh"
 #include "Managers/ClusteringManager.hh"
+#include "Managers/TrackManager.hh"
+#include "Algorithm/PCA.hh"
 
 namespace baboon {
 
@@ -204,16 +206,9 @@ namespace baboon {
 			void RecursiveClustering( CaloHit *caloHit , Cluster *cluster );
 
 			/**
-			 * @brief Function used by std::sort to sort the calo hits by increasing layer
+			 * @brief Whether or not the two calo hits belong to the same track
 			 */
-			static bool SortByLayer( CaloHit * , CaloHit * );
-
-			/**
-			 * @brief Returns the distance between the position and the closest calo hit in the cluster
-			 */
-			double DistanceToCluster( const ThreeVector &pos , Cluster *cluster );
-
-
+			bool BelongToSameTrack( CaloHit *caloHit1 , CaloHit *caloHit2 );
 
 
 			Calorimeter *calorimeter;         ///< The calorimeter instance
@@ -222,9 +217,11 @@ namespace baboon {
 			ClusterCollection finalClusters;  ///< The final cluster collection. These are registered into the clustering manager at the end
 
 			// new algorithm parameters following the Arbor ideas
-			double thresholdDistanceXY;      ///< The initial distance in X and Y direction to make the initial connections
-			double thresholdDistanceZ;       ///< The initial distance in Z direction to make the initial connections
-			int minimumClusterSizeMerging;   ///< The maximum size for a cluster to be merged in a bigger cluster
+			double thresholdDistanceXY;        ///< The initial distance in X and Y direction to make the initial connections
+			double thresholdDistanceZ;         ///< The initial distance in Z direction to make the initial connections
+			bool shouldUseIsolatedHits;        ///< Whether or not the isolated hit are used in the clustering
+
+			bool drawConnectors;               ///< Draw or not the connectors in the monitoring
 
 
 	};  // class
