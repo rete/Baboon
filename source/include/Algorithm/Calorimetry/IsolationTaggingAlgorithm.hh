@@ -30,6 +30,7 @@
 #include "Utilities/Globals.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Utilities/Internal.hh"
+#include "Managers/ClusteringManager.hh"
 
 #include "Detector/Calorimeter.hh"
 
@@ -104,12 +105,17 @@ namespace baboon {
 			 */
 			virtual Return CheckConsistency();
 
+			/**
+			 *
+			 */
+			void SetClusterHitsTagToIsolated( Cluster *cluster );
 
 			Calorimeter *calorimeter;
 
 			// Algorithm parameters
 			int distance;
 			double concentrationLimit;
+			int maximumClusterSize;
 			std::vector<double> isolationWeights;
 
 
