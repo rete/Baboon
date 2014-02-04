@@ -142,6 +142,11 @@ namespace baboon {
 			 */
 			Return SetDensity( const double &d );
 
+			/**
+			 *
+			 */
+			static bool SortByLayer( CaloHit * , CaloHit * );
+
 
 	  protected:
 

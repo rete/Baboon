@@ -108,6 +108,12 @@ namespace baboon {
 		return BABOON_SUCCESS();
 	}
 
+	bool CaloHit::SortByLayer( CaloHit *caloHit1 , CaloHit *caloHit2 ) {
+
+		if( caloHit2->GetIJK().at(2) > caloHit1->GetIJK().at(2) )
+			return true;
+		else return false;
+	}
 
 }  // namespace 
 
