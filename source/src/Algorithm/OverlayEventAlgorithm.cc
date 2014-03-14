@@ -38,6 +38,7 @@
 #include "Algorithm/Calorimetry/ClusteringAlgorithm.hh"
 #include "Managers/TrackManager.hh"
 #include "Managers/ClusteringManager.hh"
+#include "Managers/ExternInfoManager.hh"
 
 namespace baboon {
 
@@ -107,6 +108,7 @@ namespace baboon {
 
 		if( _useTrackInfo ) {
 
+			ExternInfoManager *extInfoMgr = ExternInfoManager::GetInstance();
 			AlgorithmManager *algoMan = AlgorithmManager::GetInstance();
 			TrackFinderAlgorithm *trackFinder( 0 );
 			ClusteringAlgorithm *clusteringAlgo( 0 );
@@ -162,7 +164,7 @@ namespace baboon {
 			for( unsigned int tr=0 ; tr<trackCollection1->size() ; tr++ ) {
 
 				Track *track1 = trackCollection1->at(tr);
-				TrackInfo *trackInfo = new TrackInfo;
+				OverlayEventAlgorithm::TrackInfo *trackInfo = new OverlayEventAlgorithm::TrackInfo;
 				trackInfo->track = track1;
 				this->FillTrackInfo( trackInfo );
 
@@ -175,6 +177,19 @@ namespace baboon {
 					trackEndPosition1 = trackInfo->endPosition;
 					trackBeginPosition1 = trackInfo->beginPosition;
 					backwardThrust1 = trackInfo->backwardThrust;
+
+					if( _particleType1 == "charged" ) {
+						baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
+
+						ThreeVector translation(_calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - trackEndPosition1.x()
+								, _calorimeter1->GetRepeatY()/2.0 - trackEndPosition1.y()
+								, 0.0);
+						ThreeVector enteringPoint( trackBeginPosition1.x() , trackBeginPosition1.y() , 0 );
+						externTrackInfo->enteringPoint = enteringPoint + translation;
+						externTrackInfo->momentum = backwardThrust1*_inputEnergy1;
+						externTrackInfo->charge = 1;
+				 }
+
 					delete trackInfo;
 					break;
 				}
@@ -208,19 +223,6 @@ namespace baboon {
 										, _calorimeter1->GetRepeatY()/2.0 - trackEndPosition1.y()
 										, 0.0 );
 
-				if( _generatesLCTracks ) {
-
-					//					trackBeginPosition2 =
-					// TODO : modifier la position du vertex start wrt la translation de la gerbe
-
-					// Fake track filling to retrieve info in lcio file
-					IMPL::ReconstructedParticleImpl *track1 = new IMPL::ReconstructedParticleImpl();
-//					double momentum[3] = { backwardThrust1.x()*inputEnergy1 , backwardThrust1.y()*inputEnergy1 , backwardThrust1.z()*inputEnergy1 };
-//					track1->setMomentum(  );
-//					double startVertex[3] = { 	trackBeginPosition1.x() , trackBeginPosition1.y() , trackBeginPosition1.z() };
-//					track1->setStartVertex( startVertex );
-					_trackPair.first = track1;
-				}
 			}
 
 //----------------------------------------------------------------------------------------------------
@@ -264,6 +266,18 @@ namespace baboon {
 					trackEndPosition2 = trackInfo->endPosition;
 					trackBeginPosition2 = trackInfo->beginPosition;
 					backwardThrust2 = trackInfo->backwardThrust;
+
+					if( _particleType2 == "charged" ) {
+						baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
+						ThreeVector translation( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - trackEndPosition2.x()
+								, _calorimeter2->GetRepeatY()/2.0 - trackEndPosition2.y()
+								, 0.0 );
+						ThreeVector enteringPoint( trackBeginPosition2.x() , trackBeginPosition2.y() , 0 );
+						externTrackInfo->enteringPoint = enteringPoint + translation;
+						externTrackInfo->momentum = backwardThrust2*_inputEnergy2;
+						externTrackInfo->charge = 1;
+				 }
+
 					delete trackInfo;
 					break;
 				}
@@ -297,19 +311,6 @@ namespace baboon {
 										, _calorimeter2->GetRepeatY()/2.0 - trackEndPosition2.y()
 										, 0.0 );
 
-				if( _generatesLCTracks ) {
-
-					// Fake track filling to retrieve info in lcio file
-					IMPL::ReconstructedParticleImpl *track2 = new IMPL::ReconstructedParticleImpl();
-//					double momentum[3] = { backwardThrust2.x()*inputEnergy2 , backwardThrust2.y()*inputEnergy2 , backwardThrust2.z()*inputEnergy2 };
-//					track2->setMomentum( momentum );
-////					trackBeginPosition2 =
-//
-//					// TODO : modifier la position du vertex start wrt la translation de la gerbe
-//					double startVertex[3] = { 	trackBeginPosition2.x() , trackBeginPosition2.y() , trackBeginPosition2.z() };
-//					track2->setStartVertex( startVertex );
-					_trackPair.second = track2;
-				}
 			}
 
 			this->TranslateCollection( _calorimeter1 , _collection1 , _collectionToOverlay1 , translation1 );
