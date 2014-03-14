@@ -46,6 +46,7 @@
 #include "Objects/CaloHit.hh"
 #include "Utilities/ReturnValues.hh"
 #include "Managers/AlgorithmManager.hh"
+#include "Managers/ExternInfoManager.hh"
 #include "Algorithm/OverlayEventAlgorithm.hh"
 #include "Algorithm/Calorimetry/TrackFinderAlgorithm.hh"
 #include "Algorithm/Calorimetry/ClusteringAlgorithm.hh"
@@ -207,6 +208,8 @@ int main (int argc ,char *argv[]) {
 	Data data = overlayer->GetData();
 	data.GetValue("separationDistance", &separationDistance);
 
+	ExternInfoManager *extInfoMgr = ExternInfoManager::GetInstance();
+
 	/*****************************************
 	 * LC readers (input) and writer (output)
 	 *****************************************/
@@ -282,6 +285,9 @@ int main (int argc ,char *argv[]) {
 
 		evt1 = lcReader1->readNextEvent();
 		evt2 = lcReader2->readNextEvent();
+
+		if(evt1 == 0 || evt2 == 0)
+			break;
 
 
 		/*****************************************************************
@@ -369,34 +375,6 @@ int main (int argc ,char *argv[]) {
 
 		overlayer->Process();
 
-//		// Compute the centers of gravity
-//		ThreeVector cog1(0,0,0);
-//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection1 , cog1 ) );
-//
-//		ThreeVector cog2(0,0,0);
-//		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( collection2 , cog2 ) );
-//
-//		Overlayer overlayer( collection1 , collection2 );
-
-		// Separate the two events by the given separation distance
-		// and center it at the center of the SDHCAL in the x direction
-		// and re-center them on the y axis
-//		overlayer.SetTranslations(
-//				new ThreeVector( nbOfPadsXYZ.at(0)/2.0 + separationDistance / 2.0 - cog1.x()
-//								 ,nbOfPadsXYZ.at(1)/2.0 - cog1.y()
-//								,0)
-//			   ,new ThreeVector( nbOfPadsXYZ.at(0)/2.0 - separationDistance / 2.0 - cog2.x()
-//					   	   	    ,nbOfPadsXYZ.at(1)/2.0 - cog2.y()
-//					   	   	    ,0) );
-//
-//		overlayer.OverlayCollections();
-
-
-
-		// Grab the final overlaid collection and fill more
-		// information in the collection and in the event.
-//		CaloHitCollection *outputCollection = overlayer.GetOverlaidCollection();
-
 		if( overlayer->OverlayDone() ) {
 
 			const CaloHitCollection *outputCollection = overlayer->GetOverlaidCollection();
@@ -426,32 +404,44 @@ int main (int argc ,char *argv[]) {
 				lcOutputCollection->addElement( hitImpl );
 			}
 
-			// Fill the lcio track collection
-			IMPL::LCCollectionVec *lcTrackOutputCollection = new IMPL::LCCollectionVec( LCIO::TRACK );
-
-			if( overlayer->GetTrackPair().first != nullptr )
-				lcTrackOutputCollection->addElement( overlayer->GetTrackPair().first );
-
-			if( overlayer->GetTrackPair().second != nullptr )
-				lcTrackOutputCollection->addElement( overlayer->GetTrackPair().second );
-
 			// Fill the final event
 			IMPL::LCEventImpl *outputEvent = new IMPL::LCEventImpl();
 
 			IMPL::LCFlagImpl chFlag(0);
 			EVENT::LCIO bitinfo;
-			chFlag.setBit(bitinfo.CHBIT_LONG );   // calorimeter hit position
-			chFlag.setBit(bitinfo.CHBIT_ID1 );    // cell ID
-			chFlag.setBit(bitinfo.CHBIT_STEP );   // step info
+			chFlag.setBit( bitinfo.CHBIT_LONG );   // calorimeter hit position
+			chFlag.setBit( bitinfo.CHBIT_ID1 );    // cell ID
+			chFlag.setBit( bitinfo.CHBIT_STEP );   // step info
 
-			lcOutputCollection->setFlag( chFlag.getFlag()  ) ;
 			nbOfOverlaidEvents++;
 
-			outputEvent->addCollection( (LCCollection*) lcOutputCollection,outputCollectionName);
-			outputEvent->addCollection( (LCCollection*) lcTrackOutputCollection , "SDHCALPrimaryTracks" );
-			outputEvent->setRunNumber(0);
-			outputEvent->setEventNumber(nbOfOverlaidEvents);
+			outputEvent->addCollection( (LCCollection*) lcOutputCollection , outputCollectionName );
+			outputEvent->setRunNumber( 0 );
+			outputEvent->setEventNumber( nbOfOverlaidEvents );
 			outputEvent->setDetectorName( evt1->getDetectorName() );
+
+			std::vector< TrackInfo * > &trackInfos = extInfoMgr->GetTrackInfos();
+
+			if( ! trackInfos.empty() ) {
+
+				// Fill the track info collection in lcio collection (GO)
+				IMPL::LCCollectionVec *trackInfoCollection = new IMPL::LCCollectionVec( LCIO::LCGENERICOBJECT );
+
+				IMPL::LCFlagImpl flagTrackInfo;
+				flagTrackInfo.setBit( bitinfo.GOBIT_FIXED );
+
+				trackInfoCollection->setFlag( flagTrackInfo.getFlag() );
+				lcOutputCollection->setFlag( chFlag.getFlag() );
+
+				for( unsigned int tr=0 ; tr<trackInfos.size() ; tr++ ) {
+
+					EVENT::LCGenericObject *trackInfoObj = trackInfos.at( tr )->CreateGenericObject();
+					trackInfoCollection->addElement( (LCObject *) trackInfoObj );
+				}
+
+				outputEvent->addCollection( (LCCollection*) trackInfoCollection , "SDHCALTrackInfo" );
+
+			}
 
 			// write the final event
 			lcWriter->writeEvent(outputEvent);
@@ -469,6 +459,8 @@ int main (int argc ,char *argv[]) {
 			nbOfSkippedEvents++;
 			evtID++;
 		}
+
+		extInfoMgr->ClearAllContent();
 	}
 
 
