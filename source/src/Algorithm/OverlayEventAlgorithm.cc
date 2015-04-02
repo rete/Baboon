@@ -201,7 +201,7 @@ namespace baboon {
 			ClusteringManager::GetInstance()->ClearAllContent();
 
 			// If primary track is not found and we asked for a charged particle, the overlay is not done.
-			if( !primaryTrackFound1 ) {//&& _particleType1 == "charged" ) {
+			if( !primaryTrackFound1 && _particleType1 == "neutral" ) {
 
 				delete clusters;
 				clusters = 0;
@@ -291,8 +291,7 @@ namespace baboon {
 			delete clusters;
 			clusters = 0;
 
-			// If primary track is not found and we asked for a charged particle, the overlay is not done.
-			if( !primaryTrackFound2 ) {// && _particleType2 == "charged" ) {
+			if( !primaryTrackFound2 )  && _particleType2 == "neutral" ) {
 
 				return BABOON_SUCCESS();
 			}
