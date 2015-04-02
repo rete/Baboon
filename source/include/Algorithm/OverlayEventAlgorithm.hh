@@ -184,6 +184,9 @@ namespace baboon {
 		 */
 		void EraseTrackFromCollection( Track *track , CaloHitCollection *collection );
 
+		void EraseTrackFromCollection( TrackInfo *trackInfo , CaloHitCollection *collection );
+
+		ThreeVector FindShowerEnteringPoint(CaloHitCollection *collection);
 
 
 		bool _overlayDone;
