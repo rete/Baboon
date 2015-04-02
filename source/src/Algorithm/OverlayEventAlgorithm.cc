@@ -159,6 +159,7 @@ namespace baboon {
 
 			TrackManager *trackMan = TrackManager::GetInstance();
 			TrackCollection *trackCollection1 = trackMan->GetTrackCollection();
+			ThreeVector showerEnteringPoint1(this->FindShowerEnteringPoint(_collection1));
 			bool primaryTrackFound1 = false;
 
 			for( unsigned int tr=0 ; tr<trackCollection1->size() ; tr++ ) {
@@ -172,7 +173,7 @@ namespace baboon {
 
 					primaryTrackFound1 = true;
 					if( _particleType1 == "neutral" )
-						this->EraseTrackFromCollection( track1 , _collection1 );
+						this->EraseTrackFromCollection( trackInfo , _collection1 );
 
 					trackEndPosition1 = trackInfo->endPosition;
 					trackBeginPosition1 = trackInfo->beginPosition;
@@ -181,11 +182,10 @@ namespace baboon {
 					if( _particleType1 == "charged" ) {
 						baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
 
-						ThreeVector translation(_calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - trackEndPosition1.x()
-								, _calorimeter1->GetRepeatY()/2.0 - trackEndPosition1.y()
+						ThreeVector translation(_calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - showerEnteringPoint1.x()
+								, _calorimeter1->GetRepeatY()/2.0 - showerEnteringPoint1.y()
 								, 0.0);
-						ThreeVector enteringPoint( trackBeginPosition1.x() , trackBeginPosition1.y() , 0 );
-						externTrackInfo->enteringPoint = enteringPoint + translation;
+						externTrackInfo->enteringPoint = showerEnteringPoint1 + translation;
 						externTrackInfo->momentum = backwardThrust1*_inputEnergy1;
 						externTrackInfo->charge = 1;
 				 }
@@ -219,8 +219,8 @@ namespace baboon {
 //										, 0.0 );
 //			}
 //			else {
-				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - trackEndPosition1.x()
-										, _calorimeter1->GetRepeatY()/2.0 - trackEndPosition1.y()
+				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - showerEnteringPoint1.x()
+										, _calorimeter1->GetRepeatY()/2.0 - showerEnteringPoint1.y()
 										, 0.0 );
 
 //			}
@@ -248,6 +248,7 @@ namespace baboon {
 			trackFinder->Process();
 
 			TrackCollection *trackCollection2 = trackMan->GetTrackCollection();
+			ThreeVector showerEnteringPoint2(this->FindShowerEnteringPoint(_collection2));
 			bool primaryTrackFound2 = false;
 
 			for( unsigned int tr=0 ; tr<trackCollection2->size() ; tr++ ) {
@@ -261,7 +262,7 @@ namespace baboon {
 
 					primaryTrackFound2 = true;
 					if( _particleType2 == "neutral" )
-						this->EraseTrackFromCollection( track2 , _collection2 );
+						this->EraseTrackFromCollection( trackInfo , _collection2 );
 
 					trackEndPosition2 = trackInfo->endPosition;
 					trackBeginPosition2 = trackInfo->beginPosition;
@@ -269,11 +270,10 @@ namespace baboon {
 
 					if( _particleType2 == "charged" ) {
 						baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
-						ThreeVector translation( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - trackEndPosition2.x()
-								, _calorimeter2->GetRepeatY()/2.0 - trackEndPosition2.y()
+						ThreeVector translation( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - showerEnteringPoint2.x()
+								, _calorimeter2->GetRepeatY()/2.0 - showerEnteringPoint2.y()
 								, 0.0 );
-						ThreeVector enteringPoint( trackBeginPosition2.x() , trackBeginPosition2.y() , 0 );
-						externTrackInfo->enteringPoint = enteringPoint + translation;
+						externTrackInfo->enteringPoint = showerEnteringPoint2 + translation;
 						externTrackInfo->momentum = backwardThrust2*_inputEnergy2;
 						externTrackInfo->charge = 1;
 				 }
@@ -308,8 +308,8 @@ namespace baboon {
 //										, 0.0 );
 //			}
 //			else {
-				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - trackEndPosition2.x()
-										, _calorimeter2->GetRepeatY()/2.0 - trackEndPosition2.y()
+				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - showerEnteringPoint2.x()
+										, _calorimeter2->GetRepeatY()/2.0 - showerEnteringPoint2.y()
 										, 0.0 );
 
 //			}
@@ -586,6 +586,71 @@ namespace baboon {
 			}
 		}
 
+	}
+
+
+	void OverlayEventAlgorithm::EraseTrackFromCollection( TrackInfo *trackInfo , CaloHitCollection *collection )
+	{
+		unsigned int layerCut = round(trackInfo->endPosition.z());
+
+		for(unsigned int i=0 ; i<collection->size() ; i++)
+		{
+			if(collection->at(i)->GetIJK().at(2) < layerCut)
+			{
+				collection->erase( collection->begin()  + i );
+				i--;
+			}
+		}
+	}
+
+
+	ThreeVector OverlayEventAlgorithm::FindShowerEnteringPoint(CaloHitCollection *collection)
+	{
+		float xyCut = 4.0;
+		unsigned int layerCut = 4;
+		float barycenterX = 0.f;
+		float barycenterY = 0.f;
+
+		for(unsigned int c=0 ; c<collection->size() ; c++)
+		{
+			CaloHit *pCaloHit = collection->at(c);
+
+			barycenterX += pCaloHit->GetIJK().at(0);
+			barycenterY += pCaloHit->GetIJK().at(1);
+		}
+
+		barycenterX /= collection->size();
+		barycenterY /= collection->size();
+
+		CaloHitCollection caloHitVecForEnteringPoint;
+
+		for(unsigned int c=0 ; c<collection->size() ; c++)
+		{
+			CaloHit *pCaloHit = collection->at(c);
+
+			if(fabs(pCaloHit->GetIJK().at(0)-barycenterX) < xyCut
+					&& fabs(pCaloHit->GetIJK().at(1)-barycenterY) < xyCut
+					&& pCaloHit->GetIJK().at(2) < layerCut)
+			{
+				caloHitVecForEnteringPoint.push_back(pCaloHit);
+			}
+		}
+
+		float enteringPointX = 0.f;
+		float enteringPointY = 0.f;
+
+		for(unsigned int c=0 ; c<caloHitVecForEnteringPoint.size() ; c++)
+		{
+			CaloHit *pCaloHit = caloHitVecForEnteringPoint.at(c);
+
+			enteringPointX += pCaloHit->GetIJK().at(0);
+			enteringPointY += pCaloHit->GetIJK().at(1);
+		}
+
+		enteringPointX /= caloHitVecForEnteringPoint.size();
+		enteringPointY /= caloHitVecForEnteringPoint.size();
+
+		return ThreeVector(enteringPointX, enteringPointY, 0);
 	}
 
 
