@@ -186,6 +186,7 @@ namespace baboon {
 
 
 
+
 		bool _overlayDone;
 		bool _generatesLCTracks;
 		CaloHitCollection *_collection1;
