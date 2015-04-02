@@ -291,7 +291,7 @@ namespace baboon {
 			delete clusters;
 			clusters = 0;
 
-			if( !primaryTrackFound2 )  && _particleType2 == "neutral" ) {
+			if( !primaryTrackFound2  && _particleType2 == "neutral" ) {
 
 				return BABOON_SUCCESS();
 			}
