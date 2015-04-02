@@ -210,20 +210,20 @@ namespace baboon {
 
 			ThreeVector translation1;
 
-			if( _particleType1 == "neutral" ) {
-
-				ThreeVector cog1;
-				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( _collection1 , cog1 ) );
-				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - cog1.x()
-										, _calorimeter1->GetRepeatY()/2.0 - cog1.y()
-										, 0.0 );
-			}
-			else {
+//			if( _particleType1 == "neutral" ) {
+//
+//				ThreeVector cog1;
+//				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( _collection1 , cog1 ) );
+//				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - cog1.x()
+//										, _calorimeter1->GetRepeatY()/2.0 - cog1.y()
+//										, 0.0 );
+//			}
+//			else {
 				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - trackEndPosition1.x()
 										, _calorimeter1->GetRepeatY()/2.0 - trackEndPosition1.y()
 										, 0.0 );
 
-			}
+//			}
 
 //----------------------------------------------------------------------------------------------------
 
@@ -298,20 +298,20 @@ namespace baboon {
 
 			ThreeVector translation2;
 
-			if( _particleType2 == "neutral" ) {
-
-				ThreeVector cog2;
-				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( _collection2 , cog2 ) );
-				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - cog2.x()
-										, _calorimeter2->GetRepeatY()/2.0 - cog2.y()
-										, 0.0 );
-			}
-			else {
+//			if( _particleType2 == "neutral" ) {
+//
+//				ThreeVector cog2;
+//				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( _collection2 , cog2 ) );
+//				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - cog2.x()
+//										, _calorimeter2->GetRepeatY()/2.0 - cog2.y()
+//										, 0.0 );
+//			}
+//			else {
 				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - trackEndPosition2.x()
 										, _calorimeter2->GetRepeatY()/2.0 - trackEndPosition2.y()
 										, 0.0 );
 
-			}
+//			}
 
 			this->TranslateCollection( _calorimeter1 , _collection1 , _collectionToOverlay1 , translation1 );
 			this->TranslateCollection( _calorimeter2 , _collection2 , _collectionToOverlay2 , translation2 );
