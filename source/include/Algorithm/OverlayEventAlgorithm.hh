@@ -189,6 +189,7 @@ namespace baboon {
 		ThreeVector FindShowerEnteringPoint(CaloHitCollection *collection);
 
 
+
 		bool _overlayDone;
 		bool _generatesLCTracks;
 		CaloHitCollection *_collection1;
