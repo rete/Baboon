@@ -196,7 +196,7 @@ int main (int argc ,char *argv[]) {
 	algoMan->RegisterAlgorithm( new OverlayEventAlgorithm() );
 
 	// Register track finder algo
-	algoMan->RegisterAlgorithm( new TrackFinderAlgorithm() );
+//	algoMan->RegisterAlgorithm( new TrackFinderAlgorithm() );
 
 	// Register clustering algo
 	algoMan->RegisterAlgorithm( new ClusteringAlgorithm() );
@@ -271,6 +271,8 @@ int main (int argc ,char *argv[]) {
 	int nbOfLostHits = 0;
 	nbOfEventsToOverlay = min(maxNbOfEvents,nbOfEventsToOverlay);
 
+	// skip one event for the first reader in case the overlay is don ewith the same file
+	lcReader1->skipNEvents(1);
 
 	while( nbOfOverlaidEvents != nbOfEventsToOverlay ) {
 
@@ -440,7 +442,6 @@ int main (int argc ,char *argv[]) {
 				}
 
 				outputEvent->addCollection( (LCCollection*) trackInfoCollection , "SDHCALTrackInfo" );
-
 			}
 
 			// write the final event
@@ -451,6 +452,8 @@ int main (int argc ,char *argv[]) {
 
 			nbOfLostHits += overlayer->GetNumberOfLostHits();
 			evtID++;
+
+//			std::cout << "Overlay done" << std::endl;
 		}
 		else {
 
@@ -458,6 +461,7 @@ int main (int argc ,char *argv[]) {
 			sdhcal2->ClearContent();
 			nbOfSkippedEvents++;
 			evtID++;
+//			std::cout << "Overlay not done" << std::endl;
 		}
 
 		extInfoMgr->ClearAllContent();

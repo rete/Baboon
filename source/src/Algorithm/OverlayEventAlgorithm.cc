@@ -110,15 +110,7 @@ namespace baboon {
 
 			ExternInfoManager *extInfoMgr = ExternInfoManager::GetInstance();
 			AlgorithmManager *algoMan = AlgorithmManager::GetInstance();
-			TrackFinderAlgorithm *trackFinder( 0 );
 			ClusteringAlgorithm *clusteringAlgo( 0 );
-
-			if( algoMan->AlgorithmIsRegistered("TrackFinderAlgorithm") ) {
-				trackFinder = (TrackFinderAlgorithm *) algoMan->GetAlgorithm("TrackFinderAlgorithm");
-			}
-			else
-				return BABOON_ERROR("TrackFinder algo was not registered for OverlayEvent algo. "
-						"Please register it before running or disable the \"useTrackInfo\" parameter");
 
 			if( algoMan->AlgorithmIsRegistered("ClusteringAlgorithm") ) {
 				clusteringAlgo = (ClusteringAlgorithm *) algoMan->GetAlgorithm("ClusteringAlgorithm");
@@ -126,13 +118,6 @@ namespace baboon {
 			else
 				return BABOON_ERROR("ClusteringAlgorithm algo was not registered for OverlayEvent algo. "
 						"Please register it before running or disable the \"useTrackInfo\" parameter");
-
-			ThreeVector trackEndPosition1;
-			ThreeVector trackEndPosition2;
-			ThreeVector trackBeginPosition1;
-			ThreeVector trackBeginPosition2;
-			ThreeVector backwardThrust1;
-			ThreeVector backwardThrust2;
 
 //----------------------------------------------------------------------------------------------------
 
@@ -151,79 +136,47 @@ namespace baboon {
 				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ClusteringManager::GetInstance()->AddCluster( clusters->at(c) ) );
 			}
 
-			clusters->clear();
+			// find shower start layer and entering point
+			ThreeVector showerEnteringPoint1( this->FindShowerEnteringPoint( _collection1 ) );
+			int showerStartingLayer1( this->FindShowerStartingLayer( _collection1 , clusters ) );
 
-			// Perform track finder
-			trackFinder->SetCalorimeter( _calorimeter1 );
-			trackFinder->Process();
+			bool particle1Invalid = showerEnteringPoint1.x() < 0 || showerEnteringPoint1.y() < 0
+					|| ( showerStartingLayer1 < 0 && _particleType1 == "neutral");
 
-			TrackManager *trackMan = TrackManager::GetInstance();
-			TrackCollection *trackCollection1 = trackMan->GetTrackCollection();
-			ThreeVector showerEnteringPoint1(this->FindShowerEnteringPoint(_collection1));
-			bool primaryTrackFound1 = false;
-
-			for( unsigned int tr=0 ; tr<trackCollection1->size() ; tr++ ) {
-
-				Track *track1 = trackCollection1->at(tr);
-				OverlayEventAlgorithm::TrackInfo *trackInfo = new OverlayEventAlgorithm::TrackInfo;
-				trackInfo->track = track1;
-				this->FillTrackInfo( trackInfo );
-
-				if( trackInfo->isPrimaryTrack ) {
-
-					primaryTrackFound1 = true;
-					if( _particleType1 == "neutral" )
-						this->EraseTrackFromCollection( trackInfo , _collection1 );
-
-					trackEndPosition1 = trackInfo->endPosition;
-					trackBeginPosition1 = trackInfo->beginPosition;
-					backwardThrust1 = trackInfo->backwardThrust;
-
-					if( _particleType1 == "charged" ) {
-						baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
-
-						ThreeVector translation(_calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - showerEnteringPoint1.x()
-								, _calorimeter1->GetRepeatY()/2.0 - showerEnteringPoint1.y()
-								, 0.0);
-						externTrackInfo->enteringPoint = showerEnteringPoint1 + translation;
-						externTrackInfo->momentum = backwardThrust1*_inputEnergy1;
-						externTrackInfo->charge = 1;
-				 }
-
-					delete trackInfo;
-					break;
+			if(particle1Invalid)
+			{
+				if(clusters != 0)
+				{
+					clusters->clear();
+					delete clusters;
+					clusters = 0;
 				}
 
-				delete trackInfo;
-			}
-
-			trackMan->ClearAllContent();
-			ClusteringManager::GetInstance()->ClearAllContent();
-
-			// If primary track is not found and we asked for a charged particle, the overlay is not done.
-			if( !primaryTrackFound1 && _particleType1 == "neutral" ) {
-
-				delete clusters;
-				clusters = 0;
+				ClusteringManager::GetInstance()->ClearAllContent();
 				return BABOON_SUCCESS();
 			}
 
-			ThreeVector translation1;
+			ClusteringManager::GetInstance()->ClearAllContent();
 
-//			if( _particleType1 == "neutral" ) {
-//
-//				ThreeVector cog1;
-//				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( _collection1 , cog1 ) );
-//				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - cog1.x()
-//										, _calorimeter1->GetRepeatY()/2.0 - cog1.y()
-//										, 0.0 );
-//			}
-//			else {
-				translation1 = ThreeVector( _calorimeter1->GetRepeatX()/2.0 + _separationDistance / 2.0 - showerEnteringPoint1.x()
+			ThreeVector translation1( _calorimeter1->GetRepeatX()/2.0 + double(_separationDistance) / 2.0 - showerEnteringPoint1.x()
 										, _calorimeter1->GetRepeatY()/2.0 - showerEnteringPoint1.y()
 										, 0.0 );
 
-//			}
+			// if charged particle, create a track info
+			if(_particleType1 == "charged")
+			{
+				baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
+				externTrackInfo->enteringPoint = showerEnteringPoint1 + translation1;
+				externTrackInfo->momentum = ThreeVector(0,0,1)*_inputEnergy1;
+				externTrackInfo->charge = 1;
+			}
+			else if(_particleType1 == "neutral")
+			{
+				this->EraseTrackFromCollection( showerStartingLayer1 , _collection1 );
+			}
+
+			delete clusters;
+			clusters = 0;
 
 //----------------------------------------------------------------------------------------------------
 
@@ -231,6 +184,7 @@ namespace baboon {
 				_calorimeter2->AddCaloHit( _collection2->at(h) );
 
 
+			clusters = new ClusterCollection();
 			clusteringAlgo->SetClusteringMode( fClustering2D );
 			clusteringAlgo->SetCalorimeter( _calorimeter2 );
 			clusteringAlgo->SetClusterCollection( clusters );
@@ -241,77 +195,48 @@ namespace baboon {
 				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , ClusteringManager::GetInstance()->AddCluster( clusters->at(c) ) );
 			}
 
-			clusters->clear();
+			// find shower start layer and entering point
+			ThreeVector showerEnteringPoint2(this->FindShowerEnteringPoint( _collection2 ) );
+			int showerStartingLayer2 = FindShowerStartingLayer( _collection2 , clusters );
 
-			// Perform track finder
-			trackFinder->SetCalorimeter( _calorimeter2 );
-			trackFinder->Process();
+			bool particle2Invalid = showerEnteringPoint2.x() < 0
+					|| showerEnteringPoint2.y() < 0
+					|| ( showerStartingLayer2 < 0 && _particleType2 == "neutral");
 
-			TrackCollection *trackCollection2 = trackMan->GetTrackCollection();
-			ThreeVector showerEnteringPoint2(this->FindShowerEnteringPoint(_collection2));
-			bool primaryTrackFound2 = false;
-
-			for( unsigned int tr=0 ; tr<trackCollection2->size() ; tr++ ) {
-
-				Track *track2 = trackCollection2->at(tr);
-				TrackInfo *trackInfo = new TrackInfo;
-				trackInfo->track = track2;
-				this->FillTrackInfo( trackInfo );
-
-				if( trackInfo->isPrimaryTrack ) {
-
-					primaryTrackFound2 = true;
-					if( _particleType2 == "neutral" )
-						this->EraseTrackFromCollection( trackInfo , _collection2 );
-
-					trackEndPosition2 = trackInfo->endPosition;
-					trackBeginPosition2 = trackInfo->beginPosition;
-					backwardThrust2 = trackInfo->backwardThrust;
-
-					if( _particleType2 == "charged" ) {
-						baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
-						ThreeVector translation( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - showerEnteringPoint2.x()
-								, _calorimeter2->GetRepeatY()/2.0 - showerEnteringPoint2.y()
-								, 0.0 );
-						externTrackInfo->enteringPoint = showerEnteringPoint2 + translation;
-						externTrackInfo->momentum = backwardThrust2*_inputEnergy2;
-						externTrackInfo->charge = 1;
-				 }
-
-					delete trackInfo;
-					break;
+			if(particle2Invalid)
+			{
+				if(clusters != 0)
+				{
+					clusters->clear();
+					delete clusters;
+					clusters = 0;
 				}
 
-				delete trackInfo;
-			}
-
-			trackMan->ClearAllContent();
-			ClusteringManager::GetInstance()->ClearAllContent();
-
-			delete clusters;
-			clusters = 0;
-
-			if( !primaryTrackFound2  && _particleType2 == "neutral" ) {
-
+				ClusteringManager::GetInstance()->ClearAllContent();
 				return BABOON_SUCCESS();
 			}
 
-			ThreeVector translation2;
+			ClusteringManager::GetInstance()->ClearAllContent();
 
-//			if( _particleType2 == "neutral" ) {
-//
-//				ThreeVector cog2;
-//				BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter( _collection2 , cog2 ) );
-//				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - cog2.x()
-//										, _calorimeter2->GetRepeatY()/2.0 - cog2.y()
-//										, 0.0 );
-//			}
-//			else {
-				translation2 = ThreeVector( _calorimeter2->GetRepeatX()/2.0 - _separationDistance / 2.0 - showerEnteringPoint2.x()
+			ThreeVector translation2( _calorimeter2->GetRepeatX()/2.0 - double(_separationDistance) / 2.0 - showerEnteringPoint2.x()
 										, _calorimeter2->GetRepeatY()/2.0 - showerEnteringPoint2.y()
 										, 0.0 );
 
-//			}
+			// if charged particle, create a track info
+			if(_particleType2 == "charged")
+			{
+				baboon::TrackInfo *externTrackInfo = extInfoMgr->CreateTrackInfo();
+				externTrackInfo->enteringPoint = showerEnteringPoint2 + translation2;
+				externTrackInfo->momentum = ThreeVector(0,0,1)*_inputEnergy2;
+				externTrackInfo->charge = 1;
+			}
+			else if(_particleType2 == "neutral")
+			{
+				this->EraseTrackFromCollection( showerStartingLayer2 , _collection2 );
+			}
+
+			delete clusters;
+			clusters = 0;
 
 			this->TranslateCollection( _calorimeter1 , _collection1 , _collectionToOverlay1 , translation1 );
 			this->TranslateCollection( _calorimeter2 , _collection2 , _collectionToOverlay2 , translation2 );
@@ -559,42 +484,11 @@ namespace baboon {
 
 	}
 
-
-
-	void OverlayEventAlgorithm::EraseTrackFromCollection( Track *track , CaloHitCollection *collection ) {
-
-		if( track == 0 || collection == 0 )
-			return;
-
-		CaloHitCollection *trackHits = track->GetCaloHitCollection();
-
-		for( unsigned int h=0 ; h<collection->size() ; h++ ) {
-
-			CaloHit *caloHit = collection->at( h );
-
-			for( unsigned int trH=0 ; trH<trackHits->size() ; trH++ ) {
-
-				CaloHit *trackHit = trackHits->at(trH);
-				if( caloHit == trackHit ) {
-
-					collection->erase( collection->begin()  + h );
-					h--;
-					break;
-				}
-
-			}
-		}
-
-	}
-
-
-	void OverlayEventAlgorithm::EraseTrackFromCollection( TrackInfo *trackInfo , CaloHitCollection *collection )
+	void OverlayEventAlgorithm::EraseTrackFromCollection( int showerStartLayer , CaloHitCollection *collection )
 	{
-		unsigned int layerCut = round(trackInfo->endPosition.z());
-
 		for(unsigned int i=0 ; i<collection->size() ; i++)
 		{
-			if(collection->at(i)->GetIJK().at(2) < layerCut)
+			if(collection->at(i)->GetIJK().at(2) < showerStartLayer)
 			{
 				collection->erase( collection->begin()  + i );
 				i--;
@@ -609,6 +503,8 @@ namespace baboon {
 		unsigned int layerCut = 4;
 		float barycenterX = 0.f;
 		float barycenterY = 0.f;
+
+		ThreeVector enteringPoint(-1, -1, 0);
 
 		for(unsigned int c=0 ; c<collection->size() ; c++)
 		{
@@ -638,6 +534,9 @@ namespace baboon {
 		float enteringPointX = 0.f;
 		float enteringPointY = 0.f;
 
+		if(caloHitVecForEnteringPoint.empty())
+			return enteringPoint;
+
 		for(unsigned int c=0 ; c<caloHitVecForEnteringPoint.size() ; c++)
 		{
 			CaloHit *pCaloHit = caloHitVecForEnteringPoint.at(c);
@@ -649,9 +548,55 @@ namespace baboon {
 		enteringPointX /= caloHitVecForEnteringPoint.size();
 		enteringPointY /= caloHitVecForEnteringPoint.size();
 
-		return ThreeVector(enteringPointX, enteringPointY, 0);
+		enteringPoint = ThreeVector(enteringPointX, enteringPointY, 0);
+
+		return enteringPoint;
 	}
 
+
+	int OverlayEventAlgorithm::FindShowerStartingLayer(CaloHitCollection *calohitCollection, ClusterCollection *clusterCollection)
+	{
+		std::sort(clusterCollection->begin(), clusterCollection->end(), OverlayEventAlgorithm::sortByLayer);
+
+		ThreeVector cog;
+		BABOON_THROW_RESULT_IF( BABOON_SUCCESS() , != , CaloHitHelper::ComputeBarycenter(calohitCollection, cog));
+
+		unsigned int centralCut = 10;
+		unsigned int sizeCut = 4;
+
+		for(unsigned int c=0 ; c<clusterCollection->size() ; c++)
+		{
+			Cluster *cluster = clusterCollection->at(c);
+			ThreeVector clusterPosition = cluster->GetPosition(fComputeCell);
+
+			if(cluster->Size() < sizeCut
+			|| fabs(clusterPosition.x()-cog.x()) > centralCut
+			|| fabs(clusterPosition.y()-cog.y()) > centralCut)
+				continue;
+
+			int count = 0;
+
+			for(unsigned int c1=0 ; c1<clusterCollection->size() ; c1++)
+			{
+				Cluster *cluster1 = clusterCollection->at(c1);
+				ThreeVector clusterPosition1 = cluster1->GetPosition(fComputeCell);
+
+				if(cluster1->Size() >= 5
+				&& clusterPosition1.z() - clusterPosition.z() <= 4
+				&& clusterPosition1.z() > clusterPosition.z()
+				&& fabs(clusterPosition1.x()-cog.x()) < centralCut
+				&& fabs(clusterPosition1.y()-cog.y()) < centralCut)
+					count++;
+			}
+
+			if(count >= 3)
+			{
+				return round(clusterPosition.z());
+			}
+		}
+
+		return -1;
+	}
 
 
 }  // namespace 

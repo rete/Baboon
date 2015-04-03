@@ -41,6 +41,7 @@
 #include <vector>
 
 #include "Objects/CaloHit.hh"
+#include "Objects/Cluster.hh"
 #include "Detector/Calorimeter.hh"
 
 // lcio includes
@@ -186,11 +187,16 @@ namespace baboon {
 
 		void EraseTrackFromCollection( TrackInfo *trackInfo , CaloHitCollection *collection );
 
+		void EraseTrackFromCollection( int showerStartLayer , CaloHitCollection *collection );
+
 		ThreeVector FindShowerEnteringPoint(CaloHitCollection *collection);
 
+		int FindShowerStartingLayer(CaloHitCollection *calohitCollection, ClusterCollection *clusterCollection);
 
-
-
+		static bool sortByLayer(Cluster *cluster1, Cluster *cluster2)
+		{
+			return cluster1->GetPosition(fComputeCell).z() < cluster2->GetPosition(fComputeCell).z();
+		}
 
 
 		bool _overlayDone;
